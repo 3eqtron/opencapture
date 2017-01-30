@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ROOT>
+	<externalContact>
+		<contactMail>nom.prenom@maarch.org</contactMail>
+		<targetEntityId>PJS</targetEntityId>
+	</externalContact>
+	<externalContact>
+		<contactMail>nom2.prenom2@maarch.org</contactMail>
+		<targetEntityId>BEP</targetEntityId>
+	</externalContact>
+</ROOT>

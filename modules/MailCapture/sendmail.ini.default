@@ -1,0 +1,10 @@
+; This file is use to configure the email that is send if the user don't exist
+; Only useful if you use the function checkUserMail in MailCapture.xml
+;
+; <messagerule name="from_maarch" info="fromaddress" op="checkUserMail" action="delete" >true</messagerule>
+
+
+mail_object = "Reponse automatique"
+
+
+mail_message = "votre courriel n'a pu être versé dans Maarch car vous n'avez pas été reconnu en tant qu'utilisateur de l'application."

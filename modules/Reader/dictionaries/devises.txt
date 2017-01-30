@@ -1,0 +1,5 @@
+﻿eur;EUR
+euro;EUR
+€;EUR
+$;USD
+£;GBP

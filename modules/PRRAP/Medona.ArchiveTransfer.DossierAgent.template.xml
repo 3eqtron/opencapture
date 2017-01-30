@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ArchiveTransfer 
+    xmlns="org:afnor:medona:1.0" 
+    xmlns:me="maarch.org:laabs:medona" 
+    xmlns:rm="maarch.org:laabs:recordsManagement" 
+    xmlns:dm="maarch.org:laabs:documentManagement" 
+    xmlns:org="maarch.org:laabs:organization"
+    xmlns:fp="maarch.org:laabs:fonctionPublique">
+    <Date>2015-06-16T09:25:20</Date>
+    <MessageIdentifier>NO_LOT_NUMERISATION</MessageIdentifier>
+    <CodeListVersions/>
+    <DataObjectPackage>
+        <BinaryDataObject>
+            <Attachment filename=""/>
+            <Format>fmt/18</Format>
+            <MessageDigest algorithm="md5"></MessageDigest>
+            <SignatureStatus>1</SignatureStatus>
+            <Size></Size>
+        </BinaryDataObject>
+        <DescriptiveMetadata>
+            <me:archivePackage>
+                <rm:archive>
+                    <rm:retentionStartDate></rm:retentionStartDate>
+                    <rm:descriptionObject>
+                        <fp:DossierAgent>
+                        </fp:DossierAgent>
+                    </rm:descriptionObject>
+                    <dm:document oid=""/>
+                </rm:archive>
+            </me:archivePackage>
+        </DescriptiveMetadata>
+        <ManagementMetadata>
+            <ArchivalProfile>DossierAgent</ArchivalProfile>
+            <ServiceLevel>serviceLevel_002</ServiceLevel>
+            <AccessRule>
+                <rm:archiveAccessRule>
+                    <rm:originatingAgency>
+                        <rm:Identifier>45239273100025_Finance</rm:Identifier>
+                    </rm:originatingAgency>
+                </rm:archiveAccessRule>
+            </AccessRule>
+            <AppraisalRule>
+                <AppraisalCode>destruction</AppraisalCode>
+                <Duration>P90Y</Duration>
+                <StartDate>1999-12-31</StartDate>
+            </AppraisalRule>
+        </ManagementMetadata>
+    </DataObjectPackage>
+    <ArchivalAgency>
+        <Identifier>123456789_Archives</Identifier>
+    </ArchivalAgency>
+    <TransferringAgency>
+        <Identifier>45239273100025_Finance</Identifier>
+    </TransferringAgency>
+</ArchiveTransfer>

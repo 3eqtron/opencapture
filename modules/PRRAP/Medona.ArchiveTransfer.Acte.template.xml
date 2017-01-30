@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ArchiveTransfer 
+    xmlns="org:afnor:medona:1.0" 
+    xmlns:me="maarch.org:laabs:medona" 
+    xmlns:rm="maarch.org:laabs:recordsManagement" 
+    xmlns:dm="maarch.org:laabs:documentManagement" 
+    xmlns:org="maarch.org:laabs:organization"
+    xmlns:fp="maarch.org:laabs:fonctionPublique">
+    <Date>2015-06-16T09:25:20</Date>
+    <MessageIdentifier>ACTES</MessageIdentifier>
+    <CodeListVersions/>
+    <DataObjectPackage>
+        <BinaryDataObject>
+            <Attachment filename=""/>
+            <Format>fmt/18</Format>
+            <MessageDigest algorithm="md5"></MessageDigest>
+            <SignatureStatus>1</SignatureStatus>
+            <Size></Size>
+        </BinaryDataObject>
+        <DescriptiveMetadata>
+            <me:archivePackage>
+                <rm:archive>
+                    <rm:originatorArchiveId>ID_ACTE</rm:originatorArchiveId>
+                    <dm:document oid="">
+                        <dm:fulltext>FULLTEXT</dm:fulltext>
+                    </dm:document>
+                </rm:archive>
+            </me:archivePackage>
+        </DescriptiveMetadata>
+        <ManagementMetadata>
+            <ArchivalProfile>Actes</ArchivalProfile>
+            <ServiceLevel>serviceLevel_002</ServiceLevel>
+            <AccessRule>
+                <rm:archiveAccessRule>
+                    <rm:originatingAgency>
+                        <rm:Identifier>45239273100025_Finance</rm:Identifier>
+                    </rm:originatingAgency>
+                </rm:archiveAccessRule>
+            </AccessRule>
+            <AppraisalRule>
+                <AppraisalCode>preservation</AppraisalCode>
+                <Duration>P90Y</Duration>
+                <StartDate>2016-01-01</StartDate>
+            </AppraisalRule>
+        </ManagementMetadata>
+    </DataObjectPackage>
+    <ArchivalAgency>
+        <Identifier>123456789_Archives</Identifier>
+    </ArchivalAgency>
+    <TransferringAgency>
+        <Identifier>45239273100025_Finance</Identifier>
+    </TransferringAgency>
+</ArchiveTransfer>

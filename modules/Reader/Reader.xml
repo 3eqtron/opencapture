@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Reader>
+  <Configuration uom='mm' />
+  <Dictionaries>
+    <Dictionary name='devises' type='csv' delimiter=';' enclosure='"' path='C:\xampp\htdocs\MaarchCapture\Dictionaries\devises.txt' />
+    <Dictionary name='mois' type='csv' delimiter=';' enclosure='"' path='C:\xampp\htdocs\MaarchCapture\Dictionaries\mois.txt' />		
+  </Dictionaries>
+  <Databases>
+    <Database name='maarch_entreprise' type='postgresql' host='localhost' user='postgres' password='maarch' schema='public' />
+  </Databases>
+  <Formatters>
+    <!--Formatter name='date' script='C:\xampp\htdocs\MaarchCapture\Scripts\formatters.php' func='format_date'/>
+    <Formatter name='montants' script='C:\xampp\htdocs\MaarchCapture\Scripts\formatters.php' func='format_amounts'/>
+    <Formatter name='devise' script='C:\xampp\htdocs\MaarchCapture\Scripts\formatters.php' func='format_currency'/-->
+  </Formatters>
+  <Templates>
+    <Template name='APRIA_Sx810x' uom='lc'>
+      <Locators>
+        <Locator name='SOUS_ETAT' type="field" >
+          <Field x='66' y='7' width='30' height='1' granularity="Line"/>
+        </Locator>
+        <Locator name='ASSURE' type="format" >
+          <Format granularity='All'></Format>
+        </Locator>
+      </Locators>
+      <Exports>
+        <Export name='SOUS_ETAT' locator="SOUS_ETAT" />
+      </Exports>
+    </Template>
+  </Templates>
+</Reader>

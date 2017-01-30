@@ -1,0 +1,16 @@
+== HOW TO USE ==
+1 - Print separator in Maarch Application.
+2 - Scan each file with separator in begin
+3 - Scan files must be in 1 single PDF
+4 - use AutoImport module to import in Maarch Application
+
+in Capture.xml :
+
+<batch name='SCAN' directory='/exploit/maarch/maarch_capture/files/maarchcourrier' lock="0" id='{batchname}-{timestamp}-{rand}'>
+	<workflow name="SCAN" debug="true" logMode="Maarch" maarchLogParam="/produit/maarch/maarch_web/custom/cs_maarchcourrier/apps/maarch_entreprise/xml/log4php.xml" maarchLoggerName="loggerTechnique">
+		<step name="separatePDF" module='QRSeparator' function="separatePDF">
+			<input name="ScanSource">/exploit/maarch/depot/capture/entrant/maarchcourrier/</input>
+			<input name="AutoImportDirectory">/exploit/maarch/depot/autoimport/maarchcourrier/</input>
+		</step>
+	</workflow>
+</batch>

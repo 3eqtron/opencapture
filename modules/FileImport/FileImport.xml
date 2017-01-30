@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FileImport>
+  <Profiles>
+    <!-- Profile
+      name : used to name profile on call
+      target : Content created when a file is imported ("Document" | "File")
+      recursive : import subfolders (0 | 1)
+      importDirectories : import directories as content "Directory" in Batch
+    -->
+    <Profile name="ScanDAll_MaarchDestination" target="Document" recursive="0" importDirectories="0">
+      <!-- Rule
+        info : file/folder information used to filter items (filename, extension, dirname, size, mimetype, mimeencoding)
+        test : = > < >= <= != starts-with contains
+        value : value for test
+      -->
+      <Rule info="extension" test="=" value="pdf" />
+    </Profile>
+  </Profiles>
+</FileImport>

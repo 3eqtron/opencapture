@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MailCapture>
+  <formatters>
+    <formatter name="date" script="scripts/formatters.php" func="format_mail_date"/>
+    <!-- <formatter name="mail_address" script="scripts/formatters.php" func="format_mail_address"/> -->
+  </formatters>
+  <accounts>
+    <account name="miviludes_cas_2" >
+      <mailbox>{imap.gmail.com:993/imap/ssl/novalidate-cert}</mailbox>
+      <username></username>
+      <password></password>
+      <!--IMAP_CLIENT_CERT>/vagrant/certs/client.pem</IMAP_CLIENT_CERT--> <!-- userful for imap ssl -->
+      <!--IMAP_CLIENT_KEY>/vagrant/certs/noclient.key</IMAP_CLIENT_KEY--> <!-- userful for imap ssl -->
+    </account>
+  </accounts>
+  <!-- header info: 
+      date, 
+      subject,
+      { toaddress | fromaddress | ccaddress | bccaddress }
+      { to | cc | bcc | from |sender | reply_to }  +  [row]  + subinfo { personal | mailbox | host }, 
+      Recent, Unseen, Flagged, Answered, Deleted, Draft, Msgno, message_id -->
+  <messagerules>
+    <!-- info   : header info -->
+    <!-- op     : =, !=, &gt;, &lt;, &gt;=, &lt;=, contains, nocontains, in, checkUserMail -->
+    <!-- action : delete, ignore, move (folder:=junkmail)-->
+    <messagerule name="SPM_RULE_2" info="fromaddress" action="move">true</messagerule>
+  </messagerules>
+  <messageoutputs >
+    <!-- info   : header info -->
+    <messageoutput name="doc_date" info="date" formatter="date"/>
+    <messageoutput name="type_id">1</messageoutput>
+    <messageoutput name="subject" info="subject" />
+    <!--<messageoutput name="fromaddress" info="fromaddress" formatter="mail_address"/>-->
+	<messageoutput name="fromaddress" info="fromaddress"/>
+    <messageoutput name="frompersonal" info="from[0]/personal" />
+    <messageoutput name="toaddress" info="toaddress" />
+    <messageoutput name="message_id" info="message_id" />
+	<messageoutput name="ccaddress" info="ccaddress" />
+  </messageoutputs>
+  <!-- mime part info: 
+    type (mime type 0->7)
+    encoding (0->5)
+    subtype (PDF)
+    bytes
+    disposition (BODY | ATTACHMENT | RELATED)
+    filename (xxx.pdf)
+    name (xxx.pdf)
+    mimetype (application/pdf)
+    format (pdf)
+      --> 
+  <attachmentrules>
+    <!-- info   : mime part info -->
+    <!-- op     : =, !=, &gt;, &lt;, &gt;=, &lt;=, contains, in -->
+    <attachmentrule name="images" info="format" op="in">gif jpg jpeg png</attachmentrule>
+    <attachmentrule name="application" info="format" op="in">pdf msword vnd.oasis.opendocument.text octet-stream eml</attachmentrule>
+  </attachmentrules>
+  <attachmentoutputs mode="attachment"><!-- mode attachment of mail document / new document with a copy of metadata --> 
+    <!-- info   : mime part info -->
+    <attachmentoutput name="filename" info="dparameters[filename]"/>
+    <attachmentoutput name="description" info="description"/>
+    <!--attachmentoutput name="mimetype" info="mimetype"/>
+    <attachmentoutput name="size" info="bytes"/-->
+  </attachmentoutputs>
+</MailCapture>
