@@ -1856,58 +1856,68 @@ class MailCapture
                     "Set Contact Metadata"
                 );
 
-	    $contact_title = substr($contents, strpos($contents, "Civilité:") + 10);
-            $contact_title = substr($contact_title, 0, strpos($contact_title, "Nom:"));
+    	    $contact_title = substr($contents, strpos($contents, "Civilité:") + 10);
+                $contact_title = substr($contact_title, 0, strpos($contact_title, "Nom:"));
 
-	    if(trim($contact_title) == "Monsieur"){
-		$Element->setMetadata("contact_title", "title1");
-	    }else{
-		$Element->setMetadata("contact_title", "title2");
-	    }
+    	    if(trim($contact_title) == "Monsieur"){
+    		  $Element->setMetadata("contact_title", "title1");
+    	    }else{
+    		  $Element->setMetadata("contact_title", "title2");
+    	    }
             $contact_name = substr($contents, strpos($contents, "Nom:") + 4);
             $contact_name = substr($contact_name, 0, strpos($contact_name, "Prénom:"));
+            $contact_name = preg_replace("/(\r\n|\n|\r)/", " ", $contact_name);
             $Element->setMetadata("contact_name", mb_strtoupper(trim($contact_name)));
 
             $contact_firstname = substr($contents, strpos($contents, "Prénom:") + 8);
             $contact_firstname = substr($contact_firstname, 0, strpos($contact_firstname, "Raison sociale:"));
+            $contact_firstname = preg_replace("/(\r\n|\n|\r)/", " ", $contact_firstname);
             $Element->setMetadata("contact_firstname", trim($contact_firstname));
 
             $contact_society = substr($contents, strpos($contents, "Raison sociale:") + 15);
             $contact_society = substr($contact_society, 0, strpos($contact_society, "Type de contact:"));
+            $contact_society = preg_replace("/(\r\n|\n|\r)/", " ", $contact_society);
             $Element->setMetadata("contact_society", mb_strtoupper(trim($contact_society)));
 
             $contact_type = substr($contents, strpos($contents, "Type de contact:") + 16);
             $contact_type = substr($contact_type, 0, strpos($contact_type, "Numéro de SIREN:"));
+            $contact_type = preg_replace("/(\r\n|\n|\r)/", " ", $contact_type);
             $Element->setMetadata("contact_type", mb_strtoupper(trim($contact_type)));
 
             $contact_other_data = substr($contents, strpos($contents, "Numéro de SIREN:"));
             $contact_other_data = substr($contact_other_data, 0, strpos($contact_other_data, "Message:"));
+            $contact_other_data = preg_replace("/(\r\n|\n|\r)/", " ", $contact_other_data);
             $Element->setMetadata("contact_other_data", mb_strtoupper(trim($contact_other_data)));
 
             $res_subject = substr($contents, strpos($contents, "Message:") + 8);
             $res_subject = substr($res_subject, 0, strpos($res_subject, "Votre adresse de courriel (nom@exemple.fr):"));
+            $res_subject = preg_replace("/(\r\n|\n|\r)/", " ", $res_subject);
             $Element->setMetadata("res_subject", mb_strtoupper(trim($res_subject)));
 
             $contact_mail = substr($contents, strpos($contents, "Votre adresse de courriel (nom@exemple.fr):") + 43);
             $contact_mail = substr($contact_mail, 0, strpos($contact_mail, "Adresse:"));
+            $contact_mail = preg_replace("/(\r\n|\n|\r)/", " ", $contact_mail);
             $Element->setMetadata("email", trim($contact_mail));
             $Element->setMetadata("fromaddress", trim($contact_firstname) . " " .  trim($contact_name)  ." <".trim($contact_mail).">");
             $Element->setMetadata("frompersonal", trim($contact_firstname) . " " .  trim($contact_name));
             
             $contact_address = substr($contents, strpos($contents, "Adresse:") + 8);
             $contact_address = substr($contact_address, 0, strpos($contact_address, "Code postal:"));
+            $contact_address = preg_replace("/(\r\n|\n|\r)/", " ", $contact_address);
             $Element->setMetadata("address_street", trim($contact_address));
 
             $contact_cp = substr($contents, strpos($contents, "Code postal:") + 12);
             $contact_cp = substr($contact_cp, 0, strpos($contact_cp, "Ville:"));
+            $contact_cp = preg_replace("/(\r\n|\n|\r)/", " ", $contact_cp);
             $Element->setMetadata("address_postal_code", trim($contact_cp));
 
             $contact_town = substr($contents, strpos($contents, "Ville:") + 6);
             $contact_town = substr($contact_town, 0, strpos($contact_town, "Pays:"));
+            $contact_town = preg_replace("/(\r\n|\n|\r)/", " ", $contact_town);
             $Element->setMetadata("address_town", mb_strtoupper(trim($contact_town)));
 
             $contact_country = substr($contents, strpos($contents, "Pays:") + 5);
-
+            $contact_country = preg_replace("/(\r\n|\n|\r)/", " ", $contact_country);
             $Element->setMetadata("address_country", trim($contact_country));
 
             /*echo "1".$contact_name;
