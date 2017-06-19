@@ -1,3 +1,8 @@
+***********************
+Version
+***********************
+1.0
+Copy from svn http://svn.maarch.org/custom/trunk/MaarchCapture/ (19/06/2017)
 
 ***********************
 Prerequisit

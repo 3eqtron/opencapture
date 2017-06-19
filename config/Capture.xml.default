@@ -32,16 +32,18 @@
           <input name="configFile">MailCapture.xml</input>
           <input name="folder">imported</input>
         </step>
-        <step function="ExtractContactInfo" module="MailCapture" name="ExtractContactInfo">
+        <!-- Can be only used if form is extracted to the mail body -->
+        <!-- <step function="ExtractContactInfo" module="MailCapture" name="ExtractContactInfo">
           <input name="ContentPath">/Batch/Documents/Document</input>
-        </step>
+        </step> -->
         <step function="processBatch" module="MaarchWSClient" name="SendToMaarch">
           <input name="WSDL">maarchcourrier</input>
           <input name="Process">IMPORT_MAIL_1</input>
         </step>
-        <step name="NotifyContact" module='MailCapture' function="notifyContact">
+        <!-- Can be only used if a contact mail is extracted from the mail -->
+        <!-- <step name="NotifyContact" module='MailCapture' function="notifyContact">
           <input name="ContentPath">/Batch/Documents/Document</input>
-        </step>
+        </step> -->
       </workflow>
     </batch>
   </batches>
