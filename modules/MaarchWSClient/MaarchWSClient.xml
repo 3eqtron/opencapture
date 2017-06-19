@@ -89,7 +89,7 @@
 				<argument name="collId">letterbox_coll</argument>
 				<argument name="table">res_letterbox</argument>
 				<argument attribute="extension" name="format"/>
-				<argument name="status">MAQUAL</argument>
+				<argument name="status">INIT</argument>
 				<return>
 					<returnCode/>
 					<resId metadata="resId"/>
@@ -228,7 +228,7 @@
 					</argument>
 					<argument name="data">
 						<column>attachment_type</column>
-						<value>simple_attachment</value>
+						<value>incoming_mail_attachment</value>
 						<type>string</type>
 					</argument>
 					<argument name="collId">letterbox_coll</argument>

@@ -741,6 +741,7 @@ class BatchElement
         if($extension) $path .= '.' . $extension;
         # If imported file already has batch path, no copy
 
+        //echo 'COPY FROM ' . $resourcePath . PHP_EOL . ' TO ' . $path . PHP_EOL;
         if($resourcePath != $path) {
             $copy = @copy($resourcePath, $path);
             if(!$copy) {
@@ -748,7 +749,9 @@ class BatchElement
                     "Copy of file '$resourcePath' into batch directory failed"
                 );*/
                 $_SESSION['capture']->logEvent(
-                    "Copy of file '$resourcePath' into batch directory failed", 2
+                    "Copy of file '$resourcePath' into batch directory failed " 
+                        . PHP_EOL . 'COPY FROM ' . $resourcePath . PHP_EOL 
+                        . 'COPY TO ' . $path . PHP_EOL , 2
                 );
                 $copyOK = false;
             }
