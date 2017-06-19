@@ -5,7 +5,7 @@
     <!-- <formatter name="mail_address" script="scripts/formatters.php" func="format_mail_address"/> -->
   </formatters>
   <accounts>
-    <account name="account_config" >
+    <account name="account_1" >
       <mailbox>{imap.gmail.com:993/imap/ssl/novalidate-cert}maarch_capture</mailbox>
       <username></username>
       <password></password>
