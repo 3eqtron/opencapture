@@ -22,7 +22,9 @@ Maarch modules:
 ***********************
 Install 
 ***********************
+git clone -b 1.0 https://labs.maarch.org/maarch/MaarchCapture
 
+***********************
 PDFLib 
 ***********************
 Download at www.pdflib.com
