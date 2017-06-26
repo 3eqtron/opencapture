@@ -1,3 +1,10 @@
+***********************
+Version
+***********************
+1.1
+
+- Replace fpdf by tcpdf library for Qrseparator
+	- QRSeparator now support pdf 1.6 and greater
 
 ***********************
 Prerequisit
@@ -17,7 +24,9 @@ Maarch modules:
 ***********************
 Install 
 ***********************
+git clone -b 1.1 https://labs.maarch.org/maarch/MaarchCapture
 
+***********************
 PDFLib 
 ***********************
 Download at www.pdflib.com

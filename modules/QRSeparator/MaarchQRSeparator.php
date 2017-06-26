@@ -8,7 +8,7 @@ class QRSeparator
         $this->Batch = $_SESSION['capture']->Batch;
     }
     
-    function separatePDF($ScanSource,$ResultDirectory)
+    function separatePDF($ScanSource,$ResultDirectory = false)
     {
 
         echo "Init process ...\n";
@@ -17,7 +17,7 @@ class QRSeparator
         );
 
         if (!is_readable($ScanSource)) {
-        	echo "Source directory is not valid !\n";
+            echo "Source directory is not valid !\n";
             $_SESSION['capture']->logEvent(
                 "Source directory is not valid !"
             );
@@ -25,17 +25,17 @@ class QRSeparator
         }
 
         if (!is_readable($ScanSource)) {
-        	echo "Autoimport directory is not valid ! \n";
+            echo "Result directory is not valid ! \n";
             $_SESSION['capture']->logEvent(
-                "Autoimport directory is not valid !"
+                "Result directory is not valid !"
             );
             exit();
         }
 
-        $files = array_diff(scandir($ScanSource), array('..', '.'));
+        $files = array_diff(scandir($ScanSource), array('..', '.','FAILED'));
         //print_r($files);
 
-        if(empty($files)){
+        if (empty($files)) {
             echo "No files to process ! End of process ...\n";
             $_SESSION['capture']->logEvent(
                 "No files to process ! End of process ..."
@@ -43,134 +43,195 @@ class QRSeparator
             exit();
         }
 
+        echo "There is ".count($files)." file(s) to process\n";
+        $_SESSION['capture']->logEvent(
+            "There is ".count($files)." to process"
+        );
+        $num_file = 1;
         foreach ($files as $key => $value) {
-            /*
-             * Séparation des pages du pdf scanné
-             */
-            $this->split_pdf($ScanSource.$files[$key], 'tmp/'.$key.'/');
+            echo "\n\n * File n°".$num_file.": ".$files[$key]." *\n";
+            $_SESSION['capture']->logEvent(
+                "* File n°".$num_file.": ".$files[$key]." *"
+            );
+            $array_files = explode('.', $files[$key]);
 
-            /*
-             * Restructuration des pdf en fonction des separateurs
-             */
-            $this->construct_pdf("tmp/".$key."/", $ResultDirectory);
-            unlink($ScanSource.$files[$key]);
-            rmdir("tmp/".$key."/");
+            //Ignore all files except pdf
+            if (strtolower($array_files[1]) == 'pdf') {
+
+                //call split function to sepearate pages
+                try {
+                    $this->split_pdf($ScanSource.$files[$key], realpath('tmp').'/'.$key);
+                } catch (Exception $e) {
+                    echo 'ERROR (move '.$files[$key].' to '.$ScanSource.'FAILED/) ! ',  $e->getMessage(), "\n";
+                    $_SESSION['capture']->logEvent(
+                        "ERROR (move ".$files[$key]." to ".$ScanSource."FAILED/) ! ".$e->getMessage()
+                    );
+                    if (!is_dir($ScanSource.'FAILED')) {
+                        mkdir($ScanSource.'FAILED', 0755, true);
+                    }
+                    
+                    copy($ScanSource.$files[$key], $ScanSource.'FAILED/'.$files[$key]);
+                }
+                //merge pages previously splited
+                $this->construct_pdf(realpath('tmp').'/'.$key, $ResultDirectory);
+                unlink($ScanSource.$files[$key]);
+                rmdir(realpath(realpath('tmp').'/'.$key));
+            } else {
+                echo "No pdf format ! skipping ...\n";
+                $_SESSION['capture']->logEvent(
+                    "No pdf format ! skipping ...\n"
+                );
+            }
+            $num_file++;
         }
+
+        $files = glob(realpath('tmp').'/*'); // get all file names
+        foreach($files as $file){ // iterate files
+          if(is_file($file))
+            unlink($file); // delete file
+        }
+
+        echo "End of process ...\n";
+        $_SESSION['capture']->logEvent(
+            "End of process ..."
+        );
     }
 
-    function split_pdf($filename, $end_directory = false)
+    function split_pdf($filename, $end_directory)
     {
-        require_once('fpdf/fpdf.php');
-        require_once('fpdi/fpdi.php');
-     
-        $end_directory = $end_directory ? $end_directory : './';
-        
-        //print_r($end_directory);
 
+        require_once 'tcpdf/tcpdf.php';
+        require_once 'tcpdf/tcpdi.php';
+           
+        $end_directory = $end_directory.'/';
         /*
          * Creation du repertoire split
          */
-        if (!is_dir($end_directory))
-        {
-            // Will make directories under end directory that don't exist
-            // Provided that end directory exists and has the right permissions
-            mkdir($end_directory, 0777, true);
+        if (!is_dir($end_directory)) {
+
+            // Will make directories under end directory that don't exist (Provided that end directory exists and has the right permissions)
+            mkdir($end_directory, 0755, true);
         }
         
-        $pdf = new FPDI();
-        $pagecount = $pdf->setSourceFile($filename); // How many pages?
+        $pdf = new TCPDI(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
+        //How manu pages ?
+        $pdfdata = file_get_contents($filename);
+        $pagecount = $pdf->setSourceData($pdfdata);
         
-        /*
-         * Scinde les pages du pdf
-         */ 
+        //Split each page of pdf file
         for ($i = 1; $i <= $pagecount; $i++) {
-            $new_pdf = new FPDI();
+            $new_pdf = new TCPDI(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
             $new_pdf->AddPage();
-            $new_pdf->setSourceFile($filename);
-            $new_pdf->useTemplate($new_pdf->importPage($i));
             
+            $new_pdf->setSourceData($pdfdata);
+
+            $tplidx = $new_pdf->importPage($i);
+            $new_pdf->useTemplate($tplidx);
+
             try {
                 $new_filename = $end_directory.$i.".pdf";
                 $new_pdf->Output($new_filename, "F");
-                // write message to the log file
+                echo "Page ".$i." split into ".$new_filename;
+                echo "\n";
                 $_SESSION['capture']->logEvent(
                     "Page ".$i." split into ".$new_filename
                 );
             } catch (Exception $e) {
+                echo 'Caught exception: ',  $e->getMessage(), "\n";
                 $_SESSION['capture']->logEvent(
                     "Caught exception: ".$e->getMessage()
                 );
-                //echo 'Caught exception: ',  $e->getMessage(), "\n";
             }
         }
     }
 
     function construct_pdf($split_directory, $end_directory = false)
     {
-        require_once('fpdf/fpdf.php');
-        require_once('fpdi/fpdi.php');
-        include_once('qrReader/QrReader.php');
+        require_once 'tcpdf/tcpdf.php';
+        require_once 'tcpdf/tcpdi.php';
+
+        include_once 'qrReader/QrReader.php';
+        $end_directory = $end_directory ? $end_directory : realpath('tmp').'/';
         
-        $end_directory = $end_directory ? $end_directory : './';
-        
-        $new_pdf = new FPDI();
+        //$new_pdf = new FPDI();
+        $new_pdf = new TCPDI(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
         
         $i=1;
         $z=0;
         $qr_label = '';
-        while($i!=0){
-            if(is_file($split_directory.$i.'.pdf')){
+
+        $split_directory = $split_directory.'/';
+
+        while ($i!=0) {
+            if (is_file($split_directory.$i.'.pdf')) {
 
                 $file = $i.'.pdf';
-                /*
-                 * Lecture du QRCODE
-                 */
+                $next_filename = $i+1;
+
+                //Attempt to extract QRCODE
                 $qrcode = new QrReader($split_directory.$file);
+                $pdfdata = file_get_contents($split_directory.$file);
+
                 $text = $qrcode->text();
 
-                /*
-                 * extraction du QRCODE
-                 */
-                if(!empty($text)){
+                if (!empty($text)) {
                     $isCourrier = false;
                     echo "This is a separator ! Extract name ...";
                     echo "\n";
                     $_SESSION['capture']->logEvent(
-		                "This is a separator ! Extract name ..."
-		            );
+                        "This is a separator ! Extract name ..."
+                    );
                     $old_label = $qr_label;
                     $qr_label = $text;
                     $label[]=$text;
 
-                /*
-                 * fusion des pages incluses dans le séparateur
-                 */ 
-                }else if(empty($text) && !empty($qr_label)){
+                } else if (empty($text) && !empty($qr_label)) {
+                    //If not a separator, merge of each previous pdf
                     $isCourrier =true;
                     echo "This is a maarch document page ! Add page to pdf ...";
                     echo "\n";
                     $_SESSION['capture']->logEvent(
-		                "This is a maarch document page ! Add page to pdf ..."
-		            );
+                        "This is a maarch document page ! Add page to pdf ..."
+                    );
                     $new_pdf->AddPage();
-                    $new_pdf->setSourceFile($split_directory.$file);    
-                    $new_pdf->useTemplate($new_pdf->importPage(1));
-                }   
-                $next_filename = $i+1;
+
+                    $new_pdf->setSourceData($pdfdata);
+
+                    $tplidx = $new_pdf->importPage(1);
+                    $new_pdf->useTemplate($tplidx);
+
+                } else {
+                    // If not a separator and no previous pdf, merge actual pdf
+                    echo "No separator found ! Add page to pdf ...";
+                    echo "\n";
+                    $_SESSION['capture']->logEvent(
+                        "No separator found ! Add page to pdf ..."
+                    );
+                    $label[$z] = 'NOSEPARATOR';
+                    $new_pdf->AddPage();
+
+                    $new_pdf->setSourceData($pdfdata);
+
+                    $tplidx = $new_pdf->importPage(1);
+                    $new_pdf->useTemplate($tplidx);
+                }
 
                 /*
                  * Creation du pdf du separateur
                  */
-                if((($isCourrier == false && $old_label != '' && $text != '') || (!is_file($split_directory.$next_filename.'.pdf')))){
+                if ((($isCourrier == false && $old_label != '' && $text != '') || (!is_file($split_directory.$next_filename.'.pdf')))) {
+                    // 
                     echo "End of merge pdf for service : ".$label[$z];
                     echo "\n";
                     $_SESSION['capture']->logEvent(
-		                "End of merge pdf for service : ".$label[$z]
-		            );
+                        "End of merge pdf for service : ".$label[$z]
+                    );
                     $today = date("YmdHm");
                     $rand = rand();
                     
-                
+                    //create merged pdf
                     $filename = $label[$z].'_'.$today.$rand.".pdf";
                     $new_filename = $end_directory.$filename;
 
@@ -178,27 +239,25 @@ class QRSeparator
                     $new_pdf->Output($new_filename, "F");
 
 
-                    # add new document with first BODY part found
-                    $Document = 
-                        $this->Batch->addDocument(
-                            $new_filename
-                        );
+                    // add new document with first BODY part found
+                    $Document = $this->Batch->addDocument($new_filename);
 
-                    $_SESSION['capture']->logEvent("Document " . $Document->id 
-                        . " added with source " . $new_filename);
+                    $_SESSION['capture']->logEvent(
+                        "Document " . $Document->id  . " added with source " . $new_filename
+                    );
 
-
+                    //add destination data
                     $Document->setMetadata(
                         "destination", 
                         $label[$z-1]
                     );
 
-                    $new_pdf = new FPDI();
+                    $new_pdf = new TCPDI(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
                 }
                 echo "Remove tmp file : ".$split_directory.$i.'.pdf';
                 echo "\n";
                 unlink($split_directory.$i.'.pdf');
-            }else{
+            } else {
                 break;
             }
             $text = '';

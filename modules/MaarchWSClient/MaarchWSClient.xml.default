@@ -1,252 +1,99 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <MaarchWSClient>
-	<WSDL name="maarch_entreprise" uri="http://127.0.0.1/mep14/ws_server.php?WSDL" cacheUse="0" SSL="false" >
+	<WSDL SSL="false" cacheUse="0" name="maarchcourrier" uri="http://127.0.0.1/cs_maarchcourrier/ws_server.php?WSDL">
 		<proxy>
 			<user>superadmin</user>
 			<pass>superadmin</pass>
 			<timeout>600</timeout>
 		</proxy>
 	</WSDL>
-  <process name="OMT_OPS" >
-		<loop xpath="/Batch/Documents/Document">
-			<call name="storeResourceFromURI" >
-				<argument name="fileURI" xvalue="@fileToImport" />
-        <argument name="data">
-					<column>type_id</column>
-					<value>400</value>
-					<type>integer</type>
-				</argument>
-        <argument name="data">
-					<column>scan_date</column>
-					<value xvalue="@creationdate" />
-					<type>date</type>
-				</argument>
-        <argument name="data">
-					<column>origin</column>
-					<value xvalue="@origin" />
-					<type>string</type>
-				</argument>
-        <argument name="data">
-					<column>scan_wkstation</column>
-					<value xvalue="@wkStation" />
-					<type>string</type>
-				</argument>
-        <argument name="data">
-					<column>custom_t1</column>
-					<value xvalue="@customerid" />
-					<type>string</type>
-				</argument>
-        <argument name="data">
-					<column>custom_t9</column>
-					<value xvalue="@doctype" />
-					<type>string</type>
-				</argument>
-				<argument name="data">
-					<column>identifier</column>
-					<value xvalue="@filename" />
-					<type>string</type>
-				</argument>
-				<argument name="data">
-					<column>typist</column>
-					<value>ws</value>
-					<type>string</type>
-				</argument>
-				<argument name="data">
-					<column>doc_date</column>
-					<value xvalue="@docdate" />
-					<type>date</type>
-				</argument>
-				<argument name="data">
-					<column>custom_t10</column>
-					<value xvalue="@barcodeOPS" />
-					<type>string</type>
-				</argument>
-        <argument name="data">
-					<column>policy_id</column>
-					<value>FNTC</value>
-					<type>string</type>
-				</argument>
-        <argument name="data">
-					<column>cycle_id</column>
-					<value>INIT</value>
-					<type>string</type>
-				</argument>
-				<argument name="collId">res_coll</argument>
-				<argument name="table" >res_x</argument>
-				<argument name="format">pdf</argument>
-				<argument name="status">ATT</argument>
-				<return>
-					<resId metadata="resId" />
-				</return>
-			</call>
-			<!--loop xpath="./Pages/Page">
-        <call name="setResPage" >
-          <argument name="collId">res_coll</argument>
-          <argument name="resId" xvalue="ancestor::Document/Metadata/resId" />
-          <argument name="pageNumber" attribute="number" />
-          <argument name="pageOffset" attribute="offset" />
-          <argument name="pageLength" attribute="length" />
-        </call>
-        <loop xpath="./Metadata/*">
-          <call name="setResPageIndex" >
-            <argument name="collId">res_coll</argument>
-            <argument name="resId" xvalue="ancestor::Document/Metadata/resId" />
-            <argument name="pageNumber" xvalue="ancestor::Page/@number" />
-            <argument name="indexOffset" attribute="offset" />
-            <argument name="indexLength" attribute="length" />
-            <argument name="indexName" property="nodeName" />
-            <argument name="indexValue" property="nodeValue" />
-          </call>
-        </loop>
-      </loop-->
-		</loop>
-	</process>
-	<process name="APRIA" >
-		<loop xpath="/Batch/Documents/Document">
-			<call name="storeResourceFromURI" >
-				<argument name="fileURI" xvalue="@path" />
-				<argument name="data">
-					<column>type_id</column>
-					<value metadata="type_id" />
-					<type>integer</type>
-				</argument>
-				<argument name="data">
-					<column>title</column>
-					<value metadata="title" />
-					<type>string</type>
-				</argument>
-				<argument name="data">
-					<column>identifier</column>
-					<value xvalue="@filename" />
-					<type>string</type>
-				</argument>
-				<argument name="data">
-					<column>typist</column>
-					<value>autoimport</value>
-					<type>string</type>
-				</argument>
-				<!-- APRIA page indexes -->
-				<argument name="data">
-					<column>doc_date</column>
-					<value metadata="doc_date" />
-					<type>date</type>
-				</argument>
-				<argument name="data">
-					<column>custom_t1</column>
-					<value metadata="environnement" />
-					<type>string</type>
-				</argument>
-				<argument name="data">
-					<column>custom_t2</column>
-					<value metadata="regime" />
-					<type>string</type>
-				</argument>
-				<argument name="collId">res_coll</argument>
-				<argument name="table" >res_x</argument>
-				<argument name="format">txt</argument>
-				<argument name="status">NEW</argument>
-				<return>
-					<resId metadata="resId" />
-				</return>
-			</call>
-			<!--loop xpath="./Pages/Page">
-        <call name="setResPage" >
-          <argument name="collId">res_coll</argument>
-          <argument name="resId" xvalue="ancestor::Document/Metadata/resId" />
-          <argument name="pageNumber" attribute="number" />
-          <argument name="pageOffset" attribute="offset" />
-          <argument name="pageLength" attribute="length" />
-        </call>
-        <loop xpath="./Metadata/*">
-          <call name="setResPageIndex" >
-            <argument name="collId">res_coll</argument>
-            <argument name="resId" xvalue="ancestor::Document/Metadata/resId" />
-            <argument name="pageNumber" xvalue="ancestor::Page/@number" />
-            <argument name="indexOffset" attribute="offset" />
-            <argument name="indexLength" attribute="length" />
-            <argument name="indexName" property="nodeName" />
-            <argument name="indexValue" property="nodeValue" />
-          </call>
-        </loop>
-      </loop-->
-		</loop>
-	</process>
-	<process name="MCC" >
-		<loop xpath="/Batch/Documents/Document">
-			<call name="storeResourceFromURI" >
-				<argument name="fileURI" attribute="path" />
-				<argument name="data">
-					<column>destination</column>
-					<value metadata="destination" />
-					<type>string</type>
-				</argument>
-				<argument name="data">
-					<column>source</column>
-					<value attribute="filename" />
-					<type>string</type>
-				</argument>
-				<argument name="collId">letterbox_coll</argument>
-				<argument name="table">res_letterbox</argument>
-				<argument name="format" attribute="extension"/>
-				<argument name="status">ATT</argument>
-				<return>
-					<resId metadata="resId" />
-				</return>
-			</call>
-		</loop>
-	</process>
-	<process name="Tours_BS" >
-		<loop xpath="//Document">
-			<call name="storeResource" >
-				<argument name="data">
-					<column>CUSTOM_T1</column>
-					<value metadata="Collectivite" />
-					<type>string</type>
-				</argument>
-				<argument name="data">
-					<column>type_id</column>
-					<value metadata="Type" />
-					<type>integer</type>
-				</argument>
-				<argument name="collId">letterbox_coll</argument>
-				<argument name="table">res_letterbox</argument>
-				<argument name="format" attribute="extension"/>
-				<argument name="status">NEW</argument>
-			</call>
-		</loop>
-	</process>
-	<process name="MAIL" >
+	<process name="IMPORT_SCAN_BY_QRCODE">
 		<loop xpath="/Batch/Documents/Document">
 			<call name="storeResource">
-				<argument name="encodedContent" eval="base64_encode(file_get_contents($Element-&gt;path))" />
+				<argument eval="base64_encode(file_get_contents($Element-&gt;path))" name="encodedContent"/>
 				<argument name="data">
 					<column>subject</column>
-					<value metadata="subject" />
+					<value metadata="subject"/>
 					<type>string</type>
 				</argument>
 				<argument name="data">
 					<column>doc_date</column>
-					<value metadata="doc_date" />
+					<value metadata="doc_date"/>
 					<type>date</type>
 				</argument>
 				<argument name="data">
 					<column>type_id</column>
-					<value>10</value>
+					<value>1</value>
 					<type>integer</type>
 				</argument>
-		        <argument name="data">
-		          <column>priority</column>
-		          <value metadata="xpriority"/>
-		          <type>integer</type>
-		        </argument>
+				<argument name="data">
+					<column>destination</column>
+					<value metadata="destination"/>
+					<type>string</type>
+				</argument>
 				<argument name="collId">letterbox_coll</argument>
 				<argument name="table">res_letterbox</argument>
-				<argument name="format" attribute="extension"/>
-				<argument name="status">NEW</argument>
+				<argument attribute="extension" name="format"/>
+				<argument name="status">ATT</argument>
 				<return>
-					<returnCode />
+					<returnCode/>
 					<resId metadata="resId"/>
-					<error />
+					<error/>
+				</return>
+			</call>
+			<call name="storeExtResource">
+				<argument metadata="resId" name="res_id"/>
+				<argument name="data">
+					<column>nature_id</column>
+					<value>email</value>
+					<type>string</type>
+				</argument>
+				<argument name="data">
+					<column>category_id</column>
+					<value>incoming</value>
+					<type>string</type>
+				</argument>
+				<argument name="table">mlb_coll_ext</argument>
+				<return>
+					<returnCode/>
+					<resId metadata="resId"/>
+					<error/>
+				</return>
+			</call>
+		</loop>
+	</process>
+	<process name="IMPORT_MAIL_1">
+		<loop xpath="/Batch/Documents/Document">
+			<call name="storeResource">
+				<argument eval="base64_encode(file_get_contents($Element-&gt;path))" name="encodedContent"/>
+				<argument name="data">
+					<column>subject</column>
+					<value xvalue="./Metadata/res_subject"/>
+					<type>string</type>
+				</argument>
+				<argument name="data">
+					<column>doc_date</column>
+					<value metadata="doc_date"/>
+					<type>date</type>
+				</argument>
+				<argument name="data">
+					<column>type_id</column>
+					<value>703</value>
+					<type>integer</type>
+				</argument>
+				<argument name="data">
+					<column>destination</column>
+					<value>COU</value>
+					<type>string</type>
+				</argument>
+				<argument name="collId">letterbox_coll</argument>
+				<argument name="table">res_letterbox</argument>
+				<argument attribute="extension" name="format"/>
+				<argument name="status">INIT</argument>
+				<return>
+					<returnCode/>
+					<resId metadata="resId"/>
+					<error/>
 				</return>
 			</call>
 			<call name="CreateContact">
@@ -266,6 +113,24 @@
 					<column>contact_type</column>
 					<value>106</value>
 					<type>integer</type>
+					<table>contacts_v2</table>
+				</argument>
+				<argument name="data">
+					<column>title</column>
+					<value xvalue="./Metadata/contact_title"/>
+					<type>string</type>
+					<table>contacts_v2</table>
+				</argument>
+				<argument name="data">
+					<column>society</column>
+					<value xvalue="./Metadata/contact_society"/>
+					<type>string</type>
+					<table>contacts_v2</table>
+				</argument>
+				<argument name="data">
+					<column>function</column>
+					<value xvalue="./Metadata/contact_function"/>
+					<type>string</type>
 					<table>contacts_v2</table>
 				</argument>
 				<argument name="data">
@@ -304,21 +169,17 @@
 					<type>string</type>
 					<table>contact_addresses</table>
 				</argument>
-				<argument name="data">
-					<column>phone</column>
-					<value xvalue="./Metadata/phone"/>
-					<type>string</type>
-					<table>contact_addresses</table>
-				</argument>
+				<!--<argument name="data"><column>phone</column><value xvalue="./Metadata/phone"/><type>string</type><table>contact_addresses</table></argument>-->
 				<return>
-					<returnCode />
-					<contactId />
+					<returnCode/>
+					<contactId/>
 					<addressId />
-					<error />
+					<contactInfo />
+					<error/>
 				</return>
 			</call>
 			<call name="storeExtResource">
-				<argument name="res_id" metadata="resId" />
+				<argument metadata="resId" name="res_id"/>
 				<argument name="data">
 					<column>nature_id</column>
 					<value>email</value>
@@ -329,11 +190,7 @@
 					<value>incoming</value>
 					<type>string</type>
 				</argument>
-				<argument name="data">
-					<column>alt_identifier</column>
-					<value></value>
-					<type>string</type>
-				</argument>
+				<!--<argument name="data"><column>alt_identifier</column><value></value><type>string</type></argument>-->
 				<argument name="data">
 					<column>exp_contact_id</column>
 					<value xvalue="./Metadata/fromaddress"/>
@@ -346,22 +203,22 @@
 				</argument>
 				<argument name="table">mlb_coll_ext</argument>
 				<return>
-					<returnCode />
+					<returnCode/>
 					<resId metadata="resId"/>
-					<error />
+					<error/>
 				</return>
 			</call>
 			<loop xpath="Attachments/Attachment">
 				<call name="storeResource">
-					<argument name="encodedContent" eval="base64_encode(file_get_contents($Element-&gt;path))" />
+					<argument eval="base64_encode(file_get_contents($Element-&gt;path))" name="encodedContent"/>
 					<argument name="data">
 						<column>title</column>
-						<value metadata="filename" />
+						<value metadata="filename"/>
 						<type>string</type>
 					</argument>
 					<argument name="data">
 						<column>res_id_master</column>
-						<value xvalue="ancestor::Document/Metadata/resId" />
+						<value xvalue="ancestor::Document/Metadata/resId"/>
 						<type>integer</type>
 					</argument>
 					<argument name="data">
@@ -369,110 +226,19 @@
 						<value>letterbox_coll</value>
 						<type>string</type>
 					</argument>
+					<argument name="data">
+						<column>attachment_type</column>
+						<value>incoming_mail_attachment</value>
+						<type>string</type>
+					</argument>
 					<argument name="collId">letterbox_coll</argument>
 					<argument name="table">res_attachments</argument>
-					<argument name="format" attribute="extension"/>
-					<argument name="status">NEW</argument>
+					<argument attribute="extension" name="format"/>
+					<argument name="status">TRA</argument>
 					<return>
-						<returnCode />
+						<returnCode/>
 						<resId metadata="resId"/>
-						<error />
-					</return>
-				</call>
-			</loop>
-		</loop>
-	</process>
-	<process name="SpiData" >
-		<loop xpath="/Batch/Documents/Document">
-			<call name="storeResource" >
-				<argument name="encodedContent" eval="base64_encode(file_get_contents($Element-&gt;path))" />
-				<argument name="data">
-					<column>type_id</column>
-					<value>400</value>
-					<type>integer</type>
-				</argument>
-				<argument name="data">
-					<column>doc_date</column>
-					<value xvalue="./Metadata/document/ex_invoicedate" />
-					<type>date</type>
-				</argument>
-				<argument name="data">
-					<column>identifier</column>
-					<value xvalue="./Metadata/document/ex_invoicenr" />
-					<type>string</type>
-				</argument>
-				<argument name="data">
-					<column>custom_t1</column>
-					<value xvalue="./Metadata/documentfields/doc_type" />
-					<type>string</type>
-				</argument>
-				<argument name="data">
-					<column>custom_t4</column>
-					<value xvalue="./Metadata/document/ex_ordernr" />
-					<type>string</type>
-				</argument>
-				<argument name="collId">business_coll</argument>
-				<argument name="table">res_business</argument>
-				<argument name="format" attribute="extension"/>
-				<argument name="status">VAL</argument>
-				<return>
-					<returnCode />
-					<resId metadata="resId"/>
-					<error />
-				</return>
-			</call>
-			<call name="storeExtResource" >
-				<argument name="data">
-					<column>category_id</column>
-					<value>purchase</value>
-					<type>string</type>
-				</argument>
-				<argument name="data">
-					<column>contact_id</column>
-					<value>131</value>
-					<!-- send contact id from supplier information -->
-					<type>integer</type>
-				</argument>
-				<argument name="data">
-					<column>currency</column>
-					<value xvalue="./Metadata/amount/ex_valuta" />
-					<type>string</type>
-				</argument>
-				<argument name="data">
-					<column>net_sum</column>
-					<value xvalue="./Metadata/amount/ex_totalexcl" />
-					<type>float</type>
-				</argument>
-				<argument name="data">
-					<column>tax_sum</column>
-					<value xvalue="./Metadata/amount/ex_vat_high" />
-					<!-- totaltva non renseigné -->
-					<type>float</type>
-				</argument>
-				<argument name="data">
-					<column>total_sum</column>
-					<value xvalue="./Metadata/amount/ex_total_incl" />
-					<type>float</type>
-				</argument>
-				<argument name="resId" xvalue="./ancestor::Document/Metadata/resId" />
-				<argument name="table">business_coll_ext</argument>
-			</call>
-			<loop xpath="./Attachments/Attachment">
-				<call name="storeAttachmentResource">
-					<argument name="encodedContent" eval="base64_encode(file_get_contents($Element-&gt;path))" />
-					<argument name="resId" xvalue="./ancestor::Document/Metadata/resId"/>
-					<argument name="collId">business_coll</argument>
-					<argument name="format" attribute="extension"/>
-					<argument name="title" attribute="filename" />
-				</call>
-			</loop>
-			<loop xpath="./Notes/Note">
-				<call name="addNote">
-					<argument name="resId" xvalue="./ancestor::Document/Metadata/resId"/>
-					<argument name="collId">business_coll</argument>
-					<argument name="noteContent" xvalue="."/>
-					<return>
-						<value metadata="noteId"/>
+						<error/>
 					</return>
 				</call>
 			</loop>

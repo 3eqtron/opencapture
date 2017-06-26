@@ -66,15 +66,40 @@ class MailCapture
     }
     
     private function handle_imap_errors(
-        $func
+        $func, $msgno = ''
     ) {
         $errors = array();
         $errors = imap_errors();
         $num_errors = count($errors);
         $actual_errors = 0;
+        $clearError = false;
         for($i=0; $i<$num_errors; $i++) {
             $error = trim($errors[$i]);
             if($error) {
+                if (
+                    1 === preg_match(
+                        '/Unexpected characters at end of address: <(.*)>/',
+                        $error,
+                        $matches
+                    )
+                ) {
+                    $clearError = true;
+                    $_SESSION['capture']->logEvent(
+                        'clear error because we found pattern : Unexpected characters at end of address'
+                    );
+                }
+                if (
+                    1 === preg_match(
+                        '/Must use comma to separate addresses: <(.*)>/',
+                        $error,
+                        $matches
+                    )
+                ) {
+                    $clearError = true;
+                    $_SESSION['capture']->logEvent(
+                        'clear error because we found pattern : Must use comma to separate addresses'
+                    );
+                }
                 $actual_errors ++;
                 $_SESSION['capture']->logEvent(
                     $error,
@@ -82,10 +107,29 @@ class MailCapture
                 );
             }
         }
-        if($actual_errors > 0) 
+        if ($clearError) {
+            imap_errors();
+        } elseif ($actual_errors > 0) {
+            if (
+                (
+                    $func == 'imap_headerinfo' ||
+                    $func == 'imap_fetchstructure' ||
+                    $func == 'imap_fetchbody'
+                )
+                && $msgno <> ''
+                && $this->folderError
+            ) {
+                imap_mail_move(
+                    $this->imap_stream, 
+                    trim((string) $msgno), 
+                    $this->folderError
+                );
+            }
+            
             $_SESSION['capture']->sendError(
                 "Error(s) occured during function $func"
-            );    
+            );
+        }
     }
        
     /**
@@ -100,7 +144,8 @@ class MailCapture
         $configFile=false,
         $folder=false,
         $attachmentsOutputDir=false,
-        $addHeaderInMailContent=true
+        $addHeaderInMailContent=true,
+        $folderError=false
     ) {    
         if (empty($folder) || $folder == 'false') {
             $folder=false;
@@ -116,6 +161,10 @@ class MailCapture
         } elseif ($addHeaderInMailContent == 'false') {
             $addHeaderInMailContent=false;
             $this->addHeaderInMailContent=false;
+        }
+
+        if ($folderError) {
+            $this->folderError = $folderError;
         }
 
         $this->logFile = 
@@ -177,7 +226,7 @@ class MailCapture
                 = $accountConfig->getElementsByTagName('IMAP_CLIENT_KEY')->item(0)->nodeValue;
         }
 
-        var_dump($this->params);
+        //var_dump($this->params);
         
         /**********************************************************************
         ** Load Message rules config
@@ -266,38 +315,35 @@ class MailCapture
             /**********************************************************************
             ** Action after process
             **********************************************************************/
-			if($capture){
-				switch($action) {
-				case 'move':
-					$this->writeLog(
-						"Moving message to $folder..."
-					);
-					imap_mail_move(
-						$this->imap_stream, 
-						$Msgno, 
-						$folder
-					);
-					$this->handle_imap_errors("imap_mail_move");
-					break;
-					
-				case 'delete':
-					$this->writeLog(
-						"Deleting message..."
-					);
-					imap_delete(
-						$this->imap_stream, 
-						$Msgno
-					);
-					$this->handle_imap_errors("imap_delete");
-					break;
-					
-				case 'none':
-				default:
-					break;
-				}
-			}
-                                     
-        }    
+            if ($capture) {
+                switch ($action) {
+                    case 'move':
+                        $this->writeLog("Moving message to $folder...");
+                        imap_mail_move(
+                            $this->imap_stream,
+                            $Msgno,
+                            $folder
+                        );
+                        $this->handle_imap_errors("imap_mail_move");
+                        break;
+                         
+                    case 'delete':
+                        $this->writeLog(
+                            "Deleting message..."
+                        );
+                        imap_delete(
+                            $this->imap_stream,
+                            $Msgno
+                        );
+                        $this->handle_imap_errors("imap_delete");
+                        break;
+
+                    case 'none':
+                    default:
+                        break;
+                }
+            }
+        }
         
         /**********************************************************************
         ** Actually delete tagged messages, get logs and close connection
@@ -320,24 +366,33 @@ class MailCapture
         $account,
         $action,
         $configFile=false,
-        $folder=false
+        $folder=false,
+        $folderError=false
     ) {
         $Elements = 
             $this->Batch->query(
                 '/Batch/Documents/Document'
             );
         $l = $Elements->length;
-        for($i=0; $i<$l; $i++) {
+        for ($i=0; $i<$l; $i++) {
             $Element = $Elements->item($i);
             $currentMsgId = $Element->getMetadata("uid");
             echo 'PROCESS THE MAIL ' . $currentMsgId . PHP_EOL;
             $ackVal = $Element->getMetadata("resId");
             if (empty($ackVal)) {
                 echo 'MAIL' . $currentMsgId . ' NOT INTEGRETED IN MAARCH ! ' . PHP_EOL;
-                $_SESSION['capture']->sendError(
-                    'MAIL' . $currentMsgId . ' NOT INTEGRETED IN MAARCH ! '
-                );
+                if (!$folderError || $folderError == "false") {
+                    $_SESSION['capture']->sendError(
+                        'MAIL' . $currentMsgId . ' NOT INTEGRETED IN MAARCH ! '
+                    );
+                } else {
+                    $_SESSION['capture']->logEvent(
+                        'MAIL' . $currentMsgId . ' NOT INTEGRETED IN MAARCH ! '
+                    );
+                    $folder = $folderError;
+                }
             }
+            //var_dump($folder);
             
             $this->ProcessTheMail(
                 $account,
@@ -466,7 +521,7 @@ class MailCapture
                 0,
                 0,
                 $this->params
-            );  
+            );
         
         if(!$this->imap_stream) {
             $this->handle_imap_errors("imap_open");
@@ -499,14 +554,14 @@ class MailCapture
         ** Action after process
         **********************************************************************/
 
-        switch($action) {
+        switch ($action) {
             case 'move':
                 $this->writeLog(
                     "Moving message to $folder..."
                 );
                 imap_mail_move(
-                    $this->imap_stream, 
-                    $currentMsgId, 
+                    $this->imap_stream,
+                    $currentMsgId,
                     $folder,
                     CP_UID
                 );
@@ -518,7 +573,7 @@ class MailCapture
                     "Deleting message..."
                 );
                 imap_delete(
-                    $this->imap_stream, 
+                    $this->imap_stream,
                     $currentMsgId,
                     FT_UID
                 );
@@ -528,18 +583,18 @@ class MailCapture
             case 'none':
             default:
                 break;
-        }  
+        }
         
         /**********************************************************************
         ** Actually delete tagged messages, get logs and close connection
         **********************************************************************/
         imap_expunge(
             $this->imap_stream
-        ); 
+        );
         $this->handle_imap_errors("imap_expunge");
         
         imap_close(
-            $this->imap_stream 
+            $this->imap_stream
         );
         $this->handle_imap_errors("imap_close");
         
@@ -557,7 +612,7 @@ class MailCapture
         }
 
         $this->logFile = 
-            fopen($this->Batch->directory . DIRECTORY_SEPARATOR . 'MailCapture.log', "w");
+            fopen($this->Batch->directory . DIRECTORY_SEPARATOR . 'MailCapture.log', "a+");
         
         if ($configFile) {
             $Config = '';
@@ -715,7 +770,7 @@ class MailCapture
                     $this->imap_stream, 
                     $Msgno
                 );
-            $this->handle_imap_errors("imap_headerinfo");
+            $this->handle_imap_errors("imap_headerinfo", $Msgno);
             $Msg = $this->decode_mime($imap_header);
             //var_export($Msg);
             // echo PHP_EOL . 'message date ' . $Msg->date . PHP_EOL;
@@ -802,61 +857,61 @@ class MailCapture
         case "contains":
             if(strripos($value, $test) !== false) $applies = true;
             break;
-		case "nocontains":
+          case "nocontains":
             if(strripos($value, $test) === false) $applies = true;
             break;
-		case "checkUserMail":
-			$mail = array();
-			$theString = str_replace(">", "", $value);
-        	$mail = explode("<", $theString);
+          case "checkUserMail":
+               $mail = array();
+               $theString = str_replace(">", "", $value);
+             $mail = explode("<", $theString);
 
-        	# WS
-			require_once('SOAP/Client.php');
+             # WS
+               require_once('SOAP/Client.php');
 
-			$Config_Capture = new DOMDocument();
-	        $Config_Capture->load("config" . DIRECTORY_SEPARATOR . "Capture.xml" );
-			$xpath_Capture = new DOMXpath($Config_Capture);
+               $Config_Capture = new DOMDocument();
+             $Config_Capture->load("config" . DIRECTORY_SEPARATOR . "Capture.xml" );
+               $xpath_Capture = new DOMXpath($Config_Capture);
 
-	        $WSDL_Value =
-	            $xpath_Capture->query(
-	                '//input[@name="WSDL"]'
-	            )->item(0)->nodeValue;
+             $WSDL_Value =
+                 $xpath_Capture->query(
+                     '//input[@name="WSDL"]'
+                 )->item(0)->nodeValue;
 
-	        $Config_WS = new DOMDocument();
-	        $Config_WS->load("modules" . DIRECTORY_SEPARATOR .
-	            "MaarchWSClient" . DIRECTORY_SEPARATOR . "MaarchWSClient.xml"
-	        );
+             $Config_WS = new DOMDocument();
+             $Config_WS->load("modules" . DIRECTORY_SEPARATOR .
+                 "MaarchWSClient" . DIRECTORY_SEPARATOR . "MaarchWSClient.xml"
+             );
 
-			$xpath_WS = new DOMXpath($Config_WS);
+               $xpath_WS = new DOMXpath($Config_WS);
 
-	        $WSDLConfig =
-	            $xpath_WS->query(
-	                '//WSDL[@name="'.$WSDL_Value.'"]'
-	            )->item(0);
+             $WSDLConfig =
+                 $xpath_WS->query(
+                     '//WSDL[@name="'.$WSDL_Value.'"]'
+                 )->item(0);
 
-	        $uri = $WSDLConfig->getAttribute('uri');
+             $uri = $WSDLConfig->getAttribute('uri');
 
-	        $proxyArgs =
-	            $xpath_WS->query(
-	                './proxy/*',
-	                $WSDLConfig
-	            );
+             $proxyArgs =
+                 $xpath_WS->query(
+                     './proxy/*',
+                     $WSDLConfig
+                 );
 
-	        $l = $proxyArgs->length;
-	        $proxy = array();
-	        for($i=0; $i<$l; $i++) {
-	            $proxyArg = $proxyArgs->item($i);
-	            $proxyArgName = $proxyArg->nodeName;
-	            $proxyArgValue = $proxyArg->nodeValue;
-	            $proxy[$proxyArgName] = (string)$proxyArgValue;
-	        }    
+             $l = $proxyArgs->length;
+             $proxy = array();
+             for($i=0; $i<$l; $i++) {
+                 $proxyArg = $proxyArgs->item($i);
+                 $proxyArgName = $proxyArg->nodeName;
+                 $proxyArgValue = $proxyArg->nodeValue;
+                 $proxy[$proxyArgName] = (string)$proxyArgValue;
+             }    
 
-			$wsdl = new SOAP_WSDL($uri, $proxy, false);
-			$client = $wsdl->getProxy();
+               $wsdl = new SOAP_WSDL($uri, $proxy, false);
+               $client = $wsdl->getProxy();
             
             $isUser = false;
             $this->targetEntityId = "";
-			$userWS = $client->checkUserMail($mail[count($mail) -1]);
+               $userWS = $client->checkUserMail($mail[count($mail) -1]);
 
             if (!$userWS->item->isUser && file_exists( __DIR__ . DIRECTORY_SEPARATOR . "externalContacts.xml")) {
                 $xmlfile = simplexml_load_file( __DIR__ . DIRECTORY_SEPARATOR . "externalContacts.xml");
@@ -874,21 +929,21 @@ class MailCapture
                 $isUser = true;
             }
 
-			if ($test == "true" && !$isUser) {
+               if ($test == "true" && !$isUser) {
 
-				$filename = __DIR__ . DIRECTORY_SEPARATOR . "sendmail.ini";
+                    $filename = __DIR__ . DIRECTORY_SEPARATOR . "sendmail.ini";
                 $iniFile = parse_ini_file($filename);
 
-				//Use to send html mail
-			    $headers  = 'MIME-Version: 1.0' . "\r\n";
-			    $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+                    //Use to send html mail
+                   $headers  = 'MIME-Version: 1.0' . "\r\n";
+                   $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 
-				mail($mail[count($mail) -1], $iniFile['mail_object'], $iniFile['mail_message'], $headers);
-			}
-        	
-			if (!$isUser) {
-				$applies = true;
-			}
+                    mail($mail[count($mail) -1], $iniFile['mail_object'], $iniFile['mail_message'], $headers);
+               }
+             
+               if (!$isUser) {
+                    $applies = true;
+               }
 
             break;
         }
@@ -988,15 +1043,18 @@ class MailCapture
                 $this->imap_stream, 
                 $Msg->Msgno
             );
-        $this->handle_imap_errors("imap_fetchstructure");
+        $this->handle_imap_errors("imap_fetchstructure",$Msg->Msgno);
         $Msg->parts[0] = $imap_structure;
 
         $additionalHeader = explode("\n", imap_fetchheader($this->imap_stream, $Msgno));
         foreach ($additionalHeader as $value) {
-            if(stripos($value, "X-Priority")!== false || stripos($value, "X-Priority-Label")!== false || stripos($value, "X-Priority-TTL")!== false){
+            //if(stripos($value, "X-Priority")!== false || stripos($value, "X-Priority-Label")!== false || stripos($value, "X-Priority-TTL")!== false){
+            if(stripos($value, "X-Priority")!== false || stripos($value, "X-Priority-TTL")!== false){
                 $xpriorityHeader = explode(":", $value);
                 $xpriority       = explode(" ", trim($xpriorityHeader[1]));
-                $Msg->xpriority  = trim($xpriority[0]);
+                if(is_numeric(trim($xpriority[0]))){
+                    $Msg->xpriority  = trim($xpriority[0]);
+                }
                 break;
             } else if(strpos($value, "Disposition-Notification-To")!== false){
                 $Msg->disposition_notification_to = 3; // Accusé de lecture
@@ -1033,6 +1091,7 @@ class MailCapture
         $it_part = 0;
 
         $this->writeLog("Message have ".count($Msg->parser)." parts.");
+        $aAttachmentsInfo = [];
         foreach($Msg->parser as $part) {
             $html_body = false;
             $plain_body = false;
@@ -1134,7 +1193,33 @@ class MailCapture
                 
                 break;
                 
-            case 'ATTACHMENT':
+            //case 'ATTACHMENT':
+            default:
+                //On récupère les informations de la pj pour éviter de récupérer 2 fois la meme pj car elle peut être en inline et attachment
+                $sAttachmentInfos = $part->subtype . '_' . $part->bytes;
+                if(file_exists($part->filepath)){
+                    $sAttachmentInfos .= '_' . md5_file($part->filepath);
+                }
+
+                if ((strtoupper($part->disposition) == 'ATTACHMENT' || strtoupper($part->disposition) == 'ATTACHEMENT') && !isset($aAttachmentsInfo[$sAttachmentInfos])) {
+                    echo 'captureMsg CASE ATTACHMENT' . ' Attachment ' . $part->section . PHP_EOL;
+                    $this->writeLog('captureMsg CASE ATTACHMENT  Attachment ' . $part->section);
+                } elseif (strtoupper($part->disposition) == 'INLINE' && !isset($aAttachmentsInfo[$sAttachmentInfos])) {
+                    echo 'INLINE CASE -> IT IS AN ATTACHMENT' . PHP_EOL;
+                    $this->writeLog('INLINE CASE -> IT IS AN ATTACHMENT');
+                } elseif(isset($aAttachmentsInfo[$sAttachmentInfos])){
+                    echo 'File already added => format_bytes_md5 : ' . $sAttachmentInfos . PHP_EOL;
+                    $this->writeLog('File already added => format_bytes_md5 : ' . $sAttachmentInfos);
+                    break;
+                } else {
+                    echo 'UNKNOW DISPOSITION!' . PHP_EOL;
+                    $this->writeLog("Unknow Disposition : ".strtoupper($part->disposition));
+                    break;
+                }
+
+                $this->writeLog('File added => format_bytes_md5 : ' . $sAttachmentInfos);
+                $aAttachmentsInfo[$sAttachmentInfos] = true;
+
                 if (!$isThereAnyBodyHere) {
                     $Document = 
                         $this->Batch->addDocument(
@@ -1178,8 +1263,14 @@ class MailCapture
                         );
                     if(!$process) {
                         $this->writeLog(
-                            "Attachment ".$part->section." excluded by rule..."
+                            "Attachment part ".$part->section." (mimetype ".$part->mimetype.", extension ".$part->extension.") excluded by rule..."
                         );
+                        $_SESSION['capture']->logEvent(
+                            "Attachment part ".$part->section." (mimetype ".$part->mimetype.", extension ".$part->extension.") excluded by rule...",
+                            1
+                        );
+                        echo "Attachment part ".$part->section." (mimetype ".$part->mimetype.", extension ".$part->extension.") excluded by rule..." . PHP_EOL;
+
                         continue 2;
                     }
                 }
@@ -1274,14 +1365,14 @@ class MailCapture
                         $Attachment
                     );
                 }
-                break;
-            default:
-                $this->writeLog("Unknow Disposition : ".strtoupper($part->disposition));
+                //break;
+            //default:
+            //    $this->writeLog("Unknow Disposition : ".strtoupper($part->disposition));
             break;
             }
         }
-		
-		return true;		
+          
+          return true;          
     }
     
     private function parse(
@@ -1467,7 +1558,7 @@ class MailCapture
                 
         $this->Msg->parser[] = &$part;
         
-        $this->handle_imap_errors("imap_fetchbody");
+        $this->handle_imap_errors("imap_fetchbody", $this->Msg->Msgno);
         
     }
     
@@ -1815,7 +1906,7 @@ class MailCapture
 
 
     /*************************************************/
-    /*          Format du mail attendu :	         */
+    /*          Format du mail attendu :              */
     /*************************************************/
     // Civilité: Monsieur
     // Nom: Dubois
@@ -1856,14 +1947,14 @@ class MailCapture
                     "Set Contact Metadata"
                 );
 
-    	    $contact_title = substr($contents, strpos($contents, "Civilité:") + 10);
-                $contact_title = substr($contact_title, 0, strpos($contact_title, "Nom:"));
+         $contact_title = substr($contents, strpos($contents, "Civilité:") + 10);
+            $contact_title = substr($contact_title, 0, strpos($contact_title, "Nom:"));
 
-    	    if(trim($contact_title) == "Monsieur"){
-    		  $Element->setMetadata("contact_title", "title1");
-    	    }else{
-    		  $Element->setMetadata("contact_title", "title2");
-    	    }
+         if(trim($contact_title) == "Monsieur"){
+          $Element->setMetadata("contact_title", "title1");
+         }else{
+          $Element->setMetadata("contact_title", "title2");
+         }
             $contact_name = substr($contents, strpos($contents, "Nom:") + 4);
             $contact_name = substr($contact_name, 0, strpos($contact_name, "Prénom:"));
             $contact_name = preg_replace("/(\r\n|\n|\r)/", " ", $contact_name);
