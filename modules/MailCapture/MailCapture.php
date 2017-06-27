@@ -1270,6 +1270,10 @@ class MailCapture
                             1
                         );
                         echo "Attachment part ".$part->section." (mimetype ".$part->mimetype.", extension ".$part->extension.") excluded by rule..." . PHP_EOL;
+                        $Document->setMetadata(
+                            "attachmentRuleError", 
+                            "Attachment part ".$part->section." (mimetype ".$part->mimetype.", extension ".$part->extension.") excluded by rule..."
+                        );
 
                         continue 2;
                     }
