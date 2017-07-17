@@ -35,6 +35,24 @@
 					<!--error/-->
 				</return>
 			</call>
+			<call name="/administration/parameters/fulltext_id" method="GET" queryString="fulltext_id">
+				<return>
+					<parameter/>
+				</return>
+			</call>
+			<call name="/administration/status/" method="POST">
+				<argument name="id">TEST</argument>
+				<argument name="label_status">TEST</argument>
+				<argument name="img_filename">fm-letter-end</argument>
+				<argument name="is_folder_status">N</argument>
+				<argument name="can_be_searched">Y</argument>
+				<argument name="can_be_modified">N</argument>
+				<return>
+					<!--returnCode/-->
+					<status/>
+					<!--error/-->
+				</return>
+			</call>
 		</loop>
 	</process>
 	<process name="IMPORT_SCAN_BY_QRCODE">

@@ -203,6 +203,7 @@ class MaarchWSClient extends DOMXPath
     ) {
         $serviceName = $service->getAttribute('name');
         $serviceMethod = $service->getAttribute('method');
+        $queryString = $service->getAttribute('queryString');
         
         if ($this->log) {
             $_SESSION['capture']->logEvent("Process Call of service '"
@@ -211,7 +212,7 @@ class MaarchWSClient extends DOMXPath
         
         $args = $this->parseArguments($service, $Element);
         
-        $WSReturn = $this->callService($serviceName, $args, $serviceMethod);
+        $WSReturn = $this->callService($serviceName, $args, $serviceMethod, $queryString);
         
         $result = $this->processReturn($Element, $service, $WSReturn);
     }
@@ -219,7 +220,8 @@ class MaarchWSClient extends DOMXPath
     public function callService(
         $serviceName,
         $args,
-        $serviceMethod = NULL
+        $serviceMethod = NULL,
+        $queryString = NULL
     ) {
         if ($this->log) {
             $_SESSION['capture']->logEvent("Call service '" . $serviceName . "'...");
@@ -253,8 +255,19 @@ class MaarchWSClient extends DOMXPath
             try {
                 $uriCalled = $this->uri . $serviceName;
                 $httpRequest = new Maarch\Http\Message\Request($uriCalled);
-                $httpRequest->withMethod($serviceMethod);
-                //var_dump($httpRequest);
+                if (!empty($serviceMethod)) {
+                    $httpRequest->withMethod($serviceMethod);
+                } else {
+                    $httpRequest->withMethod('GET');
+                }
+                if (!empty($queryString)) {
+                    $httpRequest->getUri()->withQuery($queryString);
+                }
+                if(!empty($args)) {
+                    $httpRequest->withHeader('Content-Type', 'application/json');
+                    $httpRequest->withSerializedBody(json_encode($args, true));
+                }
+                var_dump($httpRequest);
                 $client = new Maarch\Http\Transport\StreamClient();
                 $client->sendRequest($httpRequest);
                 $httpResponse = $client->receiveResponse();
@@ -449,6 +462,11 @@ class MaarchWSClient extends DOMXPath
         $WSReturn,
         $serviceName
     ) {
+        if ($this->type == 'REST') {
+            $WSReturnContent = json_encode($WSReturn);
+        } else {
+            $WSReturnContent = $WSReturn;
+        }
         // Return has metadata name, add metadata
         if ($return->hasAttribute('metadata')) {
             return $Element->setMetadata($return->getAttribute('metadata'), $WSReturn);
@@ -473,7 +491,7 @@ class MaarchWSClient extends DOMXPath
                 $dmpfile = $this->Batch->directory . "/" . $Element->id . "__MaarchWSClient__"
                     . str_replace(DIRECTORY_SEPARATOR, "#", $serviceName) . "__return.log";
                 $f = fopen($dmpfile, "w");
-                fwrite($f, print_r($WSReturn, true));
+                fwrite($f, print_r($WSReturnContent, true));
                 fclose($f);
                 if ($this->CatchError == "false") {
                     $_SESSION['capture']->sendError(
@@ -489,9 +507,11 @@ class MaarchWSClient extends DOMXPath
                     );
                 }
             }
-            
-            $returnContentValue = $WSReturn->$returnContentName;
-            
+            if ($this->type == 'REST') {
+                $returnContentValue = $WSReturnContent;
+            } else {
+                $returnContentValue = $WSReturn->$returnContentName;
+            }            
             $_SESSION['capture']->logEvent(
                 "return value from web service " . $serviceName . " "
                 . $returnContentName . ' : ' . $returnContentValue
