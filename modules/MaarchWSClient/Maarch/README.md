@@ -1,0 +1,1 @@
+[![build status](https://labs.maarch.org/maarch/dev/NoRM/badges/master/build.svg)](https://labs.maarch.org/maarch/dev/NoRM/commits/master) [![coverage report](https://labs.maarch.org/maarch/dev/NoRM/badges/master/coverage.svg)](https://labs.maarch.org/maarch/dev/NoRM/commits/master)

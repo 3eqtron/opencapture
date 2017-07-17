@@ -1,0 +1,59 @@
+services:
+  - postgres:latest
+
+variables:
+  POSTGRES_DB: "NoRM"
+  POSTGRES_USER: maarch
+  POSTGRES_PASSWORD: ""
+
+stages:
+  - test
+#  - codeclimate
+
+before_script:
+  - bash App/MaarchRM/ci/docker_install_php.sh > /dev/null
+  - bash App/MaarchRM/ci/docker_install_database.sh
+
+job_php-7.0:
+  image: php:7.0-apache
+  stage: test
+  script:
+    - mkdir -p /var/www/NoRM/Maarch
+    - cp -R /builds/maarch/dev/NoRM/* /var/www/NoRM/Maarch
+    - cd /var/www/NoRM/Maarch
+    - curl --location -s --output /usr/local/bin/phpunit https://phar.phpunit.de/phpunit.phar
+    - chmod +x /usr/local/bin/phpunit
+    - cd App/MaarchRM
+    - phpunit --coverage-text -c phpunit.xml
+  only:
+    - master
+
+
+job_php-7.1:
+  image: php:7.1-apache
+  stage: test
+  script:
+    - mkdir -p /var/www/NoRM/Maarch
+    - cp -R /builds/maarch/dev/NoRM/* /var/www/NoRM/Maarch
+    - cd /var/www/NoRM/Maarch
+    - curl --location -s --output /usr/local/bin/phpunit https://phar.phpunit.de/phpunit.phar
+    - chmod +x /usr/local/bin/phpunit
+    - cd App/MaarchRM
+    - phpunit --coverage-text -c phpunit.xml
+  only:
+    - master
+
+
+#codeclimate:
+#  image: docker:latest
+#  stage: codeclimate
+#  variables:
+#    DOCKER_DRIVER: overlay
+#  services:
+#    - docker:dind
+#  script:
+#    - docker pull codeclimate/codeclimate
+#    - docker run --env CODECLIMATE_CODE="$PWD" --volume "$PWD":/code --volume /var/run/docker.sock:/var/run/docker.sock --volume /tmp/cc:/tmp/cc codeclimate/codeclimate init
+#    - docker run --env CODECLIMATE_CODE="$PWD" --volume "$PWD":/code --volume /var/run/docker.sock:/var/run/docker.sock --volume /tmp/cc:/tmp/cc codeclimate/codeclimate analyze -f json > codeclimate.json
+#codeclimate:  artifacts:
+#    paths: [codeclimate.json]

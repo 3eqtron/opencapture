@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit colors="never" backupGlobals="false" bootstrap="phpunit.php">
+    <testsuites>
+        <testsuite name="Maarch RM Tests">
+            <directory>Business/Tests</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+      <whitelist>
+          <directory suffix="Test.php">Business/Tests</directory>
+      </whitelist>
+    </filter>
+
+</phpunit>
