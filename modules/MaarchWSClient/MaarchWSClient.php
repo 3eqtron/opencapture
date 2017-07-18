@@ -209,15 +209,24 @@ class MaarchWSClient extends DOMXPath
             $_SESSION['capture']->logEvent("Process Call of service '"
                 . $serviceName . "' for " . $Element->nodeName . " " . $Element->id);
         }
+
+        if ($this->type == 'SOAP' || $this->type == '') {
         
-        $args = $this->parseArguments($service, $Element);
+            $args = $this->parseSOAPArguments($service, $Element);
         
-        $WSReturn = $this->callService($serviceName, $args, $serviceMethod, $queryString);
+            $WSReturn = $this->callSOAPService($serviceName, $args, $serviceMethod, $queryString);
         
-        $result = $this->processReturn($Element, $service, $WSReturn);
+            $result = $this->processSOAPReturn($Element, $service, $WSReturn);
+        } else {
+            $args = $this->parseRESTArguments($service, $Element);
+
+            $WSReturn = $this->callRESTService($serviceName, $args, $serviceMethod, $queryString);
+
+            $result = $this->processRESTReturn($Element, $service, $WSReturn);
+        }
     }
     
-    public function callService(
+    public function callSOAPService(
         $serviceName,
         $args,
         $serviceMethod = NULL,
@@ -226,74 +235,103 @@ class MaarchWSClient extends DOMXPath
         if ($this->log) {
             $_SESSION['capture']->logEvent("Call service '" . $serviceName . "'...");
         }
-
-
-        if ($this->type == 'SOAP' || $this->type == '') {
-            try {
-                // Call service
-                $WSReturn = call_user_func_array(
-                    array(
-                        $this->SoapClient,
-                        $serviceName
-                    ),
-                    $args
-                );
-                
-                $this->checkFault("SOAP_PROXY::$serviceName", $WSReturn);
-            } catch (SoapFault $fault) {
-                $_SESSION['capture']->logEvent($fault, 2);
-            }
-            if (!$WSReturn) {
-                if ($this->CatchError == "false") {
-                    $_SESSION['capture']->sendError("ERROR No return from web service!");
-                } else {
-                    $_SESSION['capture']->logEvent("ERROR No return from web service!");
-                }
-            }
-
-        } else {
-            try {
-                $uriCalled = $this->uri . $serviceName;
-                $httpRequest = new Maarch\Http\Message\Request($uriCalled);
-                if (!empty($serviceMethod)) {
-                    $httpRequest->withMethod($serviceMethod);
-                } else {
-                    $httpRequest->withMethod('GET');
-                }
-                if (!empty($queryString)) {
-                    $httpRequest->getUri()->withQuery($queryString);
-                }
-                if(!empty($args)) {
-                    $httpRequest->withHeader('Content-Type', 'application/json');
-                    $httpRequest->withSerializedBody(json_encode($args, true));
-                }
-                var_dump($httpRequest);
-                $client = new Maarch\Http\Transport\StreamClient();
-                $client->sendRequest($httpRequest);
-                $httpResponse = $client->receiveResponse();
-                $WSReturn = json_decode($httpResponse->getBody());
-                $WSReturn->returnCode = 0;
-                $WSReturn->error = '';
-                var_dump($WSReturn);
-            } catch (Exception $fault) {
-                $_SESSION['capture']->logEvent($fault, 2);
-            }
-            if (!$WSReturn) {
-                $WSReturn->returnCode = 1;
-                $WSReturn->error = 'ERROR WITH REST WS !';
-                if ($this->CatchError == "false") {
-                    $_SESSION['capture']->sendError("ERROR No return from web service!");
-                } else {
-                    $_SESSION['capture']->logEvent("ERROR No return from web service!");
-                }
-            }
+        
+        try {
+            // Call service
+            $WSReturn = call_user_func_array(
+                array(
+                    $this->SoapClient,
+                    $serviceName
+                ),
+                $args
+            );
             
+            $this->checkFault("SOAP_PROXY::$serviceName", $WSReturn);
+        } catch (SoapFault $fault) {
+            $_SESSION['capture']->logEvent($fault, 2);
+        }
+        if (!$WSReturn) {
+            if ($this->CatchError == "false") {
+                $_SESSION['capture']->sendError("ERROR No return from web service!");
+            } else {
+                $_SESSION['capture']->logEvent("ERROR No return from web service!");
+            }
         }
         
         return $WSReturn;
     }
+
+    protected function callRESTService(
+        $serviceName,
+        $args,
+        $serviceMethod = "GET"
+    ) {
+        if ($this->log) {
+            $_SESSION['capture']->logEvent("Call service '" . $serviceName . "'...");
+        }
+
+        try {
+            // Replace URI template variables by template type parameters
+            if (preg_match_all('#\{\w+\}#', $serviceName, $matches)) {
+                foreach ($matches[0] as $templateVar) {
+                    $templateVarName = substr($templateVar, 1, -1);
+                    $templateValue = '';
+                    if (isset($args['template'][$templateVarName])) {
+                        $templateValue = $args['template'][$templateVarName];
+                    }
+                    $serviceName = str_replace($templateVar, $templateValue, $serviceName);
+                }
+            }
+            $uriCalled = $this->uri . $serviceName;
+
+            $httpRequest = new Maarch\Http\Message\Request($uriCalled);
+            $httpRequest->withMethod($serviceMethod);
+
+            // Compose query string
+            if (!empty($args['query'])) {
+                $queryParts = [];
+                foreach($args['query'] as $name => $value) {
+                    if (is_array($value)) {
+                        $glu = '&'.$name.'[]=';
+                        $queryParts[] = $name.'[]='.implode($glu, $value);
+                    } else {
+                        $queryParts[] = $name.'='.$value;
+                    }
+                }
+
+                $queryString = implode('&', $queryParts);
+                $httpRequest->getUri()->withQuery($queryString);
+            }
             
-    public function parseArguments(
+            // Compose body in json
+            if(!empty($args['entity'])) {
+                $httpRequest->withHeader('Content-Type', 'application/json');
+                $httpRequest->withSerializedBody(json_encode($args['entity'], true));
+            }
+
+            $client = new Maarch\Http\Transport\StreamClient();
+            $client->sendRequest($httpRequest);
+            $httpResponse = $client->receiveResponse();
+            
+            $WSReturn = json_decode((string) $httpResponse->getBody(), true);
+        } catch (Exception $fault) {
+            $_SESSION['capture']->logEvent($fault, 2);
+        }
+        if (!$WSReturn) {
+            $WSReturn = [];
+            $WSReturn['returnCode'] = 1;
+            $WSReturn['error'] = 'ERROR WITH REST WS !';
+            if ($this->CatchError == "false") {
+                $_SESSION['capture']->sendError("ERROR No return from web service!");
+            } else {
+                $_SESSION['capture']->logEvent("ERROR No return from web service!");
+            }
+        }
+
+        return $WSReturn;
+    }
+            
+    public function parseSOAPArguments(
         $service,
         $Element
     ) {
@@ -331,6 +369,58 @@ class MaarchWSClient extends DOMXPath
             } elseif ($argHasValue && $argIsArray) {
                 // Not first value : append in indexed array
                 $argValues[$argName][] = $argValue;
+            }
+        }
+        
+        return $argValues;
+    }
+
+    public function parseRESTArguments(
+        $service,
+        $Element
+    ) {
+        $argValues = [
+            'template' => [],
+            'query' => [],
+            'header' => [],
+            'entity' => [],
+        ];
+        $args = $this->query(
+            './argument',
+            $service
+        );
+
+        $usedArgNames = [];
+        $l = $args->length;
+        for ($i=0; $i<$l; $i++) {
+            $arg = $args->item($i);
+            if (!$argName = $arg->getAttribute('name')) {
+                $argName = (string)$i;
+            }
+                
+            $argValue = $this->parseArgument(
+                $arg,
+                $Element
+            );
+
+            $argType = 'entity';
+            if ($arg->hasAttribute('type')) {
+                $argType = $arg->getAttribute('type');
+            }
+
+            if (!isset($argValues[$argType][$argName])) {
+                $argValues[$argType][$argName] = $argValue;
+            } else {
+                if (is_array($argValues[$argType][$argName])) {
+                    if (is_string(key($argValues[$argType][$argName]))) {
+                        $argValues[$argType][$argName] = [$argValues[$argType][$argName], $argValue];
+                    } else {
+                        $argValues[$argType][$argName][] = $argValue;
+                    }
+                } else {
+                    $argValues[$argType][$argName] = [$argValues[$argType][$argName], $argValue];
+                }
+                
             }
         }
         
@@ -435,7 +525,7 @@ class MaarchWSClient extends DOMXPath
         return $argValue;
     }
     
-    public function processReturn(
+    public function processSOAPReturn(
         $Element,
         $service,
         $WSReturn
@@ -446,7 +536,7 @@ class MaarchWSClient extends DOMXPath
             return true;
         }
             
-        $this->processReturnValue(
+        $this->processSOAPReturnValue(
             $Element,
             $return,
             $WSReturn,
@@ -456,17 +546,14 @@ class MaarchWSClient extends DOMXPath
         return true;
     }
     
-    public function processReturnValue(
+    public function processSOAPReturnValue(
         $Element,
         $return,
         $WSReturn,
         $serviceName
     ) {
-        if ($this->type == 'REST') {
-            $WSReturnContent = json_encode($WSReturn);
-        } else {
-            $WSReturnContent = $WSReturn;
-        }
+        $WSReturnContent = $WSReturn;
+
         // Return has metadata name, add metadata
         if ($return->hasAttribute('metadata')) {
             return $Element->setMetadata($return->getAttribute('metadata'), $WSReturn);
@@ -507,19 +594,94 @@ class MaarchWSClient extends DOMXPath
                     );
                 }
             }
-            if ($this->type == 'REST') {
-                $returnContentValue = $WSReturnContent;
-            } else {
-                $returnContentValue = $WSReturn->$returnContentName;
-            }            
+            
+            $returnContentValue = $WSReturn->$returnContentName;
+            
             $_SESSION['capture']->logEvent(
                 "return value from web service " . $serviceName . " "
                 . $returnContentName . ' : ' . $returnContentValue
             );
             
-            $this->processReturnValue($Element, $returnContent, $returnContentValue, $serviceName);
+            $this->processSOAPReturnValue($Element, $returnContent, $returnContentValue, $serviceName);
         }
     }
+
+    public function processRESTReturn(
+        $Element,
+        $service,
+        $entity
+    ) {
+        // Root return
+        $return = $this->query('./return', $service)->item(0);
+        if (!$return) {
+            return true;
+        }
+
+        $this->processRESTReturnValue($Element, $return, $entity, $service->getAttribute('name'));
+        
+        return true;
+    }
+
+    public function processRESTReturnValue(
+        $Element,
+        $return,
+        $entity,
+        $serviceName
+    ) {
+        // Return has metadata name, add metadata
+        if ($return->hasAttribute('metadata')) {
+            return $Element->setMetadata($return->getAttribute('metadata'), $entity);
+        }
+
+        // Return has attribute
+        if ($return->hasAttribute('attribute')) {
+            return $Element->setAttribute($return->getAttribute('attribute'), $entity);
+        }
+            
+        // Return has children
+        //***********************************************************
+        $returnContents = $this->query("./*", $return);
+        $l = $returnContents->length;
+        
+        for ($i=0; $i<$l; $i++) {
+            $returnContent = $returnContents->item($i);
+            
+            $returnContentName = $returnContent->nodeName;
+
+            if (!isset($entity[$returnContentName])) {
+                $dmpfile = $this->Batch->directory . "/" . $Element->id . "__MaarchWSClient__"
+                    . str_replace(DIRECTORY_SEPARATOR, "#", $serviceName) . "__return.log";
+                $f = fopen($dmpfile, "w");
+                fwrite($f, print_r($WSReturnContent, true));
+                fclose($f);
+                if ($this->CatchError == "false") {
+                    $_SESSION['capture']->sendError(
+                        "ERROR Bad WS Response format: return "
+                        . $returnContentName . " is not set. Return dump output generated in file '"
+                        . $dmpfile . "'."
+                    );
+                } else {
+                    $_SESSION['capture']->logEvent(
+                        "ERROR Bad WS Response format: return "
+                        . $returnContentName . " is not set. Return dump output generated in file '"
+                        . $dmpfile . "'."
+                    );
+                }
+            }
+
+            $returnContentValue = $entity[$returnContentName];
+           
+            $_SESSION['capture']->logEvent(
+                "return value from web service " . $serviceName . " "
+                . $returnContentName . ' : ' . $returnContentValue
+            );
+            
+            $this->processRESTReturnValue($Element, $returnContent, $returnContentValue, $serviceName);
+        }
+
+    }
+
+
 
     public function checkFault($step, $result = false)
     {

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <MaarchWSClient>
-	<WS SSL="false" cacheUse="0" name="MaarchRestWS" type="REST" uri="http://superadmin:superadmin@127.0.0.1:8090/">
+	<WS SSL="false" cacheUse="0" name="MaarchRestWS" type="REST" uri="http://superadmin:superadmin@192.168.21.28:8090">
 		<proxy>
 			<user>superadmin</user>
 			<pass>superadmin</pass>
@@ -16,31 +16,35 @@
 	</WS>
 	<process name="MaarchRestWSProcess">
 		<loop xpath="/Batch/Documents/Document">
-			<call name="/administration/status" method="GET">
-				<argument metadata="resId" name="res_id"/>
-				<argument name="data">
-					<column>nature_id</column>
-					<value>email</value>
-					<type>string</type>
-				</argument>
-				<argument name="data">
-					<column>category_id</column>
-					<value>incoming</value>
-					<type>string</type>
-				</argument>
-				<argument name="table">mlb_coll_ext</argument>
+			<!--call name="/administration/status" method="GET">
 				<return>
-					<!--returnCode/-->
+					<returnCode/>
 					<statusList/>
-					<!--error/-->
+					<error/>
 				</return>
-			</call>
-			<call name="/administration/parameters/fulltext_id" method="GET" queryString="fulltext_id">
+			</call-->
+			<call name="/administration/parameters/{param_id}" method="GET">
+                <argument type="template" name="param_id">fulltext_id</argument>
+                <!--argument type="query" name="foo">bar</argument>
+                <argument type="query" name="baz">bul</argument>
+                <argument type="query" name="baz">bul</argument>
+                <argument name="data">
+					<column>subject</column>
+					<value metadata="subject"/>
+					<type>string</type>
+				</argument>
+				<argument name="data">
+					<column>doc_date</column>
+					<value metadata="doc_date"/>
+					<type>date</type>
+				</argument-->
 				<return>
-					<parameter/>
+					<parameter>
+                        <param_value_int metadata="param_value" />
+                    </parameter>
 				</return>
 			</call>
-			<call name="/administration/status/" method="POST">
+			<!--call name="/administration/status/" method="POST">
 				<argument name="id">TEST</argument>
 				<argument name="label_status">TEST</argument>
 				<argument name="img_filename">fm-letter-end</argument>
@@ -48,11 +52,11 @@
 				<argument name="can_be_searched">Y</argument>
 				<argument name="can_be_modified">N</argument>
 				<return>
-					<!--returnCode/-->
+					<returnCode/>
 					<status/>
-					<!--error/-->
+					<error/>
 				</return>
-			</call>
+			</call-->
 		</loop>
 	</process>
 	<process name="IMPORT_SCAN_BY_QRCODE">
