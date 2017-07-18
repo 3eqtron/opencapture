@@ -51,8 +51,6 @@ class MaarchWSClient extends DOMXPath
         
         $this->type = $WSConfig->getAttribute('type');
         
-        echo 'WS TYPE:' . $this->type . PHP_EOL;
-
         $this->uri = $WSConfig->getAttribute('uri');
         
         if ($WSConfig->hasAttribute('cacheUse')) {
@@ -620,7 +618,6 @@ class MaarchWSClient extends DOMXPath
         $entity,
         $serviceName
     ) {
-        // var_dump($entity);exit;
         // Return has metadata name, add metadata
         if ($return->hasAttribute('metadata')) {
             return $Element->setMetadata($return->getAttribute('metadata'), $entity);
@@ -640,7 +637,6 @@ class MaarchWSClient extends DOMXPath
             $returnContent = $returnContents->item($i);
             
             $returnContentName = $returnContent->nodeName;
-            echo $returnContentName . PHP_EOL;
 
             if (!isset($entity[$returnContentName])) {
                 $dmpfile = $this->Batch->directory . "/" . $Element->id . "__MaarchWSClient__"
