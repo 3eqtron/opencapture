@@ -349,21 +349,54 @@ class BatchElement
         $value
     ) {
         $Batch = $this->ownerDocument;
-        $value = str_replace('&', '&#160;', $value);
-        
+
         $Metadata = 
             $Batch->query(
                 './Metadata/'.$name,
                 $this
             )->item(0);
-        
-        if($Metadata) 
-            $Metadata->nodeValue = $value;
-        else {
-            $Metadata = $Batch->createElement($name, $value);    
-            $this->appendContent($Metadata, 'Metadata');
+        if (is_scalar($value)) {
+            $value = str_replace('&', '&#160;', $value);
+
+            if($Metadata) {
+                $Metadata->nodeValue = $value;
+            } else {
+                $Metadata = $Batch->createElement($name, $value);
+                $this->appendContent($Metadata, 'Metadata');
+            }
+        } elseif (is_array($value)) {
+            foreach ($value as $key => $item) {
+                $itemNode = $this->itemToNode($item, $name);
+                $this->appendContent($itemNode, 'Metadata');
+            }
         }
+
         return $Metadata;
+    }
+
+    protected function itemToNode($value, $name)
+    {
+        $Batch = $this->ownerDocument;
+
+        if (is_scalar($value)) {
+            return $Batch->createElement($name, $value);
+        } 
+        if (is_object($value)) {
+            $value = get_object_vars($value);
+        }
+        if (is_array($value)) {
+            $element = $Batch->createElement($name);
+            foreach ($value as $key => $item) {
+                if (is_numeric($key)) {
+                    $key = 'item';
+                }
+                $itemNode = $this->itemToNode($item, $key);
+
+                $element->appendChild($itemNode);
+            }
+
+            return $element;
+        }
     }
     
     public function getMetadata(
