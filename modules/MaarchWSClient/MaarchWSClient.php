@@ -620,6 +620,7 @@ class MaarchWSClient extends DOMXPath
         $entity,
         $serviceName
     ) {
+        //var_dump($entity);
         // Return has metadata name, add metadata
         if ($return->hasAttribute('metadata')) {
             return $Element->setMetadata($return->getAttribute('metadata'), $entity);
@@ -643,8 +644,15 @@ class MaarchWSClient extends DOMXPath
             if (!isset($entity[$returnContentName])) {
                 $dmpfile = $this->Batch->directory . "/" . $Element->id . "__MaarchWSClient__"
                     . str_replace(DIRECTORY_SEPARATOR, "#", $serviceName) . "__return.log";
-                $f = fopen($dmpfile, "w");
-                fwrite($f, print_r($entity, true));
+                $f = fopen($dmpfile, "a");
+                if (isset($entity['errors'][0])) {
+                    $errorDetails = $entity['errors'][0];
+                    fwrite($f, $errorDetails);
+                    //var_dump($errorDetails);
+                } else {
+                    fwrite($f, print_r($entity, true));
+                }
+                
                 fclose($f);
                 if ($this->CatchError == "false") {
                     $_SESSION['capture']->sendError(
