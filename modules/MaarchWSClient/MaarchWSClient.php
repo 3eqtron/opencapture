@@ -280,7 +280,7 @@ class MaarchWSClient extends DOMXPath
             // Compose query string
             if (!empty($args['query'])) {
                 $queryParts = [];
-                foreach($args['query'] as $name => $value) {
+                foreach ($args['query'] as $name => $value) {
                     if (is_array($value)) {
                         $glu = '&'.$name.'[]=';
                         $queryParts[] = $name.'[]='.implode($glu, $value);
@@ -294,7 +294,7 @@ class MaarchWSClient extends DOMXPath
             }
             
             // Compose body in json
-            if(!empty($args['entity'])) {
+            if (!empty($args['entity'])) {
                 $httpRequest->withHeader('Content-Type', 'application/json');
                 $httpRequest->withSerializedBody(json_encode($args['entity'], true));
             }
@@ -308,9 +308,12 @@ class MaarchWSClient extends DOMXPath
             $_SESSION['capture']->logEvent($fault, 2);
         }
         if (!$WSReturn) {
+            //var_dump($httpResponse);
+            //$httpResponse->getBody()->rewind();
             $WSReturn = [];
             $WSReturn['returnCode'] = 1;
             $WSReturn['error'] = 'ERROR WITH REST WS !';
+            $WSReturn['errorContent'] = (string) $httpResponse->getBody();
             if ($this->CatchError == "false") {
                 $_SESSION['capture']->sendError("ERROR No return from web service!");
             } else {
@@ -410,7 +413,6 @@ class MaarchWSClient extends DOMXPath
                 } else {
                     $argValues[$argType][$argName] = [$argValues[$argType][$argName], $argValue];
                 }
-                
             }
         }
         
@@ -642,7 +644,7 @@ class MaarchWSClient extends DOMXPath
                 $dmpfile = $this->Batch->directory . "/" . $Element->id . "__MaarchWSClient__"
                     . str_replace(DIRECTORY_SEPARATOR, "#", $serviceName) . "__return.log";
                 $f = fopen($dmpfile, "w");
-                fwrite($f, print_r($WSReturnContent, true));
+                fwrite($f, print_r($entity, true));
                 fclose($f);
                 if ($this->CatchError == "false") {
                     $_SESSION['capture']->sendError(
@@ -668,10 +670,7 @@ class MaarchWSClient extends DOMXPath
             
             $this->processRESTReturnValue($Element, $returnContent, $returnContentValue, $serviceName);
         }
-
     }
-
-
 
     public function checkFault($step, $result = false)
     {

@@ -16,47 +16,35 @@
 	</WS>
 	<process name="MaarchRestWSProcess">
 		<loop xpath="/Batch/Documents/Document">
-			<!--call name="/administration/status" method="GET">
+			<call name="/administration/status" method="GET">
 				<return>
-					<returnCode/>
-					<statusList/>
-					<error/>
+					<statusList metadata="statusList" />
 				</return>
-			</call-->
+			</call>
 			<call name="/administration/parameters/{param_id}" method="GET">
-                <argument type="template" name="param_id">fulltext_id</argument>
+                <argument type="template" name="param_id">folder_id_increment</argument>
                 <!--argument type="query" name="foo">bar</argument>
-                <argument type="query" name="baz">bul</argument>
-                <argument type="query" name="baz">bul</argument>
-                <argument name="data">
-					<column>subject</column>
-					<value metadata="subject"/>
-					<type>string</type>
-				</argument>
-				<argument name="data">
-					<column>doc_date</column>
-					<value metadata="doc_date"/>
-					<type>date</type>
-				</argument-->
+                <argument type="query" name="baz">bul</argument-->
 				<return>
 					<parameter>
                         <param_value_int metadata="param_value" />
                     </parameter>
 				</return>
 			</call>
-			<!--call name="/administration/status/" method="POST">
-				<argument name="id">TEST</argument>
-				<argument name="label_status">TEST</argument>
-				<argument name="img_filename">fm-letter-end</argument>
-				<argument name="is_folder_status">N</argument>
-				<argument name="can_be_searched">Y</argument>
-				<argument name="can_be_modified">N</argument>
+			<call name="/status" method="POST">
+				<argument type="query" name="id">TEST</argument>
+				<argument type="query" name="label_status">TEST</argument>
+				<argument type="query" name="img_filename">fm-letter-end</argument>
+				<argument type="query" name="is_folder_status">N</argument>
+				<argument type="query" name="can_be_searched">Y</argument>
+				<argument type="query" name="can_be_modified">N</argument>
 				<return>
-					<returnCode/>
-					<status/>
-					<error/>
+					<status>
+						<id metadata="id" />
+						<label_status metadata="label_status" />
+					</status>
 				</return>
-			</call-->
+			</call>
 		</loop>
 	</process>
 	<process name="IMPORT_SCAN_BY_QRCODE">
