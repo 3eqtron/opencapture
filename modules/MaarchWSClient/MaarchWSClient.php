@@ -202,8 +202,6 @@ class MaarchWSClient extends DOMXPath
         $service
     ) {
         $serviceName = $service->getAttribute('name');
-        $serviceMethod = $service->getAttribute('method');
-        $queryString = $service->getAttribute('queryString');
         
         if ($this->log) {
             $_SESSION['capture']->logEvent("Process Call of service '"
@@ -211,26 +209,20 @@ class MaarchWSClient extends DOMXPath
         }
 
         if ($this->type == 'SOAP' || $this->type == '') {
-        
             $args = $this->parseSOAPArguments($service, $Element);
-        
-            $WSReturn = $this->callSOAPService($serviceName, $args, $serviceMethod, $queryString);
-        
+            $WSReturn = $this->callSOAPService($serviceName, $args);
             $result = $this->processSOAPReturn($Element, $service, $WSReturn);
         } else {
+            $serviceMethod = $service->getAttribute('method');
             $args = $this->parseRESTArguments($service, $Element);
-
-            $WSReturn = $this->callRESTService($serviceName, $args, $serviceMethod, $queryString);
-
+            $WSReturn = $this->callRESTService($serviceName, $args, $serviceMethod);
             $result = $this->processRESTReturn($Element, $service, $WSReturn);
         }
     }
     
     public function callSOAPService(
         $serviceName,
-        $args,
-        $serviceMethod = NULL,
-        $queryString = NULL
+        $args
     ) {
         if ($this->log) {
             $_SESSION['capture']->logEvent("Call service '" . $serviceName . "'...");
@@ -628,6 +620,7 @@ class MaarchWSClient extends DOMXPath
         $entity,
         $serviceName
     ) {
+        // var_dump($entity);exit;
         // Return has metadata name, add metadata
         if ($return->hasAttribute('metadata')) {
             return $Element->setMetadata($return->getAttribute('metadata'), $entity);
@@ -647,6 +640,7 @@ class MaarchWSClient extends DOMXPath
             $returnContent = $returnContents->item($i);
             
             $returnContentName = $returnContent->nodeName;
+            echo $returnContentName . PHP_EOL;
 
             if (!isset($entity[$returnContentName])) {
                 $dmpfile = $this->Batch->directory . "/" . $Element->id . "__MaarchWSClient__"
