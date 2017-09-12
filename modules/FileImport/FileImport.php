@@ -22,7 +22,6 @@ class FileImport
             __DIR__ . DIRECTORY_SEPARATOR . "FileImport.xml"
         );
         parent::__construct($Config);
-        
     }
     
     function ImportFiles(
@@ -138,26 +137,38 @@ class FileImport
                     continue;
                 }
             }
+
+            echo "control of " . $entry_path . PHP_EOL;
+            $ofile = @fopen($entry_path, "r");
+            if ($this->isCompleteFile($ofile)) {
+                //continue
+                fclose($ofile);
+            } else {
+                $_SESSION['capture']->logEvent(
+                    "file '$entry_path' not complete, will be processed next batch"
+                );
+                continue;
+            }
             
             $_SESSION['capture']->logEvent(
                 "Adding ".$this->Target." with source '$entry_path'"
             );
             
             switch($this->Target) {
-            case 'Document':
-                $Content = 
-					$Container->addDocument(
-						$entry_path
-					);
-                break;
-                
-            case 'File':
-            default:
-                $Content = 
-					$Container->addFile(
-						$entry_path
-					);
-                break;
+                case 'Document':
+                    $Content = 
+    					$Container->addDocument(
+    						$entry_path
+    					);
+                    break;
+                    
+                case 'File':
+                default:
+                    $Content = 
+    					$Container->addFile(
+    						$entry_path
+    					);
+                    break;
             }
 			if (!$Content) {
 				//do nothing ! The resource will be processed next batch
@@ -197,8 +208,31 @@ class FileImport
 
     }
 
+    /**
+     * Return true when the file is completed
+     * @param  $file
+     * @param  $delay
+     * @param  $pointer position in the file
+     */
+    function isCompleteFile($file, $delay=200, $pointer=0)
+    {
+        if ($file == null) {
+            return false;
+        }
+        fseek($file, $pointer);
+        $currentLine = fgets($file);
+        while (!feof($file)) {
+            $currentLine = fgets($file);
+        }
+        $currentPos = ftell($file);
+        //Wait $delay ms
+        usleep($delay * 1000);
+        //echo "is complete ? " . $file . PHP_EOL;
+        if ($currentPos == $pointer) {
+            return true;
+        } else {
+            return $this->isCompleteFile($file, $delay, $currentPos);
+        }
+    }
+
 }
-
-
-
-?>
