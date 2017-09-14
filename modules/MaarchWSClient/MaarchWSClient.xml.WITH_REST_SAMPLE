@@ -16,22 +16,62 @@
 	</WS>
 	<process name="MaarchRestWSProcess">
 		<loop xpath="/Batch/Documents/Document">
-			<call name="/administration/status" method="GET">
+			<!-- <call name="/saveNumericPackage" method="POST">
+				<argument type="query" name="base64" eval="base64_encode(file_get_contents($Element-&gt;path))"/>
+				<argument type="query" name="extension" attribute="extension"/>
+				<argument type="query" name="size" attribute="size"/>
+				<return>
+					<resId metadata="resId" />
+				</return>
+			</call> -->
+			<call name="/res" method="POST">
+				<!-- <argument type="query" name="encodedFile" eval="base64_encode(file_get_contents($Element-&gt;path))"/> -->
+				<argument type="query" name="encodedFile" eval="str_replace(array('+', '/'), array('-', '_'), base64_encode(file_get_contents($Element-&gt;path)))"/>
+				<argument type="query" name="data">{&#34;data&#34;:[{&#34;column&#34;:&#34;subject&#34;,&#34;value&#34;:&#34;asubject&#34;,&#34;type&#34;:&#34;string&#34;},{&#34;column&#34;:&#34;doc_date&#34;,&#34;value&#34;:&#34;01/01/2017&#34;,&#34;type&#34;:&#34;date&#34;},{&#34;column&#34;:&#34;type_id&#34;,&#34;value&#34;:&#34;110&#34;,&#34;type&#34;:&#34;integer&#34;},{&#34;column&#34;:&#34;destination&#34;,&#34;value&#34;:&#34;VILLE&#34;,&#34;type&#34;:&#34;string&#34;}]}</argument>
+				<argument type="query" name="collId">letterbox_coll</argument>
+				<argument type="query" name="table">res_letterbox</argument>
+				<argument type="query" name="fileFormat" attribute="extension"/>
+				<argument type="query" name="status">ATT</argument>
+				<return>
+					<resId metadata="resId" />
+				</return>
+			</call>
+			<call name="/resExt" method="POST">
+				<argument type="query" name="resId" metadata="resId"/>
+				<argument type="query" name="data">{&#34;data&#34;:[{&#34;column&#34;:&#34;nature_id&#34;,&#34;value&#34;:&#34;email&#34;,&#34;type&#34;:&#34;string&#34;},{&#34;column&#34;:&#34;category_id&#34;,&#34;value&#34;:&#34;incoming&#34;,&#34;type&#34;:&#34;string&#34;}]}</argument>
+				<argument type="query" name="table">mlb_coll_ext</argument>
+				<argument type="query" name="resTable">res_letterbox</argument>
+				<return>
+					<status metadata="status" />
+				</return>
+			</call>
+			<loop xpath="Attachments/Attachment">
+				<call name="/res" method="POST">
+					<argument type="query" name="encodedFile" eval="str_replace(array('+', '/'), array('-', '_'), base64_encode(file_get_contents($Element-&gt;path)))"/>
+					<argument type="query" name="data">{&#34;data&#34;:[{&#34;column&#34;:&#34;title&#34;,&#34;value&#34;:&#34;asubject&#34;,&#34;type&#34;:&#34;string&#34;},{&#34;column&#34;:&#34;res_id_master&#34;,&#34;value&#34;:&#34;325&#34;,&#34;type&#34;:&#34;integer&#34;},{&#34;column&#34;:&#34;coll_id&#34;,&#34;value&#34;:&#34;letterbox_coll&#34;,&#34;type&#34;:&#34;string&#34;},{&#34;column&#34;:&#34;attachment_type&#34;,&#34;value&#34;:&#34;incoming_mail_attachment&#34;,&#34;type&#34;:&#34;string&#34;}]}</argument>
+					<argument type="query" name="collId">letterbox_coll</argument>
+					<argument type="query" name="table">res_attachments</argument>
+					<argument type="query" name="fileFormat" attribute="extension"/>
+					<argument type="query" name="status">TRA</argument>
+					<return>
+						<resId metadata="resId" />
+					</return>
+				</call>
+			</loop>
+			<!-- <call name="/administration/status" method="GET">
 				<return>
 					<statusList metadata="statusList" />
 				</return>
-			</call>
-			<call name="/administration/parameters/{param_id}" method="GET">
+			</call> -->
+			<!-- <call name="/administration/parameters/{param_id}" method="GET">
                 <argument type="template" name="param_id">folder_id_increment</argument>
-                <!--argument type="query" name="foo">bar</argument>
-                <argument type="query" name="baz">bul</argument-->
 				<return>
 					<parameter>
                         <param_value_int metadata="param_value" />
                     </parameter>
 				</return>
-			</call>
-			<call name="/status" method="POST">
+			</call> -->
+			<!-- <call name="/status" method="POST">
 				<argument type="query" name="id">TEST</argument>
 				<argument type="query" name="label_status">TEST</argument>
 				<argument type="query" name="img_filename">fm-letter-end</argument>
@@ -44,7 +84,7 @@
 						<label_status metadata="label_status" />
 					</status>
 				</return>
-			</call>
+			</call> -->
 		</loop>
 	</process>
 	<process name="IMPORT_SCAN_BY_QRCODE">
