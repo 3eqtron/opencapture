@@ -290,6 +290,13 @@ class Capture
         $this->Workflow->setStatus(MC_STATUS_ERROR);
         
         //echo "Capture::sendError with message '$message'" . PHP_EOL;
+
+        //test if send error by mail
+        if (file_exists('config/Mailer.xml')) {
+            $errorMessage = $message;
+            $batchInfos = $this->Batch;
+            include_once 'Mailer.php';
+        }
         
         # TO DO : manage transactions on steps to rollback to previous valide state by not saving batch
         $this->Batch->save();

@@ -47,6 +47,10 @@ class FileImport
         $_SESSION['capture']->logEvent(
             "Scanning directory $Directory for file import..."
         );
+
+        if (!is_dir($Directory)) {
+            $_SESSION['capture']->sendError("$Directory not exists");
+        }
         
         $result = 
             $this->ScanDirectory(
