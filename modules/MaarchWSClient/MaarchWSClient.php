@@ -302,12 +302,19 @@ class MaarchWSClient extends DOMXPath
             $client = new Maarch\Http\Transport\StreamClient();
             $client->sendRequest($httpRequest);
             $httpResponse = $client->receiveResponse();
-            
+            //var_dump($httpResponse);
+            $returnCode = $httpResponse->statusCode;
+
+            //echo $returnCode . PHP_EOL;
+
             $WSReturn = json_decode((string) $httpResponse->getBody(), true);
+
+            //var_dump($httpResponse);
+            //var_dump($WSReturn);
         } catch (Exception $fault) {
             $_SESSION['capture']->logEvent($fault, 2);
         }
-        if (!$WSReturn) {
+        if (!$WSReturn && $returnCode <> '200') {
             //var_dump($httpResponse);
             //$httpResponse->getBody()->rewind();
             $WSReturn = [];
@@ -635,9 +642,11 @@ class MaarchWSClient extends DOMXPath
         //***********************************************************
         $returnContents = $this->query("./*", $return);
         $l = $returnContents->length;
+
         
         for ($i=0; $i<$l; $i++) {
             $returnContent = $returnContents->item($i);
+            //var_dump($entity);
             
             $returnContentName = $returnContent->nodeName;
 
