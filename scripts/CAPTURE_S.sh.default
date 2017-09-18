@@ -1,0 +1,13 @@
+#!/bin/sh
+cd $1
+
+if [ -e /opt/.flag_S ]; then
+	exit
+fi
+touch /opt/.flag_S
+
+php MaarchCapture.php init -BatchName  PDF_PLUS_S &
+
+wait
+
+rm /opt/.flag_S
