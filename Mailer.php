@@ -49,6 +49,16 @@ $aArgsSmtpParams['smtp_user']     = $theParam['smtp_user'];
 $aArgsSmtpParams['smtp_password'] = $theParam['smtp_password'];
 $aArgsSmtpParams['smtp_secure']   = $theParam['smtp_secure'];
 
+foreach ($theParam['ssl_options'] as $key => $value) {
+    if ($value == 'false') {
+        $theParam['ssl_options'][$key] = false;
+    } elseif ($value == 'true') {
+        $theParam['ssl_options'][$key] = true;
+    }
+}
+
+//var_dump($theParam['ssl_options']);exit;
+
 $mailer->setSMTPParams($aArgsSmtpParams);
 if (isset($theParam['ssl_options'])) {
     //smtp options for ssl
@@ -138,8 +148,8 @@ if ($aArgsSignedEmailsParams['enabled']) {
         $aArgsSignedEmailsParams
     );
 }
-
-//var_dump($mailer);
+//$mailer->MailObj->Mailer = "sendmail";
+//$mailer->MailObj->Sendmail = "ssmtp";
 
 $return = $mailer->send();
 
@@ -153,4 +163,3 @@ if (
     $error = $mailer->getErrors();
     $execResult = 'E';
 }
-
