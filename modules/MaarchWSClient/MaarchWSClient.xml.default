@@ -96,7 +96,7 @@
 					<error/>
 				</return>
 			</call>
-			<call name="CreateContact">
+			<!--<call name="CreateContact">
 				<argument name="data">
 					<column>lastname</column>
 					<value xvalue="./Metadata/contact_name"/>
@@ -169,7 +169,6 @@
 					<type>string</type>
 					<table>contact_addresses</table>
 				</argument>
-				<!--<argument name="data"><column>phone</column><value xvalue="./Metadata/phone"/><type>string</type><table>contact_addresses</table></argument>-->
 				<return>
 					<returnCode/>
 					<contactId/>
@@ -177,7 +176,7 @@
 					<contactInfo />
 					<error/>
 				</return>
-			</call>
+			</call>-->
 			<call name="storeExtResource">
 				<argument metadata="resId" name="res_id"/>
 				<argument name="data">

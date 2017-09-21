@@ -45,11 +45,14 @@ class MailCapture
     ){       
         $this->Batch = $_SESSION['capture']->Batch;
         
-        $Config = new DOMDocument();
-        $Config->load(
-            __DIR__ . DIRECTORY_SEPARATOR . "MailCapture.xml"
-        );
-        parent::__construct($Config);
+        if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . "MailCapture.xml")) {
+            $_SESSION['MailCapture'] = 'MailCapture.xml';
+            $Config = new DOMDocument();
+            $Config->load(
+                __DIR__ . DIRECTORY_SEPARATOR . "MailCapture.xml"
+            );
+            parent::__construct($Config);
+        }
         
         // List encodings in upper case
         $this->encodings = mb_list_encodings();
@@ -171,6 +174,7 @@ class MailCapture
             fopen($this->Batch->directory . DIRECTORY_SEPARATOR . 'MailCapture.log', "w");
         
         if ($configFile) {
+            $_SESSION['MailCapture'] = $configFile;
             $Config = '';
             $Config = new DOMDocument();
             echo 'LOAD ' . $configFile . ' FOR CAPTURE' . PHP_EOL;
@@ -869,7 +873,7 @@ class MailCapture
                require_once('SOAP/Client.php');
 
                $Config_Capture = new DOMDocument();
-             $Config_Capture->load("config" . DIRECTORY_SEPARATOR . "Capture.xml" );
+                $Config_Capture->load("config" . DIRECTORY_SEPARATOR . $_SESSION['CaptureName'] );
                $xpath_Capture = new DOMXpath($Config_Capture);
 
              $WSDL_Value =
@@ -877,9 +881,15 @@ class MailCapture
                      '//input[@name="WSDL"]'
                  )->item(0)->nodeValue;
 
+            $MaarchWSClientConfig = $xpath_Capture->query(
+                     '//step[@name="SendToMaarch"]//input[@name="configFile"]'
+                 )->item(0)->nodeValue;
+            if (!$MaarchWSClientConfig) {
+                $MaarchWSClientConfig = 'MaarchWSClient.xml';
+            }
              $Config_WS = new DOMDocument();
              $Config_WS->load("modules" . DIRECTORY_SEPARATOR .
-                 "MaarchWSClient" . DIRECTORY_SEPARATOR . "MaarchWSClient.xml"
+                 "MaarchWSClient" . DIRECTORY_SEPARATOR . $MaarchWSClientConfig
              );
 
                $xpath_WS = new DOMXpath($Config_WS);

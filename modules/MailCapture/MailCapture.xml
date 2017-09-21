@@ -1,16 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <MailCapture>
   <formatters>
     <formatter name="date" script="scripts/formatters.php" func="format_mail_date"/>
     <!-- <formatter name="mail_address" script="scripts/formatters.php" func="format_mail_address"/> -->
   </formatters>
   <accounts>
-    <account name="miviludes_cas_2" >
-      <mailbox>{imap.gmail.com:993/imap/ssl/novalidate-cert}</mailbox>
+    <account name="account_1" >
+      <mailbox>{imap.gmail.com:993/imap/ssl/novalidate-cert}maarch_capture</mailbox>
       <username></username>
       <password></password>
-      <!--IMAP_CLIENT_CERT>/vagrant/certs/client.pem</IMAP_CLIENT_CERT--> <!-- userful for imap ssl -->
-      <!--IMAP_CLIENT_KEY>/vagrant/certs/noclient.key</IMAP_CLIENT_KEY--> <!-- userful for imap ssl -->
     </account>
   </accounts>
   <!-- header info: 
@@ -23,19 +21,23 @@
     <!-- info   : header info -->
     <!-- op     : =, !=, &gt;, &lt;, &gt;=, &lt;=, contains, nocontains, in, checkUserMail -->
     <!-- action : delete, ignore, move (folder:=junkmail)-->
-    <messagerule name="SPM_RULE_2" info="fromaddress" action="move">true</messagerule>
+    <messagerule name="from_maarch" info="fromaddress" op="checkUserMail" action="delete" >false</messagerule>
   </messagerules>
   <messageoutputs >
     <!-- info   : header info -->
     <messageoutput name="doc_date" info="date" formatter="date"/>
-    <messageoutput name="type_id">1</messageoutput>
+    <messageoutput name="type_id" >11</messageoutput>
     <messageoutput name="subject" info="subject" />
     <!--<messageoutput name="fromaddress" info="fromaddress" formatter="mail_address"/>-->
 	<messageoutput name="fromaddress" info="fromaddress"/>
     <messageoutput name="frompersonal" info="from[0]/personal" />
     <messageoutput name="toaddress" info="toaddress" />
+    <messageoutput name="xpriority" info="xpriority" />
     <messageoutput name="message_id" info="message_id" />
-	<messageoutput name="ccaddress" info="ccaddress" />
+  	<messageoutput name="ccaddress" info="ccaddress" />
+<!--     <messageoutput name="xpriority" info="xpriority" />
+    <messageoutput name="disposition_notification_to" info="disposition_notification_to" />
+    <messageoutput name="return_receipt_to" info="return_receipt_to" /> -->
   </messageoutputs>
   <!-- mime part info: 
     type (mime type 0->7)
@@ -52,7 +54,7 @@
     <!-- info   : mime part info -->
     <!-- op     : =, !=, &gt;, &lt;, &gt;=, &lt;=, contains, in -->
     <attachmentrule name="images" info="format" op="in">gif jpg jpeg png</attachmentrule>
-    <attachmentrule name="application" info="format" op="in">pdf msword vnd.oasis.opendocument.text octet-stream eml</attachmentrule>
+    <attachmentrule name="application" info="format" op="in">pdf msword vnd.oasis.opendocument.text octet-stream</attachmentrule>
   </attachmentrules>
   <attachmentoutputs mode="attachment"><!-- mode attachment of mail document / new document with a copy of metadata --> 
     <!-- info   : mime part info -->

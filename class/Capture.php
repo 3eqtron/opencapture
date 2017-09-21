@@ -14,6 +14,7 @@ class Capture
     public function Capture($ConfigName)
     {
         $Config = new DOMDocument();
+        $_SESSION['CaptureName'] = $ConfigName.".xml";
         $Config->load("config/".$ConfigName.".xml");
         parent::__construct($Config);        
     }

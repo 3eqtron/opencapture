@@ -12,12 +12,15 @@ class MaarchWSClient extends DOMXPath
     {
         $this->Batch = $_SESSION['capture']->Batch;
         //$this->Workflow = $_SESSION['capture']->Workflow;
+        if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . "MaarchWSClient.xml")) {
+            $_SESSION['MaarchWSClient'] = 'MaarchWSClient.xml';
+            $Config = new DOMDocument();
+            $Config->load(
+                __DIR__ . DIRECTORY_SEPARATOR . "MaarchWSClient.xml"
+            );
+            parent::__construct($Config); 
+        }
         
-        $Config = new DOMDocument();
-        $Config->load(
-            __DIR__ . DIRECTORY_SEPARATOR . "MaarchWSClient.xml"
-        );
-        parent::__construct($Config);
     }
        
     public function checkFault($step, $result = false)
@@ -150,6 +153,7 @@ class MaarchWSClient extends DOMXPath
         //$log = false
     ) {
         if ($configFile) {
+            $_SESSION['MaarchWSClient'] = $configFile;
             $Config = new DOMDocument();
             $Config->load(
                 __DIR__ . DIRECTORY_SEPARATOR . $configFile
