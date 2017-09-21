@@ -145,9 +145,18 @@ class MaarchWSClient extends DOMXPath
     public function processBatch(
         $WSDLName,
         $ProcessName,
-        $CatchError = "false"
+        $CatchError = "false",
+        $configFile = false
         //$log = false
     ) {
+        if ($configFile) {
+            $Config = new DOMDocument();
+            $Config->load(
+                __DIR__ . DIRECTORY_SEPARATOR . $configFile
+            );
+            parent::__construct($Config);
+        }
+
         $this->CatchError = $CatchError;
         
         //$this->log = $log;

@@ -5,6 +5,14 @@ Version
 - Can choose custom Capture.xml in script
 Ex: php MaarchCapture.php init -ConfigName Capture_custom -BatchName  CAPTURE_MAIL
 
+- Can choose custom MaarchWSClient.xml in Capture.xml
+Ex: <step function="processBatch" module="MaarchWSClient" name="SendToMaarch">
+      <input name="WSDL">maarchcourrier</input>
+      <input name="Process">IMPORT_MAIL_1</input>
+      <input name="CatchError">false</input>
+      <input name="configFile">MaarchWSClient.xml</input>
+    </step>
+
 - Fix warnings :
 
 PHP Warning:  Declaration of Workflow::load($id, $directory) should be compatible with DOMDocument::load($source, $options = NULL)

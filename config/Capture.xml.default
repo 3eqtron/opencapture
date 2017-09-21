@@ -21,6 +21,8 @@
         <step function="processBatch" module="MaarchWSClient" name="SendToMaarch">
           <input name="WSDL">maarchcourrier</input>
           <input name="Process">IMPORT_SCAN_BY_QRCODE</input>
+          <input name="CatchError">false</input>
+          <input name="configFile">MaarchWSClient.xml</input>
         </step>
       </workflow>
     </batch>
@@ -39,6 +41,8 @@
         <step function="processBatch" module="MaarchWSClient" name="SendToMaarch">
           <input name="WSDL">maarchcourrier</input>
           <input name="Process">IMPORT_MAIL_1</input>
+          <input name="CatchError">false</input>
+          <input name="configFile">MaarchWSClient.xml</input>
         </step>
         <!-- Can be only used if a contact mail is extracted from the mail -->
         <!-- <step name="NotifyContact" module='MailCapture' function="notifyContact">
