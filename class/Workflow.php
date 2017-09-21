@@ -53,7 +53,7 @@ class Workflow
     
     function load(
         $id,
-        $directory
+        $directory = null
     ) {
         parent::load($directory . DIRECTORY_SEPARATOR . $id . '.xml');
         $this->XPath = new DOMXPath($this);

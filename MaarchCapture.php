@@ -34,15 +34,6 @@ require_once "class/Capture.php";
 require_once "tools/log4php/Logger.php";
 
 /******************************************************************************
-**	LOAD CAPTURE APPLICATION
-******************************************************************************/
-echo "Instanciate new Capture processor..." . PHP_EOL;
-$Capture = new Capture();
-
-# Store in session for modules that will acces through requests
-$_SESSION['capture'] = $Capture;
-
-/******************************************************************************
 **	DEFINE COMMANDS AND ARGS
 ******************************************************************************/
 require_once "Maarch_CLITools/ArgsParser.php";
@@ -100,6 +91,17 @@ $CommandArgsParser->add_arg(
     )
 );
 
+$CommandArgsParser->add_arg(
+    "ConfigName",
+    array(
+        "short" => 'n',
+        "long" => 'ConfigName',
+        "default" => 'Capture.xml',
+        "help" => "Capture configuration name",
+        "mandatory" => false
+    )
+);
+
 /******************************************************************************
 **	PARSE COMMAND
 ******************************************************************************/
@@ -125,6 +127,7 @@ try {
 #******************************************************************************
 $command = $instrArgs['command']['name'];
 $BatchName = $instrArgs['command']['opts']['BatchName'];
+$ConfigName = $instrArgs['command']['opts']['ConfigName'];
 
 switch($command) {
 case 'init':
@@ -149,6 +152,18 @@ case 'init':
     } catch (MissingArgumentError $e) {
         die($e->getMessage());
     }
+    /******************************************************************************
+    **	LOAD CAPTURE APPLICATION
+    ******************************************************************************/
+    echo "Instanciate new Capture processor..." . PHP_EOL;
+    if (file_exists("config/".$ConfigName.".xml")) {
+        $Capture = new Capture($ConfigName);
+    } else {
+        die($ConfigName." not found !". PHP_EOL);
+    }   
+    
+    # Store in session for modules that will acces through requests
+    $_SESSION['capture'] = $Capture;
 
     $BatchId = false;
     echo "Create new batch '$BatchName'..." . PHP_EOL;
@@ -158,7 +173,7 @@ case 'init':
     }
     echo "Batch created with id '$BatchId'" . PHP_EOL;
     
-    if(isset($commandArgs['command']['opts']['WorkflowName'])) {
+    if (isset($commandArgs['command']['opts']['WorkflowName'])) {
         $WorkflowName = $commandArgs['command']['opts']['WorkflowName'];
     } else {
         $WorkflowName = $Capture->defaultWorkflow();
@@ -282,8 +297,8 @@ default:
 }
 
 $inputNames = $Capture->getStepInputs($StepName);
-echo "MaarchCapture step inputs: " . print_r($inputNames,true) . PHP_EOL;
-foreach($inputNames as $i => $inputName) {
+echo "MaarchCapture step inputs: " . print_r($inputNames, true) . PHP_EOL;
+foreach ($inputNames as $i => $inputName) {
     # Add optional Step Input
     $CommandArgsParser->add_arg(
         $inputName,
@@ -305,19 +320,16 @@ try {
     die($e->getMessage());
 }
 
-echo "MaarchCapture step: " . print_r($stepArgs,true) . PHP_EOL;
+echo "MaarchCapture step: " . print_r($stepArgs, true) . PHP_EOL;
 
 $inputArgs = array();
-foreach($inputNames as $i => $inputName) {
+foreach ($inputNames as $i => $inputName) {
     if (isset($stepArgs['command']['opts'][$inputName])) {
         $inputArgs[$inputName] = $stepArgs['command']['opts'][$inputName];
     }
 }
 
-$Result = 
-    $Capture->processWorkflow(
-        $inputArgs
-    );
+$Result = $Capture->processWorkflow($inputArgs);
 
 /******************************************************************************
 **								ERROR HANDLER

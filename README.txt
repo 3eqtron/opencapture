@@ -1,10 +1,15 @@
 ***********************
 Version
 ***********************
-1.2
+1.3
+- Can choose custom Capture.xml in script
+Ex: php MaarchCapture.php init -ConfigName Capture_custom -BatchName  CAPTURE_MAIL
 
-- Replace fpdf by tcpdf library for Qrseparator
-	- QRSeparator now support pdf 1.6 and greater
+- Fix warnings :
+
+PHP Warning:  Declaration of Workflow::load($id, $directory) should be compatible with DOMDocument::load($source, $options = NULL)
+PHP Warning:  Declaration of Batch::load($BatchId, $envDirectory) should be compatible with DOMDocument::load($source, $options = NULL)
+
 
 ***********************
 Prerequisit

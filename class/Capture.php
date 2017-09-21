@@ -11,10 +11,10 @@ class Capture
     protected $WorkflowConfig;
     protected $StepConfig;
     
-    public function Capture()
+    public function Capture($ConfigName)
     {
         $Config = new DOMDocument();
-        $Config->load("config/Capture.xml");
+        $Config->load("config/".$ConfigName.".xml");
         parent::__construct($Config);        
     }
     
