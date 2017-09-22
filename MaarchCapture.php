@@ -96,7 +96,7 @@ $CommandArgsParser->add_arg(
     array(
         "short" => 'n',
         "long" => 'ConfigName',
-        "default" => 'Capture.xml',
+        "default" => 'Capture',
         "help" => "Capture configuration name",
         "mandatory" => false
     )
