@@ -16,9 +16,16 @@ class MaarchWSClient extends DOMXPath
     public function __construct()
     {
         $this->Batch = $_SESSION['capture']->Batch;
-        $Config = new DOMDocument();
-        $Config->load(__DIR__ . "/MaarchWSClient.xml");
-        parent::__construct($Config);
+        //$this->Workflow = $_SESSION['capture']->Workflow;
+        if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . "MaarchWSClient.xml")) {
+            $_SESSION['MaarchWSClient'] = 'MaarchWSClient.xml';
+            $Config = new DOMDocument();
+            $Config->load(
+                __DIR__ . DIRECTORY_SEPARATOR . "MaarchWSClient.xml"
+            );
+            parent::__construct($Config); 
+        }
+        
     }
 
     public function processBatch(
@@ -140,6 +147,38 @@ class MaarchWSClient extends DOMXPath
         }
             
         return $Process;
+    }
+    
+    public function processBatch(
+        $WSDLName,
+        $ProcessName,
+        $CatchError = "false",
+        $configFile = false
+        //$log = false
+    ) {
+        if ($configFile) {
+            $_SESSION['MaarchWSClient'] = $configFile;
+            $Config = new DOMDocument();
+            $Config->load(
+                __DIR__ . DIRECTORY_SEPARATOR . $configFile
+            );
+            parent::__construct($Config);
+        }
+
+        $this->CatchError = $CatchError;
+        
+        //$this->log = $log;
+                
+        $this->getSoapClient($WSDLName);
+        
+        $Process = $this->getProcess($ProcessName);
+        
+        $this->processInstructions(
+            $this->Batch->documentElement,
+            $Process
+        );
+
+        
     }
     
     public function processInstructions(
