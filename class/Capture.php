@@ -38,6 +38,12 @@ class Capture
         $BatchLock = (bool)$this->BatchConfig->getAttribute('lock');
 
         $BatchDirectory = (string)$this->BatchConfig->getAttribute('directory');
+
+        $BatchDirectoryError = (string)$this->BatchConfig->getAttribute('errorDirectory');
+
+        if (empty($BatchDirectoryError)) {
+            $BatchDirectoryError = $BatchDirectory . DIRECTORY_SEPARATOR . 'errors';
+        }
         
         $Batch = new Batch();
         
@@ -83,7 +89,7 @@ class Capture
             }
         }
         
-        $Batch->init($BatchName, $BatchId, $BatchDirectory);
+        $Batch->init($BatchName, $BatchId, $BatchDirectory, $BatchDirectoryError);
         
         $Batch->save();
         
@@ -217,14 +223,29 @@ class Capture
     
     public function endWorkflow()
     {
+        $BatchName = (string)$this->BatchConfig->getAttribute('name');
+        $BatchLock = (bool)$this->BatchConfig->getAttribute('lock');
+        $BatchDirectory = (string)$this->BatchConfig->getAttribute('directory');
+        $CurrentBatchDirectory = $this->Batch->directory;
+
+        if ($this->Workflow->status == MC_STATUS_ERROR) {
+            
+
+            if (!is_dir($this->Batch->errorDirectory . DIRECTORY_SEPARATOR .  $this->Batch->id)) {
+                mkdir($this->Batch->errorDirectory . DIRECTORY_SEPARATOR .  $this->Batch->id, 0777);
+            }
+
+            $this->copyDir(
+                $CurrentBatchDirectory . DIRECTORY_SEPARATOR, 
+                $this->Batch->errorDirectory . DIRECTORY_SEPARATOR .  $this->Batch->id . DIRECTORY_SEPARATOR
+            );
+        }
+
         $this->Workflow->setStatus(
             MC_STATUS_COMPLETED,
             "No more step to process, end of the workflow."
         );
 
-        $BatchName = (string)$this->BatchConfig->getAttribute('name');
-        $BatchLock = (bool)$this->BatchConfig->getAttribute('lock');
-        $BatchDirectory = (string)$this->BatchConfig->getAttribute('directory');
         if ($BatchLock) {
             $lockfile = $BatchDirectory . DIRECTORY_SEPARATOR . $BatchName . ".lck";
             if (is_file($lockfile)) {
@@ -236,6 +257,44 @@ class Capture
             $this->Batch->delete();
             
         die();
+    }
+
+    private function copyDir($dir2copy, $dirPaste, $excludeExt=false)
+    {
+        // On vérifie si $dir2copy est un dossier
+        if (is_dir($dir2copy)) {
+            // Si oui, on l'ouvre
+            if ($dh = opendir($dir2copy)) {
+                $copyIt = true;
+                // On liste les dossiers et fichiers de $dir2copy
+                while (($file = readdir($dh)) !== false) {
+                    $copyIt = true;
+                    // Si le dossier dans lequel on veut coller n'existe pas, on le cree
+                    if (!is_dir($dirPaste)) {
+                        mkdir ($dirPaste, 0777);
+                    }
+                    // S'il s'agit d'un dossier, on relance la fonction recursive
+                    if (is_dir($dir2copy.$file) && $file != '..' && $file != '.') {
+                        $this->copyDir($dir2copy.$file.'/' , $dirPaste.$file.'/', $excludeExt);  
+                    } elseif ($file != '..' && $file != '.') {
+                        if (count($excludeExt>0) && is_array($excludeExt)) {
+                            $copyIt = true;
+                            foreach ($excludeExt as $key => $value) {
+                                if (strtolower($value) == strtolower(pathinfo($dir2copy . $file, PATHINFO_EXTENSION))) {
+                                    $copyIt = false;
+                                } 
+                            }
+                        }
+                        if ($copyIt) {
+                            copy($dir2copy . $file, $dirPaste.$file);
+                        }
+                    }
+                }
+                // On ferme $dir2copy
+                closedir($dh);
+            }
+        }
+        return true;
     }
     
         
@@ -302,6 +361,30 @@ class Capture
         # TO DO : manage transactions on steps to rollback to previous valide state by not saving batch
         $this->Batch->save();
         die();
+    }
+
+    #**********************************************************************
+    # Catch error on step/workflow
+    #********************************************************************** 
+    public function catchError(
+        $message,
+        $file = ''
+    ) {
+        $this->Workflow->logEvent($message, 2);
+        $this->Step->setStatus(
+             MC_STATUS_ERROR,
+            $message
+        );
+        $this->Workflow->setStatus(MC_STATUS_ERROR);
+        
+        echo "Capture::catchError with message '$message'" . PHP_EOL;
+
+        //test if send error by mail
+        if (file_exists('config/Mailer.xml')) {
+            $errorMessage = $message;
+            $batchInfos = $this->Batch;
+            include_once 'Mailer.php';
+        }
     }
     
     #**********************************************************************

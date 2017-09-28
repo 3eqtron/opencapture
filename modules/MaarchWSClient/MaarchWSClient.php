@@ -25,7 +25,6 @@ class MaarchWSClient extends DOMXPath
             );
             parent::__construct($Config); 
         }
-        
     }
 
     public function processBatch(
@@ -261,7 +260,7 @@ class MaarchWSClient extends DOMXPath
             if ($this->CatchError == "false") {
                 $_SESSION['capture']->sendError("ERROR No return from web service!");
             } else {
-                $_SESSION['capture']->logEvent("ERROR No return from web service!");
+                $_SESSION['capture']->CatchError("ERROR No return from web service!");
             }
         }
         
@@ -302,7 +301,7 @@ class MaarchWSClient extends DOMXPath
                         $glu = '&'.$name.'[]=';
                         $queryParts[] = $name.'[]='.implode($glu, $value);
                     } else {
-                        $queryParts[] = $name.'='.$value;
+                        $queryParts[] = $name.'='.urlencode($value);
                     }
                 }
 
@@ -341,7 +340,7 @@ class MaarchWSClient extends DOMXPath
             if ($this->CatchError == "false") {
                 $_SESSION['capture']->sendError("ERROR No return from web service!");
             } else {
-                $_SESSION['capture']->logEvent("ERROR No return from web service!");
+                $_SESSION['capture']->CatchError("ERROR No return from web service!");
             }
         }
 
@@ -603,7 +602,7 @@ class MaarchWSClient extends DOMXPath
                         . $dmpfile . "'."
                     );
                 } else {
-                    $_SESSION['capture']->logEvent(
+                    $_SESSION['capture']->CatchError(
                         "ERROR Bad WS Response format: return "
                         . $returnContentName . " is not set. Return dump output generated in file '"
                         . $dmpfile . "'."
@@ -687,7 +686,7 @@ class MaarchWSClient extends DOMXPath
                         . $dmpfile . "'."
                     );
                 } else {
-                    $_SESSION['capture']->logEvent(
+                    $_SESSION['capture']->CatchError(
                         "ERROR Bad WS Response format: return "
                         . $returnContentName . " is not set. Return dump output generated in file '"
                         . $dmpfile . "'."
@@ -721,10 +720,15 @@ class MaarchWSClient extends DOMXPath
                     . $result->faultcode . "}, faultstring: {$result->faultstring})"
                 );
             } else {
-                $_SESSION['capture']->logEvent(
+                $_SESSION['capture']->catchError(
                     "ERROR SOAP fault occured on " . $step . " : SOAP Fault: (faultcode: {"
                     . $result->faultcode . "}, faultstring: {$result->faultstring})"
+
                 );
+                // $_SESSION['capture']->logEvent(
+                //     "ERROR SOAP fault occured on " . $step . " : SOAP Fault: (faultcode: {"
+                //     . $result->faultcode . "}, faultstring: {$result->faultstring})"
+                // );
             }
         } else {
             if ($this->WSDL->fault) {
@@ -738,7 +742,7 @@ class MaarchWSClient extends DOMXPath
                         . $this->WSDL->fault->message
                     );
                 } else {
-                    $_SESSION['capture']->logEvent(
+                    $_SESSION['capture']->catchError(
                         "ERROR SOAP fault occured on $step : "
                         . $this->WSDL->fault->message
                     );

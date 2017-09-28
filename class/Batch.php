@@ -70,7 +70,8 @@ class Batch
     function init(
         $name,
         $id,
-        $rootDirectory
+        $rootDirectory,
+        $errorDirectory
     ) {
         /** Create batch root element
         ******************************************************************************/
@@ -89,6 +90,13 @@ class Batch
         $directory = $rootDirectory . DIRECTORY_SEPARATOR . $id;
         $Batch->setAttribute("directory", $directory);
         mkdir($directory, 0777);
+
+        $Batch->setAttribute("errorDirectory", $errorDirectory);
+        if (!is_dir($errorDirectory)) {
+            mkdir($errorDirectory);
+        }
+
+        echo 'error directory ' . $errorDirectory . PHP_EOL;
                
         return $id;
     }
