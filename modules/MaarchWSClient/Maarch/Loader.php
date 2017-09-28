@@ -33,7 +33,7 @@ class Loader
      *
      * @return bool
      */
-    public static function autoload(string $class) : bool
+    public static function autoload($class)
     {
         // Build the class file path
         $classfile = str_replace('\\', DIRECTORY_SEPARATOR, $class).'.php';
@@ -54,7 +54,7 @@ class Loader
      * 
      * @return array
      */
-    public static function import(string $namespace, bool $deep=false) : array
+    public static function import($namespace, $deep=false)
     {
         $imported = [];
 
