@@ -94,6 +94,7 @@ class Sendmail_PhpMailerAbstract_Service implements Sendmail_Mailer_Interface {
 	public function setMailerType(array $aArgs = []) {
 
 		$this->mailerType = $aArgs['mailerType'];
+                $this->MailObj->Mailer = $aArgs['mailerType'];
 
 	}
 	
