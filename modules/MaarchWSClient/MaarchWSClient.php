@@ -285,7 +285,7 @@ class MaarchWSClient extends DOMXPath
                         $glu = '&'.$name.'[]=';
                         $queryParts[] = $name.'[]='.implode($glu, $value);
                     } else {
-                        $queryParts[] = $name.'='.$value;
+                        $queryParts[] = $name.'='.urlencode($value);
                     }
                 }
 
