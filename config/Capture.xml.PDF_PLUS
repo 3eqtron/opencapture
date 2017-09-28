@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<capture>
+  <modules>
+    <module name="PDFPlus" src="modules/PDFPlus/PDFPlus.php" type="class"/>
+  </modules>
+  <batches>
+    <batch directory="/opt/Tmp_MaarchCapture" id="{batchname}-{timestamp}-{rand}" lock="0" name="PDF_PLUS_S">
+      <workflow debug="true" logMode="Maarch" maarchLogParam="/var/www/html/Expresso17/custom/cs_Demo_DIS/apps/maarch_entreprise/xml/log4php.xml" maarchLoggerName="loggerTechnique" name="PDF_PLUS">
+        <step function="ImportFiles" module="PDFPlus" name="Tache_S">
+          <input name="Directory_in">/opt/TestMaarchCapture/</input>
+          <input name="Directory_out">/opt/TestMaarchCaptureOut/</input>
+          <input name="Config_File">/opt/toto.ini</input>
+          <input name="Prefix">out_</input>
+          <input name="Extensions">pdf</input>
+        </step>
+      </workflow>
+    </batch>
+    <batch directory="/opt/Tmp_MaarchCapture" id="{batchname}-{timestamp}-{rand}" lock="0" name="PDF_PLUS_M">
+      <workflow debug="true" logMode="Maarch" maarchLogParam="/var/www/html/Expresso17/custom/cs_Demo_DIS/apps/maarch_entreprise/xml/log4php.xml" maarchLoggerName="loggerTechnique" name="PDF_PLUS">
+        <step function="ImportFiles" module="PDFPlus" name="Tache_M">
+          <input name="Directory_in">/opt/TestMaarchCaptureOut/</input>
+          <input name="Directory_out">/opt/TestMaarchCaptureOutFinal/</input>
+          <input name="Config_File">/opt/toto2.ini</input>
+          <input name="Prefix">fin_</input>
+          <input name="Extensions">pdf</input>
+        </step>
+      </workflow>
+    </batch>
+  </batches>
+</capture>

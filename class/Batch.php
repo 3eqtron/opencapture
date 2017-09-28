@@ -95,7 +95,7 @@ class Batch
     
     function load(
         $BatchId,
-        $envDirectory
+        $envDirectory = null
     ) {
         parent::load($envDirectory . DIRECTORY_SEPARATOR . $BatchId . DIRECTORY_SEPARATOR . $BatchId . '.xml', $options);
         $this->XPath = new DOMXPath($this);

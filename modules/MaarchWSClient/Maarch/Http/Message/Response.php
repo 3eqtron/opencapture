@@ -29,7 +29,7 @@ class Response
     /**
      * @var integer
      */
-    protected $statusCode;
+    public $statusCode;
 
     /**
      * @var string

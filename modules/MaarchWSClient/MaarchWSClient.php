@@ -16,16 +16,33 @@ class MaarchWSClient extends DOMXPath
     public function __construct()
     {
         $this->Batch = $_SESSION['capture']->Batch;
-        $Config = new DOMDocument();
-        $Config->load(__DIR__ . "/MaarchWSClient.xml");
-        parent::__construct($Config);
+        //$this->Workflow = $_SESSION['capture']->Workflow;
+        if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . "MaarchWSClient.xml")) {
+            $_SESSION['MaarchWSClient'] = 'MaarchWSClient.xml';
+            $Config = new DOMDocument();
+            $Config->load(
+                __DIR__ . DIRECTORY_SEPARATOR . "MaarchWSClient.xml"
+            );
+            parent::__construct($Config); 
+        }
+        
     }
 
     public function processBatch(
         $WSName,
         $ProcessName,
-        $CatchError = "false"
+        $CatchError = "false",
+        $configFile = false
     ) {
+        if ($configFile) {
+            $_SESSION['MaarchWSClient'] = $configFile;
+            $Config = new DOMDocument();
+            $Config->load(
+                __DIR__ . DIRECTORY_SEPARATOR . $configFile
+            );
+            parent::__construct($Config);
+        }
+
         $this->CatchError = $CatchError;
 
         $this->getWsClient($WSName);
@@ -302,12 +319,19 @@ class MaarchWSClient extends DOMXPath
             $client = new Maarch\Http\Transport\StreamClient();
             $client->sendRequest($httpRequest);
             $httpResponse = $client->receiveResponse();
-            
+            //var_dump($httpResponse);
+            $returnCode = $httpResponse->statusCode;
+
+            //echo $returnCode . PHP_EOL;
+
             $WSReturn = json_decode((string) $httpResponse->getBody(), true);
+
+            //var_dump($httpResponse);
+            //var_dump($WSReturn);
         } catch (Exception $fault) {
             $_SESSION['capture']->logEvent($fault, 2);
         }
-        if (!$WSReturn) {
+        if (!$WSReturn && $returnCode <> '200') {
             //var_dump($httpResponse);
             //$httpResponse->getBody()->rewind();
             $WSReturn = [];
@@ -635,9 +659,11 @@ class MaarchWSClient extends DOMXPath
         //***********************************************************
         $returnContents = $this->query("./*", $return);
         $l = $returnContents->length;
+
         
         for ($i=0; $i<$l; $i++) {
             $returnContent = $returnContents->item($i);
+            //var_dump($entity);
             
             $returnContentName = $returnContent->nodeName;
 
