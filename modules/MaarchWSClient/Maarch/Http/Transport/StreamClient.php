@@ -40,16 +40,25 @@ class StreamClient
     {       
         $body = $request->getBody();
 
+        $headers = [];
+        foreach ($request->getHeaders() as $name => $value) {
+            if (is_array($value)) {
+                $value = implode(', ', $value);
+            }
+
+            $headers[] = $name.': '.$value;
+        }
+
         $opts = array('http' =>
             array(
                 'method'  => $request->getMethod(),
-                'header'  => $request->getHeaders(),
+                'header'  => $headers,
                 'content' => $body ? $request->getBody()->getContents() : null,
                 'ignore_errors' => true,
                 'timeout' => 30
             )
         );
-        
+
         $context = stream_context_create($opts);
 
         // Get response
