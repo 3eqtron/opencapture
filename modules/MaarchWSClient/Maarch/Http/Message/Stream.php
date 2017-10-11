@@ -141,12 +141,12 @@ class Stream
      */
     public function rewind()
     {
-        if (fseek($this->handler, 0) !== 0) {
+        //if (fseek($this->handler, 0) !== 0) {
             // php://input is not seekable even if told so in metadata
             // To rewind, open a new stream
             fclose($this->handler);
             $this->handler = fopen($this->getMetadata('uri'), 'r');
-        }
+        //}
     }
 
     /**
