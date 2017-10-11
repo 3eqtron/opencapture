@@ -70,7 +70,7 @@ class Header
      */
     public static function phpToHttpName($name)
     {
-        $parts = array_map('ucfirst', preg_split('/([A-Z][a-z0-9]*)/', $name, -1, PREG_SPLIT_DELIM_CAPTURE + PREG_SPLIT_NO_EMPTY));
+        $parts = array_map('ucfirst', preg_split('/([^\-][A-Z][a-z0-9]*)/', $name, -1, PREG_SPLIT_DELIM_CAPTURE + PREG_SPLIT_NO_EMPTY));
         
         return implode('-', $parts); 
     }

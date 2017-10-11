@@ -312,16 +312,23 @@ class MaarchWSClient extends DOMXPath
             // Compose body in json
             if (!empty($args['entity'])) {
                 $httpRequest->withHeader('Content-Type', 'application/json');
-                $httpRequest->withSerializedBody(json_encode($args['entity'], true));
+                $httpRequest->withSerializedBody(json_encode($args['entity'], JSON_PRETTY_PRINT));
             }
+
+            //LOG
+            // file_put_contents($this->Batch->directory . "/httpRequest.txt", (string) $httpRequest);
+
 
             $client = new Maarch\Http\Transport\StreamClient();
             $client->sendRequest($httpRequest);
             $httpResponse = $client->receiveResponse();
-            //var_dump($httpResponse);
+            
+            //LOG
+            // file_put_contents($this->Batch->directory . "/httpResponse.txt", (string) $httpResponse);
             $returnCode = $httpResponse->statusCode;
 
             //echo $returnCode . PHP_EOL;
+            //var_dump((string) $httpResponse->getBody());
 
             $WSReturn = json_decode((string) $httpResponse->getBody(), true);
 
