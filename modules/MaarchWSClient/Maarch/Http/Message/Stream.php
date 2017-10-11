@@ -37,7 +37,11 @@ class Stream
      */
     public function __construct($handler)
     {
-        $this->handler = $handler;
+        // Copy to a local stream to allow seek/rewind/write operations
+        $this->handler = fopen('php://temp', 'r+');
+        stream_copy_to_stream($handler, $this->handler);
+
+        $this->rewind();
     }
 
     /**
@@ -112,7 +116,7 @@ class Stream
      */
     public function isSeekable()
     {
-        return $this->handler->getMetadata('seekable');
+        return $this->getMetadata('seekable');
     }
 
     /**
@@ -141,18 +145,7 @@ class Stream
      */
     public function rewind()
     {
-        // php://input is not seekable even if told so in metadata
-        // To rewind, open a new stream
-        $uri = $this->getMetadata('uri');
-        if ($uri == 'php://input') {
-            $newHandler = fopen($this->getMetadata('uri'), 'r');
-            fclose($this->handler);
-            $this->handler = $newHandler;
-
-            return true;
-        }
-
-        return fseek($this->handler, 0);
+        return rewind($this->handler);
     }
 
     /**
@@ -187,7 +180,7 @@ class Stream
      */
     public function isReadable()
     {
-        $mode = $this->handler->getMetadata('mode');
+        $mode = $this->getMetadata('mode');
 
         return $mode[0] == 'r' || $mode[1] == '+';;
     }

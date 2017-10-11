@@ -31,7 +31,7 @@ abstract class MessageAbstract
     /**
      * @var string The protocol version
      */
-    protected $protocolVersion;
+    protected $protocolVersion = '1.1';
 
     /**
      * @var array The headers
