@@ -81,7 +81,7 @@ class MailCapture
             if($error) {
                 if (
                     1 === preg_match(
-                        '/Unexpected characters at end of address: <(.*)>/',
+                        '/Unexpected characters at end of address/',
                         $error,
                         $matches
                     )
@@ -93,7 +93,7 @@ class MailCapture
                 }
                 if (
                     1 === preg_match(
-                        '/Must use comma to separate addresses: <(.*)>/',
+                        '/Must use comma to separate addresses/',
                         $error,
                         $matches
                     )
@@ -101,6 +101,30 @@ class MailCapture
                     $clearError = true;
                     $_SESSION['capture']->logEvent(
                         'clear error because we found pattern : Must use comma to separate addresses'
+                    );
+                }
+                if (
+                    1 === preg_match(
+                        '/Unexpected characters after address in group/',
+                        $error,
+                        $matches
+                    )
+                ) {
+                    $clearError = true;
+                    $_SESSION['capture']->logEvent(
+                        'clear error because we found pattern : Unexpected characters after address in group'
+                    );
+                }
+                if (
+                    1 === preg_match(
+                        '/Invalid mailbox list/',
+                        $error,
+                        $matches
+                    )
+                ) {
+                    $clearError = true;
+                    $_SESSION['capture']->logEvent(
+                        'clear error because we found pattern : Invalid mailbox list'
                     );
                 }
                 $actual_errors ++;
