@@ -2,6 +2,9 @@
 Version
 ***********************
 1.3
+
+- developpment of a webservice client REST.
+
 - Can choose custom Capture.xml in script
 Ex: php MaarchCapture.php init -ConfigName Capture_custom -BatchName  CAPTURE_MAIL
 
