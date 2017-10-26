@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MaarchWSClient>
+	<WS SSL="false" cacheUse="0" name="MaarchRestWS" type="REST" uri="http://bblier:maarch@127.0.0.1/maarch_v2/rest">
+		<proxy>
+			<user>superadmin</user>
+			<pass>superadmin</pass>
+			<timeout>600</timeout>
+		</proxy>
+	</WS>
+	<process name="MaarchRestWSProcessM2M">
+		<loop xpath="/Batch/Documents/Document">
+			<loop xpath="Attachments/Attachment">
+				<call name="/saveNumericPackage" method="POST">
+					<argument type="entity" name="base64" eval="base64_encode(file_get_contents($Element-&gt;path))"/>
+					<argument type="query" name="extension" attribute="extension"/>
+					<argument type="query" name="size" attribute="size"/>
+					<return>
+						<resId metadata="resId" />
+					</return>
+				</call>
+			</loop>
+		</loop>
+	</process>	
+	<process name="MaarchRestWSProcessM2Mack">
+		<loop xpath="/Batch/Documents/Document">
+			<loop xpath="Attachments/Attachment">
+				<call name="/saveMessageExchangeReturn" method="POST">
+					<argument type="entity" name="base64" eval="base64_encode(file_get_contents($Element-&gt;path))"/>
+					<argument type="query" name="extension" attribute="extension"/>
+					<argument type="query" name="size" attribute="size"/>
+					<argument type="query" name="type">Acknowledgement</argument>
+					<return>
+						<messageId metadata="messageId" />
+					</return>
+				</call>
+			</loop>
+		</loop>
+	</process>
+	<process name="MaarchRestWSProcessM2Mreply">
+		<loop xpath="/Batch/Documents/Document">
+			<loop xpath="Attachments/Attachment">
+				<call name="/saveMessageExchangeReturn" method="POST">
+					<argument type="entity" name="base64" eval="base64_encode(file_get_contents($Element-&gt;path))"/>
+					<argument type="query" name="extension" attribute="extension"/>
+					<argument type="query" name="size" attribute="size"/>
+					<argument type="query" name="type">ArchiveTransferReply</argument>
+					<return>
+						<messageId metadata="messageId" />
+					</return>
+				</call>
+			</loop>
+		</loop>
+	</process>
+	<process name="MaarchRestWSProcessM2Mnotification">
+		<loop xpath="/Batch/Documents/Document">
+			<loop xpath="Attachments/Attachment">
+				<call name="/saveMessageExchangeReview" method="POST">
+					<argument type="entity" name="base64" eval="base64_encode(file_get_contents($Element-&gt;path))"/>
+					<argument type="query" name="extension" attribute="extension"/>
+					<argument type="query" name="size" attribute="size"/>
+					<argument type="query" name="type">ArchiveModificationNotification</argument>
+					<return>
+						<messageId metadata="messageId" />
+					</return>
+				</call>
+			</loop>
+		</loop>
+	</process>
+</MaarchWSClient>

@@ -1,0 +1,9 @@
+#!/bin/sh
+
+cd /var/www/html/MaarchCaptureGit/
+php MaarchCapture.php init -BatchName MAARCH_REST_WS -WorkflowName M2M
+php MaarchCapture.php init -BatchName MAARCH_REST_WS -WorkflowName M2M_ACK
+php MaarchCapture.php init -BatchName MAARCH_REST_WS -WorkflowName M2M_REPLY
+php MaarchCapture.php init -BatchName MAARCH_REST_WS -WorkflowName M2M_NOTIFICATION
+# php MaarchCapture.php init -BatchName TELEGRAM_OEM_DGPN
+
