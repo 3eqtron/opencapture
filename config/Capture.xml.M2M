@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<capture>
+  <modules>
+    <module name="FileImport" src="modules/FileImport/FileImport.php" type="class"/>
+    <module name="PDFExtractor" src="modules/PDFExtractor/PDFExtractor.php" type="class"/>
+    <module name="PDFSpliter" src="modules/PDFSpliter/PDFSpliter.php" type="class"/>
+    <module name="Reader" src="modules/Reader/Reader.php" type="class"/>
+    <module name="Export" src="modules/Export/Export.php" type="class"/>
+    <module name="PDFAnalyzer" src="modules/PDFAnalyzer/PDFAnalyzer.php" type="class"/>
+    <module name="HTMLAnalyzer" src="modules/HTMLAnalyzer/HTMLAnalyzer.php" type="class"/>
+    <module name="MaarchWSClient" src="modules/MaarchWSClient/MaarchWSClient.php" type="class"/>
+    <module name="MailCapture" src="modules/MailCapture/MailCapture.php" type="class"/>
+    <module name="QRSeparator" src="modules/QRSeparator/MaarchQRSeparator.php" type="class"/>
+  </modules>
+  <batches>
+    <batch name="MAARCH_REST_WS" directory="/var/www/html/MaarchCaptureGit/files/" lock="0" id="{batchname}-{timestamp}-{rand}">
+      <workflow name="M2M" debug="true" logMode="Maarch" maarchLogParam="/var/www/html/maarch_v2/custom/cs_maarch_v2/apps/maarch_entreprise/xml/log4php.xml" maarchLoggerName="loggerTechnique">
+          <step name="CaptureMails" module='MailCapture' function="CaptureMails">
+              <input name="account">account_1</input>
+              <input name="Action">move</input>
+              <input name="configFile">MailCapture_M2M.xml</input>
+              <input name="folder">maarchcapture</input>
+          </step>
+        <step name="SendToMaarch" module="MaarchWSClient" function="processBatch">
+            <input name="WS">MaarchRestWS</input>
+            <input name="Process">MaarchRestWSProcessM2M</input>
+            <input name="CatchError">true</input>
+        </step>
+      </workflow>
+
+      <workflow name="M2M_ACK" debug="true" logMode="Maarch" maarchLogParam="/var/www/html/maarch_v2/custom/cs_maarch_v2/apps/maarch_entreprise/xml/log4php.xml" maarchLoggerName="loggerTechnique">
+          <step name="CaptureMails" module='MailCapture' function="CaptureMails">
+              <input name="account">account_1</input>
+              <input name="Action">move</input>
+              <input name="configFile">MailCapture_M2M_ACK.xml</input>
+              <input name="folder">maarchcapture</input>
+          </step>
+        <step name="SendToMaarch" module="MaarchWSClient" function="processBatch">
+            <input name="WS">MaarchRestWS</input>
+            <input name="Process">MaarchRestWSProcessM2Mack</input>
+            <input name="CatchError">true</input>
+        </step>
+      </workflow>
+
+      <workflow name="M2M_REPLY" debug="true" logMode="Maarch" maarchLogParam="/var/www/html/maarch_v2/custom/cs_maarch_v2/apps/maarch_entreprise/xml/log4php.xml" maarchLoggerName="loggerTechnique">
+          <step name="CaptureMails" module='MailCapture' function="CaptureMails">
+              <input name="account">account_1</input>
+              <input name="Action">move</input>
+              <input name="configFile">MailCapture_M2M_REPLY.xml</input>
+              <input name="folder">maarchcapture</input>
+          </step>
+        <step name="SendToMaarch" module="MaarchWSClient" function="processBatch">
+            <input name="WS">MaarchRestWS</input>
+            <input name="Process">MaarchRestWSProcessM2Mreply</input>
+            <input name="CatchError">true</input>
+        </step>
+      </workflow>
+
+      <workflow name="M2M_NOTIFICATION" debug="true" logMode="Maarch" maarchLogParam="/var/www/html/maarch_v2/custom/cs_maarch_v2/apps/maarch_entreprise/xml/log4php.xml" maarchLoggerName="loggerTechnique">
+          <step name="CaptureMails" module='MailCapture' function="CaptureMails">
+              <input name="account">account_1</input>
+              <input name="Action">move</input>
+              <input name="configFile">MailCapture_M2M_NOTIFICATION.xml</input>
+              <input name="folder">maarchcapture</input>
+          </step>
+        <step name="SendToMaarch" module="MaarchWSClient" function="processBatch">
+            <input name="WS">MaarchRestWS</input>
+            <input name="Process">MaarchRestWSProcessM2Mnotification</input>
+            <input name="CatchError">true</input>
+        </step>
+      </workflow>
+    </batch>
+  </batches>
+</capture>
