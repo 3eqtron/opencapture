@@ -34,7 +34,9 @@ class MailCapture
     private $attOutputs;
     private $logFile;
     private $targetEntityId;
-    
+    private $imapErrorTriggered = false;
+
+
     private $encodings;
     
     private $attachmentsOutputDir = false;
@@ -79,6 +81,7 @@ class MailCapture
         for($i=0; $i<$num_errors; $i++) {
             $error = trim($errors[$i]);
             if($error) {
+                $this->imapErrorTriggered = true;
                 if (
                     1 === preg_match(
                         '/Unexpected characters at end of address/',
@@ -337,7 +340,7 @@ class MailCapture
             $this->writeLog(
                 "Process message no " . $Msgno
             );
-            
+            $this->imapErrorTriggered = false;
             $capture = $this->captureMsg($Msgno);
             
             /**********************************************************************
@@ -421,15 +424,18 @@ class MailCapture
                 }
             }
             //var_dump($folder);
-            
-            $this->ProcessTheMail(
-                $account,
-                $action,
-                $ackVal,
-                $currentMsgId,
-                $configFile,
-                $folder
-            );
+            $metaError = $Element->getMetadata("error");
+
+            if (empty($metaError)) {
+                $this->ProcessTheMail(
+                    $account,
+                    $action,
+                    $ackVal,
+                    $currentMsgId,
+                    $configFile,
+                    $folder
+                );
+            }
         }
     }
 
@@ -1223,6 +1229,12 @@ class MailCapture
                         . " source replaced with " . $part->filepath);
                 }else{
                     $this->writeLog("mime_type : ".$part->subtype." is unsupported, no process found.");
+                }
+                if ($this->imapErrorTriggered) {
+                    $metaError = $Document->getMetadata('error');
+                    if (empty($metaError)) {
+                        $Document->setMetadata('error', true);
+                    }
                 }
                 
                 break;
