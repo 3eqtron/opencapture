@@ -431,6 +431,14 @@ class MaarchWSClient extends DOMXPath
                 $argType = $arg->getAttribute('type');
             }
 
+            if (
+                isset($argValue['value']) && 
+                is_array($argValue['value']) &&
+                empty($argValue['value'])
+            ) {
+                $argValue['value'] = '';
+            }
+
             if (!isset($argValues[$argType][$argName])) {
                 $argValues[$argType][$argName] = $argValue;
             } else {
