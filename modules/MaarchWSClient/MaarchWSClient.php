@@ -606,7 +606,7 @@ class MaarchWSClient extends DOMXPath
             
             if (!isset($WSReturn->$returnContentName)) {
                 $dmpfile = $this->Batch->directory . "/" . $Element->id . "__MaarchWSClient__"
-                    . str_replace(DIRECTORY_SEPARATOR, "#", $serviceName) . "__return.log";
+                    . str_replace('/', "#", $serviceName) . "__return.log";
                 $f = fopen($dmpfile, "w");
                 fwrite($f, print_r($WSReturnContent, true));
                 fclose($f);
