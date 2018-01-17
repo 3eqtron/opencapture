@@ -766,4 +766,3 @@ class MaarchWSClient extends DOMXPath
         }
     }
 }
-
