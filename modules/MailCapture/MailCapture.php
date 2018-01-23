@@ -895,63 +895,52 @@ class MailCapture
             if(strripos($value, $test) === false) $applies = true;
             break;
           case "checkUserMail":
-               $mail = array();
-               $theString = str_replace(">", "", $value);
-             $mail = explode("<", $theString);
+            $mail = array();
+            $theString = str_replace(">", "", $value);
+            $mail = explode("<", $theString);
 
-             # WS
-               require_once('SOAP/Client.php');
+            # WS
+            require_once('SOAP/Client.php');
 
-               $Config_Capture = new DOMDocument();
-                $Config_Capture->load("config" . DIRECTORY_SEPARATOR . $_SESSION['CaptureName'] );
-               $xpath_Capture = new DOMXpath($Config_Capture);
+            $Config_Capture = new DOMDocument();
+            $Config_Capture->load("config" . DIRECTORY_SEPARATOR . $_SESSION['CaptureName']);
+            $xpath_Capture = new DOMXpath($Config_Capture);
 
-             $WSDL_Value =
-                 $xpath_Capture->query(
-                     '//input[@name="WSDL"]'
-                 )->item(0)->nodeValue;
+            $WSDL_Value = $xpath_Capture->query('//input[@name="WSDL"]')->item(0)->nodeValue;
 
             $MaarchWSClientConfig = $xpath_Capture->query(
-                     '//step[@name="SendToMaarch"]//input[@name="configFile"]'
-                 )->item(0)->nodeValue;
+                '//step[@name="SendToMaarch"]//input[@name="configFile"]'
+            )->item(0)->nodeValue;
             if (!$MaarchWSClientConfig) {
                 $MaarchWSClientConfig = 'MaarchWSClient.xml';
             }
-             $Config_WS = new DOMDocument();
-             $Config_WS->load("modules" . DIRECTORY_SEPARATOR .
-                 "MaarchWSClient" . DIRECTORY_SEPARATOR . $MaarchWSClientConfig
-             );
+            $Config_WS = new DOMDocument();
+            $Config_WS->load("modules" . DIRECTORY_SEPARATOR .
+                "MaarchWSClient" . DIRECTORY_SEPARATOR . $MaarchWSClientConfig
+            );
+            $xpath_WS = new DOMXpath($Config_WS);
 
-               $xpath_WS = new DOMXpath($Config_WS);
+            $WSDLConfig = $xpath_WS->query('//WSDL[@name="'.$WSDL_Value.'"]')->item(0);
 
-             $WSDLConfig =
-                 $xpath_WS->query(
-                     '//WSDL[@name="'.$WSDL_Value.'"]'
-                 )->item(0);
+            $uri = $WSDLConfig->getAttribute('uri');
 
-             $uri = $WSDLConfig->getAttribute('uri');
+            $proxyArgs = $xpath_WS->query('./proxy/*',$WSDLConfig);
 
-             $proxyArgs =
-                 $xpath_WS->query(
-                     './proxy/*',
-                     $WSDLConfig
-                 );
+            $l = $proxyArgs->length;
+            $proxy = array();
+            for($i=0; $i<$l; $i++) {
+                $proxyArg = $proxyArgs->item($i);
+                $proxyArgName = $proxyArg->nodeName;
+                $proxyArgValue = $proxyArg->nodeValue;
+                $proxy[$proxyArgName] = (string)$proxyArgValue;
+            }    
 
-             $l = $proxyArgs->length;
-             $proxy = array();
-             for($i=0; $i<$l; $i++) {
-                 $proxyArg = $proxyArgs->item($i);
-                 $proxyArgName = $proxyArg->nodeName;
-                 $proxyArgValue = $proxyArg->nodeValue;
-                 $proxy[$proxyArgName] = (string)$proxyArgValue;
-             }    
-
-               $wsdl = new SOAP_WSDL($uri, $proxy, false);
-               $client = $wsdl->getProxy();
+            $wsdl = new SOAP_WSDL($uri, $proxy, false);
+            $client = $wsdl->getProxy();
             
             $isUser = false;
             $this->targetEntityId = "";
-               $userWS = $client->checkUserMail($mail[count($mail) -1]);
+            $userWS = $client->checkUserMail($mail[count($mail) -1]);
 
             if (!$userWS->item->isUser && file_exists( __DIR__ . DIRECTORY_SEPARATOR . "externalContacts.xml")) {
                 $xmlfile = simplexml_load_file( __DIR__ . DIRECTORY_SEPARATOR . "externalContacts.xml");
@@ -969,21 +958,21 @@ class MailCapture
                 $isUser = true;
             }
 
-               if ($test == "true" && !$isUser) {
+            if ($test == "true" && !$isUser) {
 
-                    $filename = __DIR__ . DIRECTORY_SEPARATOR . "sendmail.ini";
+                $filename = __DIR__ . DIRECTORY_SEPARATOR . "sendmail.ini";
                 $iniFile = parse_ini_file($filename);
 
-                    //Use to send html mail
-                   $headers  = 'MIME-Version: 1.0' . "\r\n";
-                   $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+                //Use to send html mail
+                $headers  = 'MIME-Version: 1.0' . "\r\n";
+                $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 
-                    mail($mail[count($mail) -1], $iniFile['mail_object'], $iniFile['mail_message'], $headers);
-               }
-             
-               if (!$isUser) {
-                    $applies = true;
-               }
+                mail($mail[count($mail) -1], $iniFile['mail_object'], $iniFile['mail_message'], $headers);
+            }
+
+            if (!$isUser) {
+                $applies = true;
+            }
 
             break;
         }

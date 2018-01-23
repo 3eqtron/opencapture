@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cd /opt/maarch/MaarchCapture/
+php MaarchCapture.php init -BatchName MAARCH_SCAN_TO_MC
+

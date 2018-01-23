@@ -1,12 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <MaarchWSClient>
-	<WS SSL="false" cacheUse="0" name="MaarchRestWS" type="REST" uri="http://bblier:maarch@127.0.0.1/maarch_v2/rest">
-		<proxy>
-			<user>superadmin</user>
-			<pass>superadmin</pass>
-			<timeout>600</timeout>
-		</proxy>
-	</WS>
+	<WS name="MaarchRestWS" type="REST" uri="http://bblier:maarch@127.0.0.1/MaarchCourrier/rest/" SSL="false" cacheUse="0" />
 	<process name="MaarchRestWSProcessM2M">
 		<loop xpath="/Batch/Documents/Document">
 			<loop xpath="Attachments/Attachment">

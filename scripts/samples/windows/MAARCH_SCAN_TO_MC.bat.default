@@ -1,0 +1,4 @@
+
+cd F:\maarch\MaarchCapture\
+
+C:\xampp\php\php.exe MaarchCapture.php init -BatchName MAARCH_SCAN_TO_MC
