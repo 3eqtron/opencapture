@@ -1,0 +1,8 @@
+stages:
+  - test
+
+before_script:
+  - apt-get update > /dev/null
+
+only:
+  - develop
