@@ -6,11 +6,12 @@
 set -xe
 
 mkdir /usr/kerberos \
-&& ln -s /usr/lib/x86_64-linux-gnu /usr/kerberos/lib
+&& ln -s /usr/lib/x86_64-linux-gnu /usr/kerberos/lib \
+&& ln -s /usr/lib64/x86_64-linux-gnu/ /usr/kerberos/lib64
 
 apt-get install -y libc-client-dev libpq-dev libxml2-dev libxslt1-dev \
 && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
-&& docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
+&& docker-php-ext-configure imap --with-kerberos=/usr/kerberos --with-imap-ssl \
 && docker-php-ext-install pdo_pgsql gettext pgsql xsl xmlrpc zip imap \
 && pecl install xdebug \
 && docker-php-ext-enable xdebug
