@@ -6,7 +6,7 @@
 set -xe
 
 export DEBIAN_FRONTEND=noninteractive \
-&& apt-get install -yqq postfix dovecot-imapd \
+&& apt-get install -yqq postfix dovecot-imapd less \
 && echo 'virtual_mailbox_domains = fake' >> /etc/postfix/main.cf \
 && echo 'virtual_mailbox_base = /var/vmail' >> /etc/postfix/main.cf \
 && echo 'virtual_mailbox_maps = hash:/etc/postfix/virtual_mailbox' >> /etc/postfix/main.cf \
