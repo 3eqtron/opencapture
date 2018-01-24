@@ -17,6 +17,5 @@ job_php-7.0:
   stage: test
   script:
     - mkdir -p /opt/maarch/docservers/indexes/{letterbox_coll,attachments_coll,version_attachments_coll}
-
-only:
-  - develop
+  only:
+    - develop
