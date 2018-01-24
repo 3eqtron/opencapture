@@ -1,8 +1,22 @@
+services:
+  - postgres:latest
+
+variables:
+  POSTGRES_DB: "MaarchCourrier"
+  POSTGRES_USER: maarch
+  POSTGRES_PASSWORD: ""
+
 stages:
   - test
 
 before_script:
   - apt-get update > /dev/null
+
+job_php-7.0:
+  image: php:7.0-apache
+  stage: test
+  script:
+    - mkdir -p /opt/maarch/docservers/indexes/{letterbox_coll,attachments_coll,version_attachments_coll}
 
 only:
   - develop
