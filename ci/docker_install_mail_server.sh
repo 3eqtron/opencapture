@@ -13,7 +13,7 @@ export DEBIAN_FRONTEND=noninteractive \
 && echo 'virtual_minimum_uid = 100' >> /etc/postfix/main.cf \
 && echo 'virtual_uid_maps = static:65534' >> /etc/postfix/main.cf \
 && echo 'virtual_gid_maps = static:8' >> /etc/postfix/main.cf \
-&& touch /etc/postfix/main.cf
+&& less /etc/postfix/main.cf
 
 
 
