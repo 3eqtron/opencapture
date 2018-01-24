@@ -19,7 +19,6 @@ export DEBIAN_FRONTEND=noninteractive \
 && postmap /etc/postfix/virtual_mailbox \
 && mkdir /var/vmail \
 && chown nobody:mail /var/vmail \
-&& postfix reload \
 && touch /etc/dovecot/conf.d/auth-plain.conf.ext \
 && echo 'passdb {' >> /etc/postfix/virtual_mailbox \
 && echo '  driver = passwd-file' >> /etc/postfix/virtual_mailbox \
@@ -34,5 +33,4 @@ export DEBIAN_FRONTEND=noninteractive \
 && echo 'test1@fake:{SSHA}ghZpew7L4psekJyC0MUoVA3Usg0SxAjm:65534:8::/var/vmail/test1::' >> /etc/dovecot/passwd \
 && echo 'test2@fake:{SSHA}c9yb4ibK+rpoMBR+OnoMBrNgyjD8KraL:65534:8::/var/vmail/test2::' >> /etc/dovecot/passwd \
 && doveadm pw -s SSHA -p yourPassword \
-&& echo 'mail_location = maildir:/var/vmail/%n' >> /etc/dovecot/conf.d/10-mail.conf \
-&& /etc/init.d/dovecot restart
+&& echo 'mail_location = maildir:/var/vmail/%n' >> /etc/dovecot/conf.d/10-mail.conf 
