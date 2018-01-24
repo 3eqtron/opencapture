@@ -10,8 +10,8 @@ stages:
   - test
 
 before_script:
+  - pear channel-discover pear.maarch.org
   - apt-get update > /dev/null
-  - apt-get install php-pear -yqq > /dev/null
   - apt-get install apt-utils -yqq > /dev/null
   - apt-get install -yqq libc-client-dev  > /dev/null 
   - apt-get install -yqq libkrb5-dev  > /dev/null
