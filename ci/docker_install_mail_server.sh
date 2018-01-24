@@ -20,7 +20,8 @@ export DEBIAN_FRONTEND=noninteractive \
 && postmap /etc/postfix/virtual_mailbox \
 && mkdir /var/vmail \
 && chown nobody:mail /var/vmail \
-&& postfix reload \
+&& postfix stop \
+&& postfix start \
 && touch /etc/dovecot/conf.d/auth-plain.conf.ext \
 && echo 'passdb {' >> /etc/postfix/virtual_mailbox \
 && echo '  driver = passwd-file' >> /etc/postfix/virtual_mailbox \
