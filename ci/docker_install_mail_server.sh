@@ -30,7 +30,7 @@ export DEBIAN_FRONTEND=noninteractive \
 && echo '  args = username_format=%u /etc/dovecot/passwd' >> /etc/postfix/virtual_mailbox \
 && echo '}' >> /etc/postfix/virtual_mailbox \
 && echo '!include auth-plain.conf.ext' >> /etc/dovecot/conf.d/10-auth.conf \
-&& touch /etc/dovecot/passwd
+&& touch /etc/dovecot/passwd \
 && echo 'test1@fake:{SSHA}ghZpew7L4psekJyC0MUoVA3Usg0SxAjm:65534:8::/var/vmail/test1::' >> /etc/dovecot/passwd \
 && echo 'test2@fake:{SSHA}c9yb4ibK+rpoMBR+OnoMBrNgyjD8KraL:65534:8::/var/vmail/test2::' >> /etc/dovecot/passwd \
 && doveadm pw -s SSHA -p yourPassword \
