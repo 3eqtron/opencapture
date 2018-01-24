@@ -11,6 +11,7 @@ stages:
 
 before_script:
   - apt-get update > /dev/null
+  - bash ci/docker_install_mail_server.sh > /dev/null
   - bash ci/docker_install_php.sh > /dev/null
   - pear channel-discover pear.maarch.org
   - pear install maarch/CLITools-0.3.1
