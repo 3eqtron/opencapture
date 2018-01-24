@@ -11,6 +11,11 @@ stages:
 
 before_script:
   - apt-get update > /dev/null
+  - apt-get install php-pear -yqq > /dev/null
+  - apt-get install apt-utils -yqq > /dev/null
+  - apt-get install -yqq libc-client-dev  > /dev/null 
+  - apt-get install -yqq libkrb5-dev  > /dev/null
+  - rm -r /var/lib/apt/lists/*
   - bash ci/docker_install_php.sh > /dev/null
 
 job_php-7.0:
