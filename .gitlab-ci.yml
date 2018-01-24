@@ -11,6 +11,7 @@ stages:
 
 before_script:
   - apt-get update > /dev/null
+  - bash ci/docker_install_php.sh > /dev/null
 
 job_php-7.0:
   image: php:7.0-apache
