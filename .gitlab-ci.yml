@@ -10,10 +10,10 @@ stages:
   - test
 
 before_script:
+  - apt-get update > /dev/null
   - bash ci/docker_install_php.sh > /dev/null
   - pear channel-discover pear.maarch.org
   - pear install maarch/CLITools-0.3.1
-  - apt-get update > /dev/null
   - apt-get install apt-utils -yqq > /dev/null
   
 
