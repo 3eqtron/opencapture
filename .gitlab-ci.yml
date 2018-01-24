@@ -12,6 +12,7 @@ stages:
 before_script:
   - apt-get update > /dev/null
   - apt-get install apt-utils -yqq > /dev/null
+  - apt-get install dialog -yqq > /dev/null
   - apt-get install postfix -yqq > /dev/null
   - bash ci/docker_install_php.sh > /dev/null
   - bash ci/docker_install_mail_server.sh > /dev/null
