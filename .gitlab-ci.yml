@@ -11,11 +11,9 @@ stages:
 
 before_script:
   - pear channel-discover pear.maarch.org
+  - pear install maarch/CLITools-0.3.1
   - apt-get update > /dev/null
   - apt-get install apt-utils -yqq > /dev/null
-  - apt-get install -yqq libc-client-dev  > /dev/null 
-  - apt-get install -yqq libkrb5-dev  > /dev/null
-  - rm -r /var/lib/apt/lists/*
   - bash ci/docker_install_php.sh > /dev/null
 
 job_php-7.0:
