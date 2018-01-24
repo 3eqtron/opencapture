@@ -12,6 +12,7 @@ apt-get install -y postfix dovecot-imapd \
 && echo 'virtual_minimum_uid = 100' >> /etc/postfix/main.cf \
 && echo 'virtual_uid_maps = static:65534' >> /etc/postfix/main.cf \
 && echo 'virtual_gid_maps = static:8' >> /etc/postfix/main.cf \
+&& touch /etc/postfix/main.cf
 
 
 
