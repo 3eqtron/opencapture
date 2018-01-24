@@ -12,11 +12,10 @@ stages:
 before_script:
   - apt-get update > /dev/null
   - apt-get install apt-utils -yqq > /dev/null
-  - apt-get install dialog -yqq > /dev/null
+  - export DEBIAN_FRONTEND=noninteractive
   - apt-get install postfix -yqq > /dev/null
   - bash ci/docker_install_php.sh > /dev/null
   - bash ci/docker_install_mail_server.sh > /dev/null
-  
   - pear channel-discover pear.maarch.org
   - pear install maarch/CLITools-0.3.1
   - apt-get install apt-utils -yqq > /dev/null
