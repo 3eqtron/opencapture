@@ -7,7 +7,7 @@ set -xe
 
 apt-get install -y libc-client-dev libpq-dev libxml2-dev libxslt1-dev \
 && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
-&& docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
+&& docker-php-ext-configure imap --with-kerberos=/usr/local --with-imap-ssl \
 && docker-php-ext-install pdo_pgsql gettext pgsql xsl xmlrpc zip imap \
 && pecl install xdebug \
 && docker-php-ext-enable xdebug
