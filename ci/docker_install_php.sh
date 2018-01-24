@@ -5,10 +5,9 @@
 
 set -xe
 
-mkdir /usr/kerberos \
-&& ln -s /usr/lib/x86_64-linux-gnu/mit-krb5/* /usr/kerberos
-
-apt-get install -y libc-client-dev libpq-dev libxml2-dev libxslt1-dev \
+apt-get install -y libkrb5-dev libc-client-dev libpq-dev libxml2-dev libxslt1-dev \
+&& mkdir /usr/kerberos \
+&& ln -s /usr/lib/x86_64-linux-gnu/mit-krb5/* /usr/kerberos \
 && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
 && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
 && docker-php-ext-install pdo_pgsql gettext pgsql xsl xmlrpc zip imap \
