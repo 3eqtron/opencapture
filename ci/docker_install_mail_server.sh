@@ -6,7 +6,7 @@
 set -xe
 
 export DEBIAN_FRONTEND=noninteractive \
-&& apt-get install -yqq postfix dovecot-imapd iptables \
+&& apt-get install -yqq postfix dovecot-imapd \
 && export DEBIAN_FRONTEND=dialog \
 && echo 'virtual_mailbox_domains = fake' >> /etc/postfix/main.cf \
 && echo 'virtual_mailbox_base = /var/vmail' >> /etc/postfix/main.cf \
@@ -37,9 +37,9 @@ export DEBIAN_FRONTEND=noninteractive \
 && echo 'test2@fake:{SSHA}c9yb4ibK+rpoMBR+OnoMBrNgyjD8KraL:65534:8::/var/vmail/test2::' >> /etc/dovecot/passwd \
 && doveadm pw -s SSHA -p yourPassword \
 && echo 'mail_location = maildir:/var/vmail/%n' >> /etc/dovecot/conf.d/10-mail.conf \
-&& /etc/init.d/dovecot restart \
-&& iptables -A OUTPUT -p tcp -d 127.0.0.1 --dport 25 -j ACCEPT \
-&& iptables -A OUTPUT -p tcp --dport 25 -j DROP \
-&& echo 'iface eth0 inet dhcp' >> /etc/network/interfaces \
-&& echo '        up /sbin/iptables -A OUTPUT -p tcp -d 127.0.0.1 --dport 25 -j ACCEPT' >> /etc/network/interfaces \
-&& echo '        up /sbin/iptables -A OUTPUT -p tcp --dport 25 -j DROP' >> /etc/network/interfaces
+&& /etc/init.d/dovecot restart
+# && iptables -A OUTPUT -p tcp -d 127.0.0.1 --dport 25 -j ACCEPT \
+# && iptables -A OUTPUT -p tcp --dport 25 -j DROP \
+# && echo 'iface eth0 inet dhcp' >> /etc/network/interfaces \
+# && echo '        up /sbin/iptables -A OUTPUT -p tcp -d 127.0.0.1 --dport 25 -j ACCEPT' >> /etc/network/interfaces \
+# && echo '        up /sbin/iptables -A OUTPUT -p tcp --dport 25 -j DROP' >> /etc/network/interfaces
