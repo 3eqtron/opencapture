@@ -1,6 +1,6 @@
 services:
   - postgres:latest
-  - apache:latest
+  - my-apache:latest
 
 variables:
   POSTGRES_DB: "MaarchCourrier"
