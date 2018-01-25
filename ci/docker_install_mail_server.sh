@@ -23,14 +23,14 @@ export DEBIAN_FRONTEND=noninteractive \
 && postfix stop \
 && postfix start \
 && touch /etc/dovecot/conf.d/auth-plain.conf.ext \
-&& echo 'passdb {' >> /etc/postfix/virtual_mailbox \
-&& echo '  driver = passwd-file' >> /etc/postfix/virtual_mailbox \
-&& echo '  args = username_format=%u /etc/dovecot/passwd' >> /etc/postfix/virtual_mailbox \
-&& echo '}' >> /etc/postfix/virtual_mailbox \
-&& echo 'userdb {' >> /etc/postfix/virtual_mailbox \
-&& echo '  driver = passwd-file' >> /etc/postfix/virtual_mailbox \
-&& echo '  args = username_format=%u /etc/dovecot/passwd' >> /etc/postfix/virtual_mailbox \
-&& echo '}' >> /etc/postfix/virtual_mailbox \
+&& echo 'passdb {' >> /etc/dovecot/conf.d/auth-plain.conf.ext \
+&& echo '  driver = passwd-file' >> /etc/dovecot/conf.d/auth-plain.conf.ext \
+&& echo '  args = username_format=%u /etc/dovecot/passwd' >> /etc/dovecot/conf.d/auth-plain.conf.ext \
+&& echo '}' >> /etc/dovecot/conf.d/auth-plain.conf.ext \
+&& echo 'userdb {' >> /etc/dovecot/conf.d/auth-plain.conf.ext \
+&& echo '  driver = passwd-file' >> /etc/dovecot/conf.d/auth-plain.conf.ext \
+&& echo '  args = username_format=%u /etc/dovecot/passwd' >> /etc/dovecot/conf.d/auth-plain.conf.ext \
+&& echo '}' >> /etc/dovecot/conf.d/auth-plain.conf.ext \
 && echo '!include auth-plain.conf.ext' >> /etc/dovecot/conf.d/10-auth.conf \
 && touch /etc/dovecot/passwd \
 && echo 'test1@fake:{SSHA}ghZpew7L4psekJyC0MUoVA3Usg0SxAjm:65534:8::/var/vmail/test1::' >> /etc/dovecot/passwd \
