@@ -38,8 +38,3 @@ export DEBIAN_FRONTEND=noninteractive \
 && doveadm pw -s SSHA -p yourPassword \
 && echo 'mail_location = maildir:/var/vmail/%n' >> /etc/dovecot/conf.d/10-mail.conf \
 && /etc/init.d/dovecot restart
-# && iptables -A OUTPUT -p tcp -d 127.0.0.1 --dport 25 -j ACCEPT \
-# && iptables -A OUTPUT -p tcp --dport 25 -j DROP \
-# && echo 'iface eth0 inet dhcp' >> /etc/network/interfaces \
-# && echo '        up /sbin/iptables -A OUTPUT -p tcp -d 127.0.0.1 --dport 25 -j ACCEPT' >> /etc/network/interfaces \
-# && echo '        up /sbin/iptables -A OUTPUT -p tcp --dport 25 -j DROP' >> /etc/network/interfaces

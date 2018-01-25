@@ -11,12 +11,13 @@ stages:
 
 before_script:
   - apt-get update > /dev/null
+  - apt-get install git -yqq > /dev/null
+  - mkdir -p /var/www/html/
+  - git clone https://labs.maarch.org/maarch/MaarchCourrier.git /var/www/html/MaarchCourrier
   - apt-get install apt-utils -yqq > /dev/null
   - bash ci/docker_install_mail_server.sh > /dev/null
   - bash ci/send_simple_mail.sh > /dev/null
   - bash ci/docker_install_php.sh > /dev/null
-  - php ci/test_imap.php
-  #- bash ci/test_imap.sh > /dev/null
 
 job_php-7.0:
   image: php:7.0-apache
@@ -30,7 +31,7 @@ job_php-7.0:
     - cp /opt/maarch/MaarchCapture/scripts/samples/linux/MAARCH_CI_SCAN.sh.default /opt/maarch/MaarchCapture/scripts/MAARCH_CI_SCAN.sh
     - cp /opt/maarch/MaarchCapture/scripts/samples/linux/MAARCH_CI_MAIL.sh.default /opt/maarch/MaarchCapture/scripts/MAARCH_CI_MAIL.sh
     - cp /opt/maarch/MaarchCapture/ci/samples/sample.pdf /opt/maarch/MaarchCapture/files/TEST_IMPORT/
-    #- bash /opt/maarch/MaarchCapture/scripts/MAARCH_CI_SCAN.sh
+    - bash /opt/maarch/MaarchCapture/scripts/MAARCH_CI_SCAN.sh
     - bash /opt/maarch/MaarchCapture/scripts/MAARCH_CI_MAIL.sh
     - ls -al /opt/maarch/MaarchCapture/files/*
     
