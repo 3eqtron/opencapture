@@ -13,9 +13,10 @@ before_script:
   - apt-get update > /dev/null
   - apt-get install apt-utils -yqq > /dev/null
   - bash ci/docker_install_mail_server.sh > /dev/null
-  - bash ci/send_simple_mail.sh > /dev/null
+  - bash ci/send_simple_mail.sh
   - bash ci/docker_install_php.sh > /dev/null
-  - bash ci/test_imap.sh > /dev/null
+  - php ci/test_imap.php
+  #- bash ci/test_imap.sh > /dev/null
 
 job_php-7.0:
   image: php:7.0-apache
