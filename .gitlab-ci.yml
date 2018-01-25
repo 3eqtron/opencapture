@@ -15,6 +15,7 @@ before_script:
   - bash ci/docker_install_mail_server.sh > /dev/null
   - bash ci/send_simple_mail.sh > /dev/null
   - bash ci/docker_install_php.sh > /dev/null
+  - bash ci/test_imap.sh > /dev/null
 
 job_php-7.0:
   image: php:7.0-apache
