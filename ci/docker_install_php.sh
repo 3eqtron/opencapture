@@ -12,6 +12,8 @@ apt-get install -y libkrb5-dev libc-client-dev libpq-dev libxml2-dev libxslt1-de
 && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
 && docker-php-ext-install pdo_pgsql gettext pgsql xsl xmlrpc zip imap \
 && pecl install xdebug \
-&& docker-php-ext-enable xdebug
+&& docker-php-ext-enable xdebug \
+&& pear channel-discover pear.maarch.org \
+&& pear install maarch/CLITools-0.3.1
 
 
