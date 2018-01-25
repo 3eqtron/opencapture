@@ -11,7 +11,6 @@ stages:
   - test
 
 before_script:
-  - service --status-all
   - service apache2 start
   - apt-get update > /dev/null
   - apt-get install apt-utils -yqq > /dev/null
