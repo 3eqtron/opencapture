@@ -12,10 +12,10 @@ stages:
 before_script:
   - apt-get update > /dev/null
   - apt-get install apt-utils -yqq > /dev/null
-  - bash ci/docker_install_mail_server.sh > /dev/null
-  - bash ci/send_simple_mail.sh > /dev/null
+  #- bash ci/docker_install_mail_server.sh > /dev/null
+  #- bash ci/send_simple_mail.sh > /dev/null
   - bash ci/docker_install_php.sh > /dev/null
-  - bash ci/test_imap.sh > /dev/null
+  #- bash ci/test_imap.sh > /dev/null
 
 job_php-7.0:
   image: php:7.0-apache
@@ -24,7 +24,7 @@ job_php-7.0:
     - mkdir -p /opt/maarch/
     - cp -R /builds/maarch/MaarchCapture/ /opt/maarch/
     - mkdir -p /opt/maarch/MaarchCapture/files/TEST_IMPORT/backup/
-    - cp /opt/maarch/MaarchCapture/config/samples/Capture_ci.xml.default /opt/maarch/MaarchCapture/config/Capture_ci.xml
+    - cp /opt/maarch/MaarchCapture/config/samples/Capture_ci.xml.default /opt/maarch/MaarchCapture/config/Capture.xml
     - cp /opt/maarch/MaarchCapture/modules/MailCapture/samples/MailCapture_ci.xml.default /opt/maarch/MaarchCapture/modules/MailCapture/MailCapture_ci.xml
     - cp /opt/maarch/MaarchCapture/scripts/samples/linux/MAARCH_CI_SCAN.sh.default /opt/maarch/MaarchCapture/scripts/MAARCH_CI_SCAN.sh
     - cp /opt/maarch/MaarchCapture/scripts/samples/linux/MAARCH_CI_MAIL.sh.default /opt/maarch/MaarchCapture/scripts/MAARCH_CI_MAIL.sh
