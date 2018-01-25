@@ -5,6 +5,12 @@
 
 set -xe
 
+#retrieves sources
+apt-get install -y git \
+&& mkdir -p /var/www/html/ \
+&& git clone https://labs.maarch.org/maarch/MaarchCourrier.git /var/www/html/MaarchCourrier \
+&& git --git-dir=/var/www/html/MaarchCourrier/.git checkout develop
+
 #install prerequisites
 apt-get install wget -yqq > /dev/null \
 && apt-get install npm -yqq > /dev/null \
@@ -16,12 +22,6 @@ apt-get install wget -yqq > /dev/null \
 && php composer.phar install \
 && mv composer.phar /usr/local/bin/composer \
 && chmod +x /usr/local/bin/composer
-
-#retrieves sources
-apt-get install -y git \
-&& mkdir -p /var/www/html/ \
-&& git clone https://labs.maarch.org/maarch/MaarchCourrier.git /var/www/html/MaarchCourrier \
-&& git --git-dir=/var/www/html/MaarchCourrier/.git checkout develop
 
 #install database
 apt-get install postgresql-client -yqq
