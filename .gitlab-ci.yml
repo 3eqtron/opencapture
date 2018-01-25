@@ -12,6 +12,7 @@ stages:
 
 before_script:
   - service --status-all
+  - service apache2 start
   - apt-get update > /dev/null
   - apt-get install apt-utils -yqq > /dev/null
   - bash ci/docker_install_php.sh > /dev/null
