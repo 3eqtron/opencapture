@@ -11,9 +11,7 @@ stages:
 
 before_script:
   - apt-get update > /dev/null
-  - apt-get install git -yqq > /dev/null
-  - mkdir -p /var/www/html/
-  - git clone https://labs.maarch.org/maarch/MaarchCourrier.git /var/www/html/MaarchCourrier
+  - bash ci/docker_install_maarchcourrier.sh > /dev/null
   - apt-get install apt-utils -yqq > /dev/null
   - bash ci/docker_install_mail_server.sh > /dev/null
   - bash ci/send_simple_mail.sh > /dev/null
