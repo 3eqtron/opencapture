@@ -11,6 +11,8 @@ apt-get install -y git \
 && git clone https://labs.maarch.org/maarch/MaarchCourrier.git /var/www/html/MaarchCourrier \
 && git --git-dir=/var/www/html/MaarchCourrier/.git checkout develop
 
+cd /var/www/html/MaarchCourrier
+
 #install prerequisites
 apt-get install wget -yqq > /dev/null \
 && apt-get install npm -yqq > /dev/null \
@@ -45,3 +47,4 @@ curl -sL https://deb.nodesource.com/setup_7.x | bash - \
 && npm install \
 && sed 's/<databaseserver>.*<\/databaseserver>/<databaseserver>postgres<\/databaseserver>/;s/<databasepassword>.*<\/databasepassword>/<databasepassword><\/databasepassword>/;s/<databasename>.*<\/databasename>/<databasename>MaarchCourrier<\/databasename>/;s/<databaseuser>.*<\/databaseuser>/<databaseuser>maarch<\/databaseuser>/' apps/maarch_entreprise/xml/config.xml.default > apps/maarch_entreprise/xml/config.xml
 
+cd /builds/maarch/MaarchCapture
