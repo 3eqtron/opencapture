@@ -15,7 +15,7 @@
         <loop xpath="/Batch/Documents/Document">
        	<!--loop xpath="/Batch/Documents/Document[not(Metadata/error)]"--> <!-- sample management if no error -->
        	<!--loop xpath="/Batch/Documents/Document[Metadata/error=1]"--> <!-- sample management if error exists -->
-            <call name="/res" method="POST">
+            <call name="/resiste" method="POST">
                 <argument type="entity" name="encodedFile" eval="base64_encode(file_get_contents($Element-&gt;path))"/>
                 <argument type="entity" name="data">
                   <column>type_id</column>
