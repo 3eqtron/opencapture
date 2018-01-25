@@ -45,6 +45,7 @@ curl -sL https://deb.nodesource.com/setup_7.x | bash - \
 && npm install npm@latest -g \
 && npm set registry https://registry.npmjs.org/ \
 && npm install \
-&& sed 's/<databaseserver>.*<\/databaseserver>/<databaseserver>postgres<\/databaseserver>/;s/<databasepassword>.*<\/databasepassword>/<databasepassword><\/databasepassword>/;s/<databasename>.*<\/databasename>/<databasename>MaarchCourrier<\/databasename>/;s/<databaseuser>.*<\/databaseuser>/<databaseuser>maarch<\/databaseuser>/' apps/maarch_entreprise/xml/config.xml.default > apps/maarch_entreprise/xml/config.xml
+&& sed 's/<databaseserver>.*<\/databaseserver>/<databaseserver>postgres<\/databaseserver>/;s/<databasepassword>.*<\/databasepassword>/<databasepassword><\/databasepassword>/;s/<databasename>.*<\/databasename>/<databasename>MaarchCourrier<\/databasename>/;s/<databaseuser>.*<\/databaseuser>/<databaseuser>maarch<\/databaseuser>/' apps/maarch_entreprise/xml/config.xml.default > apps/maarch_entreprise/xml/config.xml \
+&& touch installed.lck
 
 cd /builds/maarch/MaarchCapture
