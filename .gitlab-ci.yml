@@ -37,7 +37,6 @@ job_php-7.0:
     - chown -R www-data. /opt/maarch/
     - chown -R www-data. /var/www/html/
     - chmod -R 775 /opt/maarch/
-    - chmod -R 775 /opt/maarch/
     - chmod -R 775 /var/www/html/
     - bash /opt/maarch/MaarchCapture/scripts/MAARCH_CI_SCAN.sh
     - bash /opt/maarch/MaarchCapture/scripts/MAARCH_CI_MAIL.sh
