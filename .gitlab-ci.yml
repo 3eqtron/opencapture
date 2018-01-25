@@ -1,5 +1,6 @@
 services:
   - postgres:latest
+  - apache:latest
 
 variables:
   POSTGRES_DB: "MaarchCourrier"
@@ -11,6 +12,7 @@ stages:
 
 before_script:
   - apt-get update > /dev/null
+  - apt-get install apache2  -yqq > /dev/null
   - bash ci/docker_install_php.sh > /dev/null
   - bash ci/docker_install_maarchcourrier.sh > /dev/null
   - apt-get install apt-utils -yqq > /dev/null
