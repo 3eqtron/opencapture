@@ -11,9 +11,6 @@ stages:
   - test
 
 before_script:
-  - service postgres restart
-  - service apache2 stop
-  - service apache2 start
   - apt-get update > /dev/null
   - bash ci/docker_install_php.sh > /dev/null
   - bash ci/docker_install_maarchcourrier.sh > /dev/null
