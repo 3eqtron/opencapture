@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <MaarchWSClient>
-	<!-- REST FRONTAL -->
-    <WS name="MaarchRestWS" type="REST" uri="https://superadmin:superadmin@demo.maarchcourrier.com/rest/" />
+    <!-- REST FRONTAL -->
+    <WS name="MaarchRestWS" type="REST" uri="http://superadmin:superadmin@127.0.0.1/rest/" SSL="false" cacheUse="0" />
     <!-- SOAP FRONTAL -->
-    <WS name="MaarchSoapWS" type="SOAP" uri="https://demo.maarchcourrier.com/ws_server.php?WSDL" SSL="true" cacheUse="0" >
+    <WS name="MaarchSoapWS" type="SOAP" uri="http://127.0.0.1/ws_server.php?WSDL" SSL="false" cacheUse="0" >
         <proxy>
             <user>superadmin</user>
             <pass>superadmin</pass>
