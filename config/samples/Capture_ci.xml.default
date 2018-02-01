@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<capture>
+    <modules>
+        <module name="FileImport" src="modules/FileImport/FileImport.php" type="class"/>
+        <module name="MaarchWSClient" src="modules/MaarchWSClient/MaarchWSClient.php" type="class"/>
+        <module name="MailCapture" src="modules/MailCapture/MailCapture.php" type="class"/>
+    </modules>
+    <batches>
+        <batch name="MAARCH_CI_SCAN" directory="/opt/maarch/MaarchCapture/files/" id="{batchname}-{timestamp}-{rand}" lock="0">
+            <workflow name="MAARCH_CI_SCAN" debug="true" logMode="default">
+                <step name="ImportFiles" module='FileImport' function="ImportFiles">
+                    <input name="Directory">/opt/maarch/MaarchCapture/files/TEST_IMPORT/</input>
+                    <input name="Target">Document</input>
+                    <input name="Action">none</input>
+                    <input name="MoveDirectory">/opt/maarch/MaarchCapture/files/TEST_IMPORT/backup/</input>
+                    <input name="Recursive">0</input>
+                    <input name="CreateFolders">0</input>
+                </step>
+            </workflow>
+        </batch>
+        <batch name="MAARCH_CI_MAIL" directory="/opt/maarch/MaarchCapture/files/" id="{batchname}-{timestamp}-{rand}" lock="0">
+            <workflow name="MAARCH_CI_MAIL" debug="true" logMode="default">
+                <step function="CaptureMails" module="MailCapture" name="CAPTURE_MAIL_1">
+                    <input name="account">account_1</input>
+                    <input name="Action">none</input>
+                    <input name="configFile">MailCapture_ci.xml</input>
+                    <input name="folder">maarch/purge</input>
+                </step>
+            </workflow>
+        </batch>
+        <batch name="MAARCH_CI_SCAN_TO_MC" directory="/opt/maarch/MaarchCapture/files/" id="{batchname}-{timestamp}-{rand}" lock="0">
+            <workflow name="MAARCH_CI_SCAN_TO_MC" debug="true" logMode="default">
+                <step name="ImportFiles" module='FileImport' function="ImportFiles">
+                    <input name="Directory">/opt/maarch/MaarchCapture/files/TEST_IMPORT/</input>
+                    <input name="Target">Document</input>
+                    <input name="Action">none</input>
+                    <input name="MoveDirectory">/opt/maarch/MaarchCapture/files/TEST_IMPORT/backup/</input>
+                    <input name="Recursive">0</input>
+                    <input name="CreateFolders">0</input>
+                </step>
+                <step name="SendToMaarch" module="MaarchWSClient" function="processBatch">
+                    <input name="WS">MaarchRestWS</input>
+                    <input name="Process">MaarchRestWSProcessFromScan</input>
+                    <input name="CatchError">false</input>
+                    <input name="configFile">MaarchWSClient_ci.xml</input>
+                </step>
+                <!-- <step name="SendToMaarch" module="MaarchWSClient" function="processBatch">
+                    <input name="WS">MaarchSoapWS</input>
+                    <input name="Process">MaarchSoapWSProcessFromScan</input>
+                    <input name="CatchError">false</input>
+                    <input name="configFile">MaarchWSClient_ci.xml</input>
+                </step> -->
+            </workflow>
+        </batch>
+        <batch name="MAARCH_CI_MAIL_TO_MC" directory="/opt/maarch/MaarchCapture/files/" id="{batchname}-{timestamp}-{rand}" lock="0">
+            <workflow name="MAARCH_CI_MAIL_TO_MC" debug="true" logMode="default">
+                <step function="CaptureMails" module="MailCapture" name="CAPTURE_MAIL_1">
+                    <input name="account">account_1</input>
+                    <input name="Action">none</input>
+                    <input name="configFile">MailCapture_ci.xml</input>
+                    <input name="folder">maarch/purge</input>
+                </step>
+                <step name="SendToMaarch" module="MaarchWSClient" function="processBatch">
+                    <input name="WS">MaarchRestWS</input>
+                    <input name="Process">MaarchRestWSProcessFromMail</input>
+                    <input name="CatchError">false</input>
+                    <input name="configFile">MaarchWSClient_ci.xml</input>
+                </step>
+                <!-- <step name="SendToMaarch" module="MaarchWSClient" function="processBatch">
+                    <input name="WS">MaarchSoapWS</input>
+                    <input name="Process">MaarchSoapWSProcessFromMail</input>
+                    <input name="CatchError">false</input>
+                    <input name="configFile">MaarchWSClient_ci.xml</input>
+                </step> -->
+            </workflow>
+        </batch>
+    </batches>
+</capture>

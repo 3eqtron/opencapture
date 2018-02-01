@@ -1,9 +1,0 @@
-#!/bin/sh
-
-cd /opt/maarch/MaarchCapture/
-
-# Mass Scan by QRcode
-php MaarchCapture.php init -ConfigName Capture -BatchName  SCAN_MASS
-
-# Mail Import
-php MaarchCapture.php init -ConfigName Capture -BatchName  CAPTURE_MAIL_1

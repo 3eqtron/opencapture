@@ -1,0 +1,4 @@
+
+cd F:\maarch\MaarchCapture\
+
+C:\xampp\php\php.exe MaarchCapture.php init -BatchName MAARCH_MAIL_TO_MC

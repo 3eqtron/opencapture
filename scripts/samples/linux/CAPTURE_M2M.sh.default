@@ -7,3 +7,13 @@ php MaarchCapture.php init -BatchName MAARCH_REST_WS -WorkflowName M2M_REPLY
 php MaarchCapture.php init -BatchName MAARCH_REST_WS -WorkflowName M2M_NOTIFICATION
 # php MaarchCapture.php init -BatchName TELEGRAM_OEM_DGPN
 
+if [ $? -eq 0 ]
+then
+  echo "ok"
+  exit 0
+else
+  echo "ko"
+  exit 1
+fi
+exit 0
+

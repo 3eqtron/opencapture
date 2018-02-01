@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MailCapture>
+    <formatters>
+        <formatter name="date" script="scripts/formatters.php" func="format_mail_date"/>
+    </formatters>
+    <accounts>
+        <account name="account_1" >
+            <mailbox>{imap.gmail.com:993/imap/ssl/novalidate-cert}maarch_capture</mailbox>
+            <username>mail@address.com</username>
+            <password>APassw0rd</password>
+        </account>
+    </accounts>
+    <messagerules>
+        <messagerule name="from_maarch" info="fromaddress" action="delete">false</messagerule>
+    </messagerules>
+    <messageoutputs >
+        <messageoutput name="doc_date" info="date" formatter="date"/>
+        <messageoutput name="type_id">108</messageoutput>
+        <messageoutput name="destination">COU</messageoutput>
+        <messageoutput name="subject" info="subject" />
+        <messageoutput name="fromaddress" info="fromaddress"/>
+        <messageoutput name="frompersonal" info="from[0]/personal" />
+        <messageoutput name="toaddress" info="toaddress" />
+        <messageoutput name="xpriority" info="xpriority" />
+        <messageoutput name="message_id" info="message_id" />
+        <messageoutput name="ccaddress" info="ccaddress" />
+    </messageoutputs>
+    <attachmentrules>
+        <attachmentrule name="images" info="format" op="in">gif jpg jpeg png</attachmentrule>
+        <attachmentrule name="application" info="format" op="in">pdf msword vnd.oasis.opendocument.text octet-stream</attachmentrule>
+    </attachmentrules>
+    <attachmentoutputs mode="attachment">
+        <attachmentoutput name="filename" info="dparameters[filename]"/>
+        <attachmentoutput name="description" info="description"/>
+    </attachmentoutputs>
+</MailCapture>

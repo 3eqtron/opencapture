@@ -1,0 +1,5 @@
+files/
+config/Capture.xml
+*.log
+*.sh
+*.xml

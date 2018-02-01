@@ -360,7 +360,7 @@ class Capture
         
         # TO DO : manage transactions on steps to rollback to previous valide state by not saving batch
         $this->Batch->save();
-        die();
+        exit(1);
     }
 
     #**********************************************************************

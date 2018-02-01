@@ -1,0 +1,14 @@
+#!/bin/sh
+
+cd /opt/maarch/MaarchCapture/
+php MaarchCapture.php init -BatchName MAARCH_CI_MAIL
+
+if [ $? -eq 0 ]
+then
+  echo "ok"
+  exit 0
+else
+  echo "ko"
+  exit 1
+fi
+exit 0
