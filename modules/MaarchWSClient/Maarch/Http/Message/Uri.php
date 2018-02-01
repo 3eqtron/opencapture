@@ -47,7 +47,7 @@ class Uri
     /**
      * @var integer The port
      */
-    protected $port = 80;
+    protected $port;
 
     /**
      * @var string The path

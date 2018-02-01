@@ -55,14 +55,18 @@ class StreamClient
                 'header'  => $headers,
                 'content' => $body ? $request->getBody()->getContents() : null,
                 'ignore_errors' => true,
-                'timeout' => 30
+                'timeout' => 30,
+            ),
+            'ssl' => array(
+                'verify_peer'       => false,
+                'verify_peer_name'  => false
             )
         );
 
         $context = stream_context_create($opts);
 
         // Get response
-        $this->socket = fopen((string) $request->getUri(), 'r', false, $context);       
+        $this->socket = fopen((string) $request->getUri(), 'r', false, $context);
     }
 
     /**
