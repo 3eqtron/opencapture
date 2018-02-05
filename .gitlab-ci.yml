@@ -15,7 +15,7 @@ before_script:
   - apt-get update > /dev/null
   - apt-get install apt-utils -yqq > /dev/null
   - bash ci/docker_install_php.sh > /dev/null
-  - bash ci/docker_install_maarchcourrier.sh > /dev/null
+  - #bash ci/docker_install_maarchcourrier.sh > /dev/null
   - bash ci/docker_install_mail_server.sh > /dev/null
   - bash ci/send_simple_mail.sh > /dev/null
 
