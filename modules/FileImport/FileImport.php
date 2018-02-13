@@ -9,7 +9,7 @@ class FileImport
     private $MoveDirectory;
     private $Recursive = false;
     private $CreateFolders = false;
-    private $Extensions = array();
+    private $Extensions = '';
     private $NbMaxFoldersToImport = 0;
     private $DeleteSubFolders = false;
     private $SubFoldersToDel = array();
@@ -31,7 +31,7 @@ class FileImport
         $MoveDirectory=false,
         $Recursive=false,
         $CreateFolders=false,
-        $Extensions=array(),
+        $Extensions='',
         $NbMaxFoldersToImport = 0,
         $DeleteSubFolders = false
     ) { 
@@ -131,9 +131,18 @@ class FileImport
             
             /* If extensions filtered, check extension
             ********************************************************************************/
+            $extArr = array();
+            if (
+            	is_string($this->Extensions) &&
+            	isset($this->Extensions) && 
+            	$this->Extensions <> ''
+            ) {
+            	$extArr = explode(' ', strtolower($this->Extensions));
+            }
             $entry_ext = substr(strrchr($entry_path , '.'), 1);
-            if(count($this->Extensions) > 0) {
-                if(!in_array($entry_ext, $this->Extensions)) {
+            if(count($extArr) > 0) {
+                if(!in_array(strtolower($entry_ext), $extArr)) {
+                	echo 'discard ' . $entry_path . PHP_EOL; 
                     $this->discard(
                         $entry_path,
                         $entry_name
