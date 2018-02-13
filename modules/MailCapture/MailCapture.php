@@ -883,7 +883,12 @@ class MailCapture
             if($value != $test) $applies = true;
             break;
         case "in":
-            if(in_array($value, explode(' ', $test))) $applies = true;
+            if(in_array($value, explode(' ', $test))) {
+                $applies = true;
+                var_dump($test);
+                var_dump($value);
+                echo 'iiiiiiiiiiccciiiiiii';
+            }
             break;
         case "notin":
             if(!in_array(strtolower($value), explode(' ', strtolower($test)))) $applies = true;

@@ -15,12 +15,12 @@ before_script:
   - apt-get update > /dev/null
   - apt-get install apt-utils -yqq > /dev/null
   - bash ci/docker_install_php.sh > /dev/null
-  - bash ci/docker_install_maarchcourrier.sh > /dev/null
+# - bash ci/docker_install_maarchcourrier.sh > /dev/null
   - bash ci/docker_install_mail_server.sh > /dev/null
   - bash ci/send_simple_mail.sh > /dev/null
 
-job_php-7.0:
-  image: php:7.0-apache
+job_php-7.1:
+  image: php:7.1-apache
   stage: test
   script:
     - mkdir -p /opt/maarch/
