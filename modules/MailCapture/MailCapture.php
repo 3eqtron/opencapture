@@ -1200,8 +1200,11 @@ class MailCapture
                     # Replace document source if HTML found after PLAIN
                     @unlink($Document->path);
 
+                    $subject = $Document->getMetadata("subject");
                     $fromaddress = $Document->getMetadata("fromaddress");
                     $doc_date = $Document->getMetadata("doc_date");
+                    $toaddress = $Document->getMetadata("toaddress");
+                    $ccaddress = $Document->getMetadata("ccaddress");
 
                     libxml_use_internal_errors(true);
                     
@@ -1209,12 +1212,26 @@ class MailCapture
                     $doc->loadHTMLFile($part->filepath);
                     $body = $doc->getElementsByTagName('body');
                     if ($this->addHeaderInMailContent) {
-                        $metadatas_doc_date= $doc->createElement("p", "");
+                        $metadatas_doc_date = $doc->createElement("p", "");
                         $body->item(0)->insertBefore($metadatas_doc_date, $body->item(0)->firstChild);
-                        $metadatas_doc_date= $doc->createElement("div", "Re&ccedil;u le : ".$doc_date);
+
                         $body->item(0)->insertBefore($metadatas_doc_date, $body->item(0)->firstChild);
-                        $metadatas_fromaddress = $doc->createElement("div", "Envoy&eacute; par : ".$fromaddress);
+
+                        $metadatas_ccaddress = $doc->createElement("div", "Cc        : ".$ccaddress);
+                        $body->item(0)->insertBefore($metadatas_ccaddress, $body->item(0)->firstChild);
+
+                        $metadatas_toaddress = $doc->createElement("div", "Pour      : ".$toaddress);
+                        $body->item(0)->insertBefore($metadatas_toaddress, $body->item(0)->firstChild);
+
+                        $metadatas_doc_date = $doc->createElement("div",  "Date      : ".$doc_date);
+                        $body->item(0)->insertBefore($metadatas_doc_date, $body->item(0)->firstChild);
+
+                        $metadatas_fromaddress= $doc->createElement("div","De        : ".$fromaddress);
                         $body->item(0)->insertBefore($metadatas_fromaddress, $body->item(0)->firstChild);
+
+                        $metadatas_subject = $doc->createElement("div",    "Objet    : ".$subject);
+                        $body->item(0)->insertBefore($metadatas_subject, $body->item(0)->firstChild);
+
                     }
                     $doc->saveHTMLFile($part->filepath);
 
