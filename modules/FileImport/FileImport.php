@@ -1,20 +1,19 @@
 <?php
 
-class FileImport
-    extends DOMXPath
+class FileImport extends DOMXPath
 {
     private $Batch;
-    private $Target = "File";
-    private $Action = "none";
+    private $Target               = "File";
+    private $Action               = "none";
     private $MoveDirectory;
-    private $Recursive = false;
-    private $CreateFolders = false;
-    private $Extensions = '';
+    private $Recursive            = false;
+    private $CreateFolders        = false;
+    private $Extensions           = '';
     private $NbMaxFoldersToImport = 0;
-    private $DeleteSubFolders = false;
-    private $SubFoldersToDel = array();
+    private $DeleteSubFolders     = false;
+    private $SubFoldersToDel      = array();
     
-    function __construct()
+    public function __construct()
     {
         $this->Batch = $_SESSION['capture']->Batch;
         $Config = new DOMDocument();
@@ -24,25 +23,27 @@ class FileImport
         parent::__construct($Config);
     }
     
-    function ImportFiles(
+    public function ImportFiles(
         $Directory,
-        $Target='File',
-        $Action='none',
-        $MoveDirectory=false,
-        $Recursive=false,
-        $CreateFolders=false,
-        $Extensions='',
+        $Target = 'File',
+        $Action = 'none',
+        $MoveDirectory = false,
+        $Recursive = false,
+        $CreateFolders = false,
+        $Extensions = '',
         $NbMaxFoldersToImport = 0,
-        $DeleteSubFolders = false
-    ) { 
-        $this->Target = $Target;
-        $this->Action = $Action;
-        $this->MoveDirectory = $MoveDirectory;
-        $this->Recursive = $Recursive;
-        $this->CreateFolders = $CreateFolders;
-        $this->Extensions = $Extensions;
+        $DeleteSubFolders = false,
+        $fileNameStructure = ""
+    ) {
+        $this->Target               = $Target;
+        $this->Action               = $Action;
+        $this->MoveDirectory        = $MoveDirectory;
+        $this->Recursive            = $Recursive;
+        $this->CreateFolders        = $CreateFolders;
+        $this->Extensions           = $Extensions;
         $this->NbMaxFoldersToImport = $NbMaxFoldersToImport;
-        $this->DeleteSubFolders = $DeleteSubFolders;
+        $this->DeleteSubFolders     = $DeleteSubFolders;
+        $this->fileNameStructure    = $fileNameStructure;
         
         $_SESSION['capture']->logEvent(
             "Scanning directory $Directory for file import..."
@@ -52,7 +53,7 @@ class FileImport
             $_SESSION['capture']->sendError("$Directory not exists");
         }
         
-        $result = 
+        $result =
             $this->ScanDirectory(
                 $Directory,
                 $this->Batch
@@ -71,7 +72,7 @@ class FileImport
         return $result;
     }
 
-    function ScanDirectory(
+    public function ScanDirectory(
         $Directory,
         $Parent
     ) {
@@ -80,7 +81,7 @@ class FileImport
         ********************************************************************************/
         $dirhdl = opendir($Directory);
         
-        if(!$dirhdl) {
+        if (!$dirhdl) {
             $_SESSION['capture']->logEvent(
                 "Unable to open directory '$Directory' !", 2
             );
@@ -90,11 +91,11 @@ class FileImport
             );
         }
         
-        if($this->CreateFolders) {
+        if ($this->CreateFolders) {
             $_SESSION['capture']->logEvent(
                 "Adding Folder with path '$Directory'"
             );
-            $Container = 
+            $Container =
                 $Parent->addFolder(
                     $Directory
                 );
@@ -103,18 +104,19 @@ class FileImport
         }
         
         $nbDir = 0;
-        while($entry_name = readdir($dirhdl)) {
+        while ($entry_name = readdir($dirhdl)) {
             $entry_path = $Directory  . DIRECTORY_SEPARATOR . $entry_name;
             
             /* not a file or sub folder
             ********************************************************************************/
-            if($entry_name == '.' || $entry_name == '..') 
+            if ($entry_name == '.' || $entry_name == '..') {
                 continue;
+            }
             
             /* sub folder, process recursively if requested
             ********************************************************************************/
-            if(is_dir($entry_path)) {
-                if($this->Recursive) {
+            if (is_dir($entry_path)) {
+                if ($this->Recursive) {
                     $nbDir++;
                     if ($nbDir <= $this->NbMaxFoldersToImport) {
                         array_push($this->SubFoldersToDel, $entry_path);
@@ -133,16 +135,16 @@ class FileImport
             ********************************************************************************/
             $extArr = array();
             if (
-            	is_string($this->Extensions) &&
-            	isset($this->Extensions) && 
-            	$this->Extensions <> ''
+                is_string($this->Extensions) &&
+                isset($this->Extensions) &&
+                $this->Extensions <> ''
             ) {
-            	$extArr = explode(' ', strtolower($this->Extensions));
+                $extArr = explode(' ', strtolower($this->Extensions));
             }
-            $entry_ext = substr(strrchr($entry_path , '.'), 1);
-            if(count($extArr) > 0) {
-                if(!in_array(strtolower($entry_ext), $extArr)) {
-                	echo 'discard ' . $entry_path . PHP_EOL; 
+            $entry_ext = substr(strrchr($entry_path, '.'), 1);
+            if (count($extArr) > 0) {
+                if (!in_array(strtolower($entry_ext), $extArr)) {
+                    echo 'discard ' . $entry_path . PHP_EOL;
                     $this->discard(
                         $entry_path,
                         $entry_name
@@ -167,38 +169,46 @@ class FileImport
                 "Adding ".$this->Target." with source '$entry_path'"
             );
             
-            switch($this->Target) {
+            switch ($this->Target) {
                 case 'Document':
-                    $Content = 
-    					$Container->addDocument(
-    						$entry_path
-    					);
+                    $Content =
+                        $Container->addDocument(
+                            $entry_path
+                        );
                     break;
                     
                 case 'File':
                 default:
-                    $Content = 
-    					$Container->addFile(
-    						$entry_path
-    					);
+                    $Content =
+                        $Container->addFile(
+                            $entry_path
+                        );
                     break;
             }
-			if (!$Content) {
-				//do nothing ! The resource will be processed next batch
-			} else {
-				$this->discard($entry_path, $entry_name);
-			}
+            if (!$Content) {
+                //do nothing ! The resource will be processed next batch
+            } else {
+                $this->discard($entry_path, $entry_name);
+                if (!empty($this->fileNameStructure)) {
+                    preg_match_all('/(?<=\[)(.*?)(?=\])/m', $this->fileNameStructure, $matches, PREG_PATTERN_ORDER);
+                    $pathInfo       = pathinfo($entry_name);
+                    $filenameValues = explode("_", $pathInfo['filename']);
+                    foreach ($filenameValues as $key => $value) {
+                        $Content->setMetadata($matches[0][$key], $value);
+                    }
+                    $Content->setMetadata('extension', $pathInfo['extension']);
+                }
+            }
         }
-
     }
 
-    function discard(
+    public function discard(
         $entry_path,
         $entry_name
     ) {
         /********************************************************************************
         ** Original File action
-        ********************************************************************************/			
+        ********************************************************************************/
         switch ($this->Action) {
         case 'move':
             $_SESSION['capture']->logEvent(
@@ -218,7 +228,6 @@ class FileImport
         default:
             // Nothing
         }
-
     }
 
     /**
@@ -227,7 +236,7 @@ class FileImport
      * @param  $delay
      * @param  $pointer position in the file
      */
-    function isCompleteFile($file, $delay=200, $pointer=0)
+    public function isCompleteFile($file, $delay = 200, $pointer = 0)
     {
         if ($file == null) {
             return false;
@@ -247,5 +256,4 @@ class FileImport
             return $this->isCompleteFile($file, $delay, $currentPos);
         }
     }
-
 }
