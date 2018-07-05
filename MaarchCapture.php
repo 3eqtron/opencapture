@@ -211,6 +211,19 @@ case 'continue':
     } catch (MissingArgumentError $e) {
         die($e->getMessage());
     }
+
+    /******************************************************************************
+    **  LOAD CAPTURE APPLICATION
+    ******************************************************************************/
+    echo "Instanciate new Capture processor..." . PHP_EOL;
+    if (file_exists("config/".$ConfigName.".xml")) {
+        $Capture = new Capture($ConfigName);
+    } else {
+        die($ConfigName." not found !". PHP_EOL);
+    }   
+    
+    # Store in session for modules that will acces through requests
+    $_SESSION['capture'] = $Capture;
     
     #echo "MaarchCapture continue: " . print_r($commandArgs,true) . PHP_EOL;
     
