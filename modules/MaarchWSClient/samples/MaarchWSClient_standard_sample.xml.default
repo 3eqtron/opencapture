@@ -169,6 +169,18 @@
                     </return>
                 </call>
             </loop>
+            <call name="/contacts" method="POST">
+                <argument type="entity" name="firstname">Sylvester</argument>
+                <argument type="entity" name="lastname">Stallone</argument>
+                <argument type="entity" name="contactType">106</argument>
+                <argument type="entity" name="contactPurposeId">3</argument>
+                <argument type="entity" name="isCorporatePerson">N</argument>
+                <argument type="entity" name="email">sylvester@stallone.com</argument>
+                <return>
+                    <contactId/>
+                    <addressId/>
+                </return>
+            </call>
         </loop>
     </process>
     <!-- SOAP SAMPLES -->
