@@ -16,10 +16,6 @@
                     <input name="MoveDirectory">/opt/maarch/MaarchCapture/files/TEST_IMPORT/backup/</input>
                     <input name="Recursive">0</input>
                     <input name="CreateFolders">0</input>
-                    <input name="Extensions"></input>
-                    <input name="NbMaxFoldersToImport">0</input>
-                    <input name="DeleteSubFolders">false</input>
-                    <input name="fileNameStructure">[destination]_[barcode]</input><!-- extension is automatically set in extension metadata -->
                 </step>
                 <!-- REST SAMPLE -->
 
