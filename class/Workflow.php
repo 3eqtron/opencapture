@@ -55,6 +55,27 @@ class Workflow
         $id,
         $directory = null
     ) {
+        $source = file_get_contents($directory . DIRECTORY_SEPARATOR . $id . '.xml');
+
+        $source = str_replace("&nbsp;"," ",$source);
+        $source = str_replace("&eacute;", "e",$source);
+        $source = str_replace("&egrave;","e",$source);
+        $source = str_replace("&ecirc;","e",$source);
+        $source = str_replace("&agrave;","a",$source);
+        $source = str_replace("&acirc;","a",$source);
+        $source = str_replace("&icirc;","i",$source);
+        $source = str_replace("&ocirc;","o",$source);
+        $source = str_replace("&ucirc;","u",$source);
+        $source = str_replace("&acute;","",$source);
+        $source = str_replace("&deg;","o",$source);
+        $source = str_replace("&rsquo;", "'",$source);
+
+        unlink($directory . DIRECTORY_SEPARATOR . $id . '.xml');
+
+        $fp = fopen($directory . DIRECTORY_SEPARATOR . $id . '.xml', 'a');
+        fwrite($fp, $source);
+        fclose($fp);
+
         parent::load($directory . DIRECTORY_SEPARATOR . $id . '.xml');
         $this->XPath = new DOMXPath($this);
     }
