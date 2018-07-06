@@ -1,16 +1,16 @@
 #!/bin/bash
 
 # Chemin de maarch_capture
-MAARCH_CAPTURE_PATH='/produit/maarch/maarch_scripts/maarch_capture/'
+MAARCH_CAPTURE_PATH='/opt/maarch/MaarchCapture/'
 
 # Nom de votre fichier xml de capture (ex : Capture.xml)
-CAPTURE_CONFIG_NAME='Capture_miviludes'
+CAPTURE_CONFIG_NAME='Capture'
 
 # Nom du batch à reprendre
-BATCH_NAME_TARGET='MAIL_miviludes_1'
+BATCH_NAME_TARGET='MAARCH_MAIL_TO_MC'
 
 # Chemin des fichiers générés de march_capture
-FILES_TO_SCAN_PATH='/exploit/maarch/maarch_capture/files/miviludes/'
+FILES_TO_SCAN_PATH='/opt/maarch/MaarchCapture/files/'
 
 # Date à laquelle commencer la reprise
 START_DATE='2018-06-27'
