@@ -13,33 +13,13 @@
     <!-- REST SAMPLES -->
     <process name="MaarchRestWSProcessFromScan">
         <loop xpath="/Batch/Documents/Document">
-       	<!--loop xpath="/Batch/Documents/Document[not(Metadata/error)]"--> <!-- sample management if no error -->
-       	<!--loop xpath="/Batch/Documents/Document[Metadata/error=1]"--> <!-- sample management if error exists -->
-            <call name="/res" method="POST">
+            <call name="/resources" method="POST">
                 <argument type="entity" name="encodedFile" eval="base64_encode(file_get_contents($Element-&gt;path))"/>
-                <argument type="entity" name="data">
-                  <column>type_id</column>
-                  <value>108</value>
-                  <type>integer</type>
-                </argument>
-                <argument type="entity" name="data">
-                  <column>destination</column>
-                  <value>COU</value>
-                  <type>string</type>
-                </argument>
-                <argument name="data">
-                    <column>priority</column>
-                    <value>2</value>
-                    <type>integer</type>
-                </argument>
-                <argument type="entity" name="data">
-                  <column>scan_batch</column>
-                  <value>SVE</value>
-                  <type>string</type>
-                </argument>
-                <argument type="entity" name="collId">letterbox_coll</argument>
-                <argument type="entity" name="table">res_letterbox</argument>
-                <argument type="entity" name="fileFormat" attribute="extension"/>
+                <argument type="entity" name="type_id">108</argument>
+                <argument type="entity" name="destination">COU</argument>
+                <argument type="entity" name="priority">2</argument>
+                <argument type="entity" name="category_id">incoming</argument>
+                <argument type="entity" name="format" attribute="extension"/>
                 <argument type="entity" name="status">INIT</argument>
                 <return>
                     <resId metadata="resId" />
@@ -49,92 +29,26 @@
     </process>
     <process name="MaarchRestWSProcessFromMail">
         <loop xpath="/Batch/Documents/Document">
-            <call name="/res" method="POST">
+            <call name="/resources" method="POST">
                 <argument type="entity" name="encodedFile" eval="base64_encode(file_get_contents($Element-&gt;path))"/>
-                <argument type="entity" name="data">
-                  <column>subject</column>
-                  <value metadata="subject" />
-                  <type>string</type>
-                </argument>
-                <argument type="entity" name="data">
-                  <column>doc_date</column>
-                  <value metadata="doc_date" />
-                  <type>date</type>
-                </argument>
-                <argument type="entity" name="data">
-                  <column>type_id</column>
-                  <value metadata="type_id"/>
-                  <type>integer</type>
-                </argument>
-                <argument type="entity" name="data">
-                  <column>destination</column>
-                  <value metadata="destination"/>
-                  <type>string</type>
-                </argument>
-                <argument type="entity" name="data">
-                  <column>initiator</column>
-                  <value metadata="destination"/>
-                  <type>string</type>
-                </argument>
-                <argument type="entity" name="data">
-                  <column>priority</column>
-                  <value>2</value>
-                  <type>integer</type>
-                </argument>
-                <argument type="entity" name="data">
-                  <column>custom_t10</column>
-                  <value xvalue="./Metadata/fromaddress" />
-                  <type>string</type>
-                </argument>
-                <argument type="entity" name="data">
-                  <column>custom_t11</column>
-                  <value xvalue="./Metadata/toaddress" />
-                  <type>string</type>
-                </argument>
-                <argument type="entity" name="data">
-                  <column>custom_t12</column>
-                  <value xvalue="./Metadata/ccaddress" />
-                  <type>string</type>
-                </argument>
-                <argument type="entity" name="data">
-                  <column>source</column>
-                  <value xvalue="./Metadata/message_id" />
-                  <type>string</type>
-                </argument>
-                <argument type="entity" name="collId">letterbox_coll</argument>
-                <argument type="entity" name="table">res_letterbox</argument>
-                <argument type="entity" name="fileFormat" attribute="extension"/>
+                <argument type="entity" name="format" attribute="extension"/>
                 <argument type="entity" name="status">INIT</argument>
+                <argument type="entity" name="type_id" metadata="type_id"/>
+                <argument type="entity" name="category_id">incoming</argument>
+                <argument type="entity" name="subject" metadata="subject"/>
+                <argument type="entity" name="doc_date" metadata="doc_date"/>
+                <argument type="entity" name="destination" metadata="destination"/>
+                <argument type="entity" name="initiator" metadata="destination"/>
+                <argument type="entity" name="priority">2</argument>
+                <argument type="entity" name="custom_t10" xvalue="./Metadata/fromaddress"/>
+                <argument type="entity" name="custom_t11" xvalue="./Metadata/toaddress"/>
+                <argument type="entity" name="custom_t12" xvalue="./Metadata/ccaddress"/>
+                <argument type="entity" name="source" xvalue="./Metadata/message_id"/>
+                <argument type="entity" name="nature_id">email</argument>
+                <argument type="entity" name="exp_contact_id" xvalue="./Metadata/fromaddress"/>
+                <argument type="entity" name="address_id" xvalue="./Metadata/fromaddress"/>
                 <return>
                     <resId metadata="resId" />
-                </return>
-            </call>
-            <call name="/resExt" method="POST">
-                <argument type="entity" name="resId" metadata="resId"/>
-                <argument type="entity" name="data">
-                    <column>nature_id</column>
-                    <value>email</value>
-                    <type>string</type>
-                </argument>
-                <argument type="entity" name="data">
-                    <column>category_id</column>
-                    <value>incoming</value>
-                    <type>string</type>
-                </argument>
-                <argument type="entity" name="data">
-                    <column>exp_contact_id</column>
-                    <value xvalue="./Metadata/fromaddress"/>
-                    <type>integer</type>
-                </argument>
-                <argument type="entity" name="data">
-                    <column>address_id</column>
-                    <value xvalue="./Metadata/fromaddress"/>
-                    <type>integer</type>
-                </argument>
-                <argument type="entity" name="table">mlb_coll_ext</argument>
-                <argument type="entity" name="resTable">res_letterbox</argument>
-                <return>
-                    <status metadata="status" />
                 </return>
             </call>
             <loop xpath="Attachments/Attachment">
