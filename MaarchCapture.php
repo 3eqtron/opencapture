@@ -224,10 +224,6 @@ case 'continue':
     
     # Store in session for modules that will acces through requests
     $_SESSION['capture'] = $Capture;
-<<<<<<< MaarchCapture.php
-    
-=======
->>>>>>> MaarchCapture.php
     
     #echo "MaarchCapture continue: " . print_r($commandArgs,true) . PHP_EOL;
     
@@ -417,4 +413,4 @@ $Result = $Capture->processWorkflow($inputArgs);
     throw new Exception($errmsg);
 }*/
 
-?>
+?>
