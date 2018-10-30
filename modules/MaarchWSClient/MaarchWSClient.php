@@ -685,13 +685,7 @@ class MaarchWSClient extends DOMXPath
                 $dmpfile = $this->Batch->directory . "/" . $Element->id . "__MaarchWSClient__"
                     . str_replace(DIRECTORY_SEPARATOR, "#", $serviceName) . "__return.log";
                 $f = fopen($dmpfile, "a");
-                if (isset($entity['errors'][0])) {
-                    $errorDetails = $entity['errors'][0];
-                    fwrite($f, $errorDetails);
-                } else {
-                    fwrite($f, print_r($entity, true));
-                }
-                
+                fwrite($f, print_r($entity, true));
                 fclose($f);
                 if ($this->CatchError == "false") {
                     $_SESSION['capture']->sendError(

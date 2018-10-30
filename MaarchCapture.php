@@ -225,7 +225,6 @@ case 'continue':
     # Store in session for modules that will acces through requests
     $_SESSION['capture'] = $Capture;
     
-    
     #echo "MaarchCapture continue: " . print_r($commandArgs,true) . PHP_EOL;
     
     $BatchId = $commandArgs['command']['opts']['BatchId'];
