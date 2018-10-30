@@ -75,7 +75,11 @@ class MailCapture
     ) {
         $errors = array();
         $errors = imap_errors();
-        $num_errors = count($errors);
+        if (!empty($errors)) {
+            $num_errors = count($errors);
+        } else {
+            $num_errors = 0;
+        }
         $actual_errors = 0;
         $clearError = false;
         for($i=0; $i<$num_errors; $i++) {

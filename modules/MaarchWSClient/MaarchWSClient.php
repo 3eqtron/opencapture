@@ -23,7 +23,7 @@ class MaarchWSClient extends DOMXPath
             $Config->load(
                 __DIR__ . DIRECTORY_SEPARATOR . "MaarchWSClient.xml"
             );
-            parent::__construct($Config); 
+            parent::__construct($Config);
         }
     }
 
@@ -432,7 +432,7 @@ class MaarchWSClient extends DOMXPath
             }
 
             if (
-                isset($argValue['value']) && 
+                isset($argValue['value']) &&
                 is_array($argValue['value']) &&
                 empty($argValue['value'])
             ) {
@@ -534,7 +534,7 @@ class MaarchWSClient extends DOMXPath
             $argContentValue = $this->parseArgument($argContent, $Element);
             
             $argContentHasValue = $argContentIsArray = false;
-            if (count($argValue[$argContentName]) > 0) {
+            if (!empty($argValue[$argContentName]) && count($argValue[$argContentName]) > 0) {
                 $argContentHasValue = true;
             }
             if (isset($argValue[$argContentName][0])) {
@@ -688,7 +688,6 @@ class MaarchWSClient extends DOMXPath
                 if (isset($entity['errors'][0])) {
                     $errorDetails = $entity['errors'][0];
                     fwrite($f, $errorDetails);
-                    //var_dump($errorDetails);
                 } else {
                     fwrite($f, print_r($entity, true));
                 }

@@ -1,7 +1,6 @@
 <?php
 
-class Capture
-    extends DOMXPath
+class Capture extends DOMXPath
 {
     public $Batch;
     public $Workflow;
@@ -16,13 +15,13 @@ class Capture
         $Config = new DOMDocument();
         $_SESSION['CaptureName'] = $ConfigName.".xml";
         $Config->load("config/".$ConfigName.".xml");
-        parent::__construct($Config);        
+        parent::__construct($Config);
     }
     
     #**********************************************************************
     #
-    #                   PUBLIC METHODS FOR BATCH CONTROL 
-    # 
+    #                   PUBLIC METHODS FOR BATCH CONTROL
+    #
     #**********************************************************************
     
     #**********************************************************************
@@ -47,14 +46,14 @@ class Capture
         
         $Batch = new Batch();
         
-        if(!$BatchId = (string)$this->BatchConfig->getAttribute('id'))
+        if (!$BatchId = (string)$this->BatchConfig->getAttribute('id')) {
             $BatchId = 'B' . date("U");
-        else {
+        } else {
             $l = preg_match_all("/{[^{]*}/", $BatchId, $tags);
-            for($i=0, $l=count($tags[0]); $i<$l; $i++) {
+            for ($i=0, $l=count($tags[0]); $i<$l; $i++) {
                 $tag = $tags[0][$i];
                 $instr = substr($tag, 1, strlen($tag) - 2);
-                switch($instr) {
+                switch ($instr) {
                 case 'timestamp':
                     $val = date("U");
                     break;
@@ -73,7 +72,7 @@ class Capture
                 }
                 $BatchId = str_replace($tag, $val, $BatchId);
             }
-            $forbiddenChars = array_merge(array_map('chr', range(0,31)), array(" ", "<", ">", ":", '"', "/", "\\", "|", "?", "*"));
+            $forbiddenChars = array_merge(array_map('chr', range(0, 31)), array(" ", "<", ">", ":", '"', "/", "\\", "|", "?", "*"));
             $BatchId = 'B' . str_replace($forbiddenChars, "_", $BatchId);
         }
 
@@ -85,7 +84,7 @@ class Capture
 
                 return false;
             } else {
-               file_put_contents($lockfile, $BatchId);
+                file_put_contents($lockfile, $BatchId);
             }
         }
         
@@ -123,8 +122,8 @@ class Capture
     
     #**********************************************************************
     #
-    #                 PUBLIC METHODS FOR WORKFLOW CONTROL 
-    # 
+    #                 PUBLIC METHODS FOR WORKFLOW CONTROL
+    #
     #**********************************************************************
     #**********************************************************************
     # Initialize a workflow for a Batch
@@ -134,7 +133,7 @@ class Capture
     ) {
         //echo "Capture::initWorkflow($WorkflowName)" . PHP_EOL;
              
-        $this->loadWorkflowConfig($WorkflowName); 
+        $this->loadWorkflowConfig($WorkflowName);
         
         $WorkflowDirectory = (string)$this->Batch->directory;
         $WorkflowId = "W" . substr($this->Batch->id, 1);
@@ -148,7 +147,7 @@ class Capture
             $logsParam['logMode'] = "default";
         }
 
-        if(!$WorkflowLogDir = (string)$this->WorkflowConfig->getAttribute('log')) {
+        if (!$WorkflowLogDir = (string)$this->WorkflowConfig->getAttribute('log')) {
             $WorkflowLogDir = $WorkflowDirectory;
         }
         $WorkflowLog = $WorkflowLogDir . DIRECTORY_SEPARATOR . $WorkflowId . '.log';
@@ -179,7 +178,7 @@ class Capture
     #**********************************************************************
     # Load a workflow with Batch
     #**********************************************************************
-    public function loadWorkflow() 
+    public function loadWorkflow()
     {
         //echo "Capture::loadWorkflow()" . PHP_EOL;
        
@@ -194,17 +193,17 @@ class Capture
         
         $this->Workflow = $Workflow;
         
-        $this->loadWorkflowConfig($WorkflowName); 
+        $this->loadWorkflowConfig($WorkflowName);
         
         return $Workflow;
     }
     
     #**********************************************************************
     # Process a batch workflow
-    #**********************************************************************    
-	public function processWorkflow(
+    #**********************************************************************
+    public function processWorkflow(
         $inputArgs = array()
-    ) {        
+    ) {
         //echo "Capture::processWorkflow()" . PHP_EOL;
         
         $this->Workflow->setStatus(
@@ -219,7 +218,7 @@ class Capture
         }
         
         $this->endWorkflow();
-	}
+    }
     
     public function endWorkflow()
     {
@@ -229,14 +228,12 @@ class Capture
         $CurrentBatchDirectory = $this->Batch->directory;
 
         if ($this->Workflow->status == MC_STATUS_ERROR) {
-            
-
             if (!is_dir($this->Batch->errorDirectory . DIRECTORY_SEPARATOR .  $this->Batch->id)) {
                 mkdir($this->Batch->errorDirectory . DIRECTORY_SEPARATOR .  $this->Batch->id, 0777);
             }
 
             $this->copyDir(
-                $CurrentBatchDirectory . DIRECTORY_SEPARATOR, 
+                $CurrentBatchDirectory . DIRECTORY_SEPARATOR,
                 $this->Batch->errorDirectory . DIRECTORY_SEPARATOR .  $this->Batch->id . DIRECTORY_SEPARATOR
             );
         }
@@ -253,8 +250,9 @@ class Capture
             }
         }
 
-        if($this->WorkflowConfig->getAttribute('debug') != 'true')
+        if ($this->WorkflowConfig->getAttribute('debug') != 'true') {
             $this->Batch->delete();
+        }
             
         die();
     }
@@ -271,18 +269,18 @@ class Capture
                     $copyIt = true;
                     // Si le dossier dans lequel on veut coller n'existe pas, on le cree
                     if (!is_dir($dirPaste)) {
-                        mkdir ($dirPaste, 0777);
+                        mkdir($dirPaste, 0777);
                     }
                     // S'il s'agit d'un dossier, on relance la fonction recursive
                     if (is_dir($dir2copy.$file) && $file != '..' && $file != '.') {
-                        $this->copyDir($dir2copy.$file.'/' , $dirPaste.$file.'/', $excludeExt);  
+                        $this->copyDir($dir2copy.$file.'/', $dirPaste.$file.'/', $excludeExt);
                     } elseif ($file != '..' && $file != '.') {
-                        if (count($excludeExt>0) && is_array($excludeExt)) {
+                        if (is_array($excludeExt) && count($excludeExt) > 0) {
                             $copyIt = true;
-                            foreach ($excludeExt as $key => $value) {
+                            foreach ($excludeExt as $value) {
                                 if (strtolower($value) == strtolower(pathinfo($dir2copy . $file, PATHINFO_EXTENSION))) {
                                     $copyIt = false;
-                                } 
+                                }
                             }
                         }
                         if ($copyIt) {
@@ -300,24 +298,25 @@ class Capture
         
     #**********************************************************************
     # Retrieve next workflow input names
-    #********************************************************************** 
-    public function getStepInputs($StepName) 
+    #**********************************************************************
+    public function getStepInputs($StepName)
     {
         $inputNames = array();
         
         $this->LoadStepConfig($StepName);
 
-        $inputConfigs = 
+        $inputConfigs =
             $this->query(
                 './input',
                 $this->StepConfig
             );
         $l = $inputConfigs->length;
-        for($i=0; $i<$l; $i++) {
+        for ($i=0; $i<$l; $i++) {
             $inputConfig = $inputConfigs->item($i);
             
-            if(!$inputName = $inputConfig->getAttribute('name'))
+            if (!$inputName = $inputConfig->getAttribute('name')) {
                 $inputName = (string)$i;
+            }
             $inputNames[] = $inputName;
         }
         return $inputNames;
@@ -325,7 +324,7 @@ class Capture
     
     #**********************************************************************
     # Log event in current step or workflow
-    #********************************************************************** 
+    #**********************************************************************
     public function logEvent(
         $message,
         $level = 0
@@ -338,7 +337,7 @@ class Capture
     
     #**********************************************************************
     # Trigger error on step/workflow
-    #********************************************************************** 
+    #**********************************************************************
     public function sendError(
         $message
     ) {
@@ -365,7 +364,7 @@ class Capture
 
     #**********************************************************************
     # Catch error on step/workflow
-    #********************************************************************** 
+    #**********************************************************************
     public function catchError(
         $message,
         $file = ''
@@ -389,7 +388,7 @@ class Capture
     
     #**********************************************************************
     # Process a batch workflow step
-    #********************************************************************** 
+    #**********************************************************************
     public function processStep(
         $StepName,
         $inputArgs = array()
@@ -420,9 +419,9 @@ class Capture
         
         # How to send information about Capture object, Batch and workflow to called module
         
-        switch($ModuleInterface) {
+        switch ($ModuleInterface) {
         case 'session_id':
-            # For executables and .NET modules, acces through session_id 
+            # For executables and .NET modules, acces through session_id
             #   with a look in COOKIE sess_<id>
             $inputs['session_id'] = session_id();
             break;
@@ -433,34 +432,36 @@ class Capture
         }
         
         // Input arguments
-        $inputConfigs = 
+        $inputConfigs =
             $this->query(
                 './input',
                 $this->StepConfig
             );
         $l = $inputConfigs->length;
-        for($i=0; $i<$l; $i++) {
+        for ($i=0; $i<$l; $i++) {
             $inputConfig = $inputConfigs->item($i);
             
-            if(!$inputName = $inputConfig->getAttribute('name'))
+            if (!$inputName = $inputConfig->getAttribute('name')) {
                 $inputName = (string)$i;
+            }
                 
-            if(isset($inputArgs[$inputName]))
+            if (isset($inputArgs[$inputName])) {
                 $inputValue = $inputArgs[$inputName];
-            else
+            } else {
                 $inputValue = $this->parseArgument($inputConfig);
+            }
                 
             $inputs[$inputName] = $inputValue;
         }
         
         // Ouptut
-        if($outputConfig = 
+        if ($outputConfig =
             $this->query(
                 './output',
                 $this->StepConfig
             )->item(0)
         ) {
-            $outputName = $outputConfig->getAttribute('name');   
+            $outputName = $outputConfig->getAttribute('name');
         } else {
             $outputName = false;
         }
@@ -473,13 +474,13 @@ class Capture
             "Starting step " . $StepName
         );
 
-        switch($ModuleType) {
+        switch ($ModuleType) {
         case 'class':
             require_once $ModuleSrc;
             $Module = new $ModuleName();
             $ReflectionClass = new ReflectionClass($Module);
             $ReflectionMethod = $ReflectionClass->getMethod($FuncName);
-            $output = 
+            $output =
                 $ReflectionMethod->invokeArgs(
                     $Module,
                     $inputs
@@ -488,7 +489,7 @@ class Capture
             
         case "script":
             require_once $ModuleSrc;
-            $output = 
+            $output =
                 call_user_func_array(
                     $FuncName,
                     $inputs
@@ -499,7 +500,7 @@ class Capture
             //TO DO
             exec(
                 escapeshellcmd($command),
-                $output, 
+                $output,
                 $StepResult
             );
             break;
@@ -513,12 +514,12 @@ class Capture
         );
         
         # Save batch XML
-        $this->Workflow->logEvent("Saving batch on disk...");        
+        $this->Workflow->logEvent("Saving batch on disk...");
         $starttime = microtime(true);
         $this->Batch->save();
         $endtime = microtime(true);
         $processtime = number_format(($endtime - $starttime), 3);
-        $this->Workflow->logEvent('Batch saved in ' .$processtime . ' seconds');      
+        $this->Workflow->logEvent('Batch saved in ' .$processtime . ' seconds');
         
         return $output;
     }
@@ -527,22 +528,25 @@ class Capture
         $arg
     ) {
         // Argument is an xpath query
-        if($arg->hasAttribute('xpath'))
+        if ($arg->hasAttribute('xpath')) {
             return
                 $this->Batch->query(
                     $arg->getAttribute('xpath')
                 );
+        }
                 
         // Argument is an xpath evaluation
-        if($arg->hasAttribute('xvalue')) {
+        if ($arg->hasAttribute('xvalue')) {
             $node =
                 $this->Batch->query(
                     $arg->getAttribute('xvalue')
                 )->item(0);
-            if($node && $node->nodeType == XML_ATTRIBUTE_NODE)
+            if ($node && $node->nodeType == XML_ATTRIBUTE_NODE) {
                 return (string)$node->value;
-            if($node && $node->nodeType == XML_ELEMENT_NODE)
+            }
+            if ($node && $node->nodeType == XML_ELEMENT_NODE) {
                 return (string)$node->nodeValue;
+            }
         }
         
         // Arg has content
@@ -550,33 +554,36 @@ class Capture
         $l = $argContents->length;
         
         // Arg has scalar value
-        if($l == 1 && (string)$arg->nodeValue)
+        if ($l == 1 && (string)$arg->nodeValue) {
             return (string)$arg->nodeValue;
+        }
         
         // Arg has multiple values
         $argValue = array();
-        for($i=0; $i<$l; $i++){
+        for ($i=0; $i<$l; $i++) {
             $argContent = $argContents->item($i);
-            if($argContent->nodeType != XML_ELEMENT_NODE) continue;
-            if(!$argContentName = $argContent->getAttribute('name'))
+            if ($argContent->nodeType != XML_ELEMENT_NODE) {
+                continue;
+            }
+            if (!$argContentName = $argContent->getAttribute('name')) {
                 $argContentName = (string)$i;
+            }
             
             $argContentValue = $this->parseArgument($argContent);
             $argValue[$argContentName] = $argContentValue;
         }
         return $argValue;
-
     }
     
     public function defaultWorkflow()
     {
-        $WorkflowConfig = 
+        $WorkflowConfig =
             $this->query(
                 ".//workflow",
                 $this->BatchConfig
             )->item(0);
             
-        if(!$WorkflowConfig) {
+        if (!$WorkflowConfig) {
             trigger_error("No workflow defined for batch");
             $this->Workflow->logEvent("No workflow defined for batch", 1);
         }
@@ -587,8 +594,8 @@ class Capture
     public function nextStep()
     {
         # Retrieve the last step initialized on workflow
-        if($lastStep = $this->Workflow->lastStep()) {
-            switch($lastStep->status) {
+        if ($lastStep = $this->Workflow->lastStep()) {
+            switch ($lastStep->status) {
             case  MC_STATUS_COMPLETED:
                 $StepXPath = './step[@name="'.$lastStep->name.'"]/following-sibling::step';
                 break;
@@ -601,39 +608,41 @@ class Capture
             case  MC_STATUS_RETRYING:
             default:
                 $StepXPath = './step[@name="'.$lastStep->name.'"]';
-            }   
+            }
         } else {
-            $StepXPath = './step'; 
+            $StepXPath = './step';
         }
         $nextStep = $this->query($StepXPath, $this->WorkflowConfig)->item(0);
         
-        if($nextStep)
+        if ($nextStep) {
             return $nextStep->getAttribute('name');
+        }
         
         return false;
     }
     
     #**********************************************************************
     #
-    #                PROTECTED METHODS FOR CONFIG CONTROL 
-    # 
+    #                PROTECTED METHODS FOR CONFIG CONTROL
+    #
     #**********************************************************************
     
     #**********************************************************************
     # Load batch configuration
-    #********************************************************************** 
+    #**********************************************************************
     public function loadBatchConfig(
         $BatchName
     ) {
-		//echo "Capture::loadBatchConfig($BatchName)" . PHP_EOL;
+        //echo "Capture::loadBatchConfig($BatchName)" . PHP_EOL;
         
-        $BatchConfig = 
+        $BatchConfig =
             $this->query(
                 "//batch[@name='".$BatchName."']"
             )->item(0);
             
-		if(!$BatchConfig)
-			die ("Unable to load batch definition $BatchName");
+        if (!$BatchConfig) {
+            die("Unable to load batch definition $BatchName");
+        }
             
         $this->BatchConfig = $BatchConfig;
         
@@ -642,19 +651,20 @@ class Capture
     
     #**********************************************************************
     # Load workflow configuration
-    #********************************************************************** 
+    #**********************************************************************
     public function loadWorkflowConfig(
         $WorkflowName
     ) {
         //echo "Capture::loadWorkflowConfig($WorkflowName)" . PHP_EOL;
-        $WorkflowConfig = 
+        $WorkflowConfig =
             $this->query(
                 ".//workflow[@name='".$WorkflowName."']",
                 $this->BatchConfig
             )->item(0);
         
-        if(!$WorkflowConfig)
-            die ("Undefined workflow '$WorkflowName'");
+        if (!$WorkflowConfig) {
+            die("Undefined workflow '$WorkflowName'");
+        }
                 
         $this->WorkflowConfig = $WorkflowConfig;
     }
@@ -667,13 +677,13 @@ class Capture
     ) {
         //echo "Capture::loadStepConfig($stepName)" . PHP_EOL;
         
-        $StepConfig = 
+        $StepConfig =
             $this->query(
                 './step[@name="'.$stepName.'"]',
                 $this->WorkflowConfig
             )->item(0);
         
-        if(!$StepConfig) {
+        if (!$StepConfig) {
             trigger_error("Undefined workflow step '$StepName'");
             $this->Workflow->logEvent("Undefined workflow step '$StepName'", 1);
         }
@@ -686,19 +696,19 @@ class Capture
     #**********************************************************************
     # Load module configuration
     #**********************************************************************
-	protected function loadModuleConfig(
+    protected function loadModuleConfig(
         $ModuleName
     ) {
-        $ModuleConfig = 
+        $ModuleConfig =
             $this->query(
                 '//module[@name="'.$ModuleName.'"]'
             )->item(0);
-        if(!$ModuleConfig)
-            die ("Unable to load module configuration with name '$ModuleName'");
+        if (!$ModuleConfig) {
+            die("Unable to load module configuration with name '$ModuleName'");
+        }
         
         $this->ModuleConfig = $ModuleConfig;
         
         return true;
     }
-    
 }
