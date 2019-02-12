@@ -1,0 +1,10 @@
+{
+    "require": {
+        "khanamiryan/qrcode-detector-decoder": "^1.0",
+        "setasign/fpdi-tcpdf": "^2.0.0",
+        "setasign/fpdf": "^1.8.1",
+        "setasign/fpdi-fpdf": "^2.0.0",
+        "setasign/fpdi-tfpdf": "^2.0.0"
+        
+    }
+}
