@@ -374,6 +374,14 @@ class MaarchWSClient extends DOMXPath
                 $arg,
                 $Element
             );
+
+            if (
+                isset($argValue['value']) &&
+                is_array($argValue['value']) &&
+                empty($argValue['value'])
+            ) {
+                $argValue['value'] = '';
+            }
             
             $argHasValue = $argIsArray = false;
             if (count($argValues[$argName]) > 0) {
