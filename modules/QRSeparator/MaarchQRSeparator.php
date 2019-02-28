@@ -84,13 +84,6 @@ class QRSeparator
             $num_file++;
         }
 
-        $files = glob(sys_get_temp_dir().'/*'); // get all file names
-        foreach ($files as $file) { // iterate files
-          if (is_file($file)) {
-              unlink($file);
-          } // delete file
-        }
-
         echo "End of process ...\n";
         $_SESSION['capture']->logEvent(
             "End of process ..."
@@ -99,7 +92,6 @@ class QRSeparator
 
     public function split_pdf($filename, $end_directory)
     {
-           
         $end_directory = $end_directory.'/';
         /*
          * Creation du repertoire split
@@ -146,7 +138,6 @@ class QRSeparator
 
     public function construct_pdf($split_directory, $end_directory = false)
     {
-
         $end_directory = $end_directory ? $end_directory : sys_get_temp_dir().'/';
         
         //$new_pdf = new FPDI();
