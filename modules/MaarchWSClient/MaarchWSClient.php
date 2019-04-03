@@ -72,13 +72,17 @@ class MaarchWSClient extends DOMXPath
         if ($WSConfig->hasAttribute('cacheUse')) {
             $cacheUse = $WSConfig->getAttribute('cacheUse');
         } else {
-            $cacheUse = WSDL_CACHE_USE;
+            if (defined('WSDL_CACHE_USE')) {
+                $cacheUse = WSDL_CACHE_USE;
+            }
         }
 
         if ($WSConfig->hasAttribute('cacheMaxAge')) {
             $cacheMaxAge = $WSConfig->getAttribute('cacheMaxAge');
         } else {
-            $cacheMaxAge = WSDL_CACHE_MAX_AGE;
+            if (defined('WSDL_CACHE_MAX_AGE')) {
+                $cacheMaxAge = WSDL_CACHE_MAX_AGE;
+            }
         }
         $SSL = $WSConfig->getAttribute('SSL');
             
@@ -168,7 +172,7 @@ class MaarchWSClient extends DOMXPath
                 $parentInstruction
             );
         $l = $instructions->length;
-        if ($this->log) {
+        if (isset($this->log) && $this->log) {
             $_SESSION['capture']->logEvent("Process $l instructions on "
                 . $Element->nodeName . " " . $Element->id);
         }
@@ -217,7 +221,7 @@ class MaarchWSClient extends DOMXPath
     ) {
         $serviceName = $service->getAttribute('name');
         
-        if ($this->log) {
+        if (isset($this->log) && $this->log) {
             $_SESSION['capture']->logEvent("Process Call of service '"
                 . $serviceName . "' for " . $Element->nodeName . " " . $Element->id);
         }
@@ -272,7 +276,7 @@ class MaarchWSClient extends DOMXPath
         $args,
         $serviceMethod = "GET"
     ) {
-        if ($this->log) {
+        if (isset($this->log) && $this->log) {
             $_SESSION['capture']->logEvent("Call service '" . $serviceName . "'...");
         }
 

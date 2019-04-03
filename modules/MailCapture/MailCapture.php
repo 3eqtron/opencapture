@@ -1139,7 +1139,7 @@ class MailCapture
             switch(strtoupper($part->disposition)) {
             case 'BODY':
                 $isThereAnyBodyHere = true;
-                if($html_body) continue;
+                if($html_body) break;
                 $this->writeLog("Disposition is BODY");
                 if($part->subtype == 'html') {
                     $this->createHtml($part);
@@ -1148,7 +1148,7 @@ class MailCapture
                 elseif ($part->subtype == 'plain') {
                     $plain_body = true;
                 }
-                if(!$Document && ($html_body || $plain_body)) {
+                if(!isset($Document) && ($html_body || $plain_body)) {
                     $content = file_get_contents($part->filepath);
                     if ( empty($content) ) {
                         echo "ERROR: file_get_contents({$part->filepath}) failed\n";
@@ -1219,7 +1219,10 @@ class MailCapture
                         $metadatas_doc_date = $doc->createElement("p", "");
                         $body->item(0)->insertBefore($metadatas_doc_date, $body->item(0)->firstChild);
 
-                        $body->item(0)->insertBefore($metadatas_doc_date, $body->item(0)->firstChild);
+                        if($metadatas_doc_date !== $body->item(0)->firstChild) {
+                            //$newnode->parentNode->insertBefore( $newnode, $firstSibling );
+                            $body->item(0)->insertBefore($metadatas_doc_date, $body->item(0)->firstChild);
+                        }
 
                         $metadatas_ccaddress = $doc->createElement("div", "Cc        : ".$ccaddress);
                         $body->item(0)->insertBefore($metadatas_ccaddress, $body->item(0)->firstChild);
@@ -1336,7 +1339,7 @@ class MailCapture
                             "Attachment part ".$part->section." (mimetype ".$part->mimetype.", extension ".$part->extension.") excluded by rule..."
                         );
 
-                        continue 2;
+                        break 2;
                     }
                 }
                 
@@ -1550,7 +1553,7 @@ class MailCapture
         #*********************************************************************
         if($part->subtype == 'plain')
             $part->extension = 'txt';
-        else if(is_array($part->dparameters) && isset($part->dparameters['filename'])) 
+        else if(isset($part->dparameters) && is_array($part->dparameters) && isset($part->dparameters['filename'])) 
             $part->extension = substr(strrchr($part->dparameters['filename'], '.'), 1);
         else if(is_array($part->parameters) && isset($part->parameters['name'])) 
             $part->extension = substr(strrchr($part->parameters['name'], '.'), 1);
@@ -1767,8 +1770,10 @@ class MailCapture
         $infopath = explode('/', $info);
         $value = $structure;
         foreach($infopath as $infostep) {
-            //echo "eval " . '$value = $value->' . $infostep . ";" . PHP_EOL;
-            eval('$value = $value->' . $infostep . ";");
+            if (isset($value->$infostep)) {
+                //echo "eval " . '$value = $value->' . $infostep . ";" . PHP_EOL;
+                eval('$value = $value->' . $infostep . ";");
+            }
         }
         
         if(is_scalar($value)) {

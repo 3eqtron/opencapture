@@ -48,7 +48,9 @@ class Response
         }
 
         // Get the protocol version from apache server
-        $protocol = strtok($_SERVER['SERVER_PROTOCOL'], '/');
+        if (isset($_SERVER['SERVER_PROTOCOL'])) {
+            $protocol = strtok($_SERVER['SERVER_PROTOCOL'], '/');
+        }
         $this->protocolVersion = strtok('');
     }
 
