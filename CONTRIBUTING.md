@@ -55,7 +55,6 @@ En voici les grands principes de fonctionnement :
 * Le lien des FEAT de la forge et GIT se donc dans le master.
 * C'est sur cette branche qu'interviennent nos partenaires techniques pour les améliorations du produit (parce qu'on a validé la FEAT avec eux). Il faudra donc aussi les remonter dans 'develop' une fois accepté ici.
 * C'est sur cette branche que se passent l'ensemble des tests unitaires et d'intégration.
-* C'est à partir de cette branche qu'est géré l'internationalisation produite par notre [plateforme de traduction](http://translate.maarch.org/)
 
 ##### Version stable
 'v1.x' est la version opérationnelle et stable de Maarch Capture
