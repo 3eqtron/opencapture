@@ -1,205 +1,96 @@
-NOTA : this document is still in work in progress
+# Guide de contribution à Maarch Capture
 
-# Contributing to Maarch
+Tout d'abord, merci de prendre le temps de contribuer.
 
-:+1::tada: First off, thanks for taking the time to contribute! :tada::+1:
+Voici un ensemble de lignes directrices pour contribuer à Maarch et ses produits, hébergés dans l'Organisation Maarch sur [Maarch GitLab](http://labs.maarch.org).
 
-The following is a set of guidelines for contributing to Maarch and its packages, which are hosted in the [Maarch Organization](https://labs.maarch.org/maarch/) on Maarch GitLab. 
-Use your best judgment, and feel free to propose changes to this document in a merge request.
+## Que dois-je savoir avant de commencer ?
+### Contrat de contribution
+Toute personne souhaitant contribuer à Maarch doit lire et signer notre [contrat de licence de contributeur](https://labs.maarch.org/maarch/MaarchCourrier/blob/master/CLA.md). 
 
-#### Table Of Contents
+L'équipe Maarch est légalement interdite d'accepter les demandes de fusion des utilisateurs qui n'ont pas encore signé le CLA.
 
-[What should I know before I get started?](#what-should-i-know-before-i-get-started)
-  * [ Contributor Agreement ](#contributor-agreement)
-  * [About Maarch](#about-maarch)
+### A propos de Maarch
+Les solutions Maarch sont des outils de gestion électronique de documents professionnel qui répondent nativement à la grande majorité des besoins en gestion opérationnelle des documents.
 
-[How Can I Contribute?](#how-can-i-contribute)
-  * [Reporting Bugs](#reporting-bugs)
-  * [Suggesting Enhancements](#suggesting-enhancements)
-  * [Your First Code Contribution](#your-first-code-contribution)
-  * [Pull Requests](#pull-requests)
+Ils sont publiés sous les termes de la licence gratuite et open source GNU / GPLv3. L'une des conséquences est que les logiciels Maarch sont abordables pour tout type d'organisation.
 
-[Styleguides](#styleguides)
-  * [Git Commit Messages](#git-commit-messages)
-  * [php Styleguide](#maarch-styleguide)
-  * [JavaScript Styleguide](#javascript-styleguide)
-  * [Documentation Styleguide](#documentation-styleguide)
+### Processus de gestion des contributions
+Le succès de Maarch nous apporte de nombreux retours fonctionnels ou techniques de la part de sa communauté (utilisateurs, clients, partenaires, core team).
+Maarch s'organise pour traiter au mieux ces demandes.
 
-## What should I know before I get started?
+Selon les types de demandes ou contributions remontées, Maarch a mis en place les processus suivants :
 
-###  Contributor Agreement 
+#### Demande d'évolution
+Toute demande FEAT doit être déclarée dans la forge, qu'elle soit finalement réalisée par un développeur de la core team Maarch ou un partenaire.
 
-Anyone wishing to contribute to MaarchCapture must read & sign our [Contributor License Agreement](CLA.md). The Maarch team is legally prevented from accepting any merge requests 
-from users who have not signed the CLA first.
+* Une FEAT doit être acceptée (ou refusée) avant de commencer son développement
+* Comme il y a plusieurs manière d'adresser un même besoin, les développeurs discutent entre eux pour échanger sur le comment faire
 
-### About MaarchCapture
+#### Déclaration de bug
+Tout BUG doit être déclaré et qualifié (notamment sur sa gravité) dans la forge.
+* Un BUG doit être reproductible sur la version stable cible
+* Si il y a une méthode de contournement temporaire possible (le temps de traiter proprement le bug), elle est indiquée dans la forge.
 
-MaarchCapture is a software that natively answers a vast majority of the needs for the capture of documents. 
-It is released under the terms of the free and open source license GNU/GPLv3. One of the consequence is that Maarch software is affordable for any kind of organisation.
+#### A propos de l'ingénierie logicielle
+L'ingénierie logicielle Maarch est traitée depuis notre [gitlab](http://labs.maarch.org).
+En voici les grands principes de fonctionnement :
 
-## How Can I Contribute?
+##### Branche de développement
+'develop' est la zone de jeu commune des développeurs de la core team Maarch :
+* C'est ici qu'ils ajoutent leur code nouveau, expérimentent, suppriment le code inutile, explorent ensemble des pistes techniques et se challengent sur la bonne manière de faire.
+* Bien évidement, tout code ajouté doit être accompagné de son test unitaire. N'y est donc intégré que du code relativement exploitable, utile au projet et aux autres développeurs.
+* C'est une version non opérationnelle et non stable qui peut être modifiée plusieurs fois par heure.
+* Cette branche ne préfigure pas d'une future version car tout peut y être remis en question à tout moment.
+* Il peut y avoir un nombre illimité de branche créée à partir de celle-ci.
 
-### Reporting Bugs
+##### Master ou la future version
+'master' est la release-candidate de la version future.
+* La future version stable du produit se dessine donc dans le master. Elle est à tout moment opérationnelle, mais déclarée comme non-stable. Son code est une agrégation, sur la dernière version déclarée stable :
 
-This section guides you through submitting a bug report for Maarch. Following these guidelines helps maintainers and the community understand your report :pencil:, reproduce the behavior :computer: :computer:, and find related reports :mag_right:.
+** du code nouveau/modifié de 'develop' déclaré comme "terminé et probablement stable" par les développeurs. On ne merge donc pas TOUT 'develop' mais seulement certaines parties validée.
+** du code nouveau/modifié (et non totalement révolutionnaire) d'une commande client
+** Toute demande de merge se fait par les développeurs et est acceptée (ou pas) par le "project master"
 
-Before creating bug reports, please check [this list](#before-submitting-a-bug-report) as you might find out that you don't need to create one. When you are creating a bug report, please [include as many details as possible](#how-do-i-submit-a-good-bug-report). Fill out [the required template](ISSUE_TEMPLATE.md), the information it asks for helps us resolve issues faster.
+* Le lien des FEAT de la forge et GIT se donc dans le master.
+* C'est sur cette branche qu'interviennent nos partenaires techniques pour les améliorations du produit (parce qu'on a validé la FEAT avec eux). Il faudra donc aussi les remonter dans 'develop' une fois accepté ici.
+* C'est sur cette branche que se passent l'ensemble des tests unitaires et d'intégration.
+* C'est à partir de cette branche qu'est géré l'internationalisation produite par notre [plateforme de traduction](http://translate.maarch.org/)
 
-#### Before Submitting A Bug Report
+##### Version stable
+'v1.x' est la version opérationnelle et stable de Maarch Capture
 
-* **Check the [FAQs on the wiki](http://wiki.maarch.org/Maarch_Courrier).** You might be able to find the cause of the problem and fix things yourself. Most importantly, check if you can reproduce the problem in the latest version of Maarch. 
-* **Determine which repository the problem should be reported in**.
-* **Perform a [cursory search](http://forum.maarch.org/)** to see if the problem has already been reported. If it has, add a comment to the existing issue instead of opening a new one.
+* Son code représente un instant T dans 'master' qu'on a jugé prêt et stable pour déploiement chez les utilisateurs.
+* À sa création, c'est donc une branche directement issue de 'master' sans rien d'autre.
+* C'est cette version qui accueille les corrections de bugs et les mini-évolutions, y compris ceux issus de nos partenaires techniques sur ce qu'ils détectent et auront déclarés dans la forge.
+* Tout bug corrigé ici est également déployé dans 'master' et, éventuellement si toujours pertinent, dans 'develop'.
+* Cette branche est 'taguée' régulièrement pour indiquer à tous qu'il y a eu des corrections de bugs.
+* C'est sur cette branche que sont passés l'ensemble des tests unitaires (créés dans 'develop'), d'intégration (créés dans 'master') et fonctionnels.
+* Les montées de versions sont :
+** Manuelle par Maarch pour passer d'une v1.x à une v1.y
 
-#### How Do I Submit A (Good) Bug Report?
+## Comment je contribue ?
+### Signaler des bugs
+Cette section vous guide lors de la soumission d'un bogue pour Maarch. 
+En suivant ces directives, les responsables de la maintenance et la communauté comprennent votre rapport, reproduisent le comportement et trouvent des rapports connexes.
 
-Bugs are tracked as [Gitlab issues](https://guides.github.com/features/issues/). After you've determined which repository your bug is related to, create an issue on that repository and provide the following information by filling in [the template](ISSUE_TEMPLATE.md).
+#### Avant de soumettre un bug
+* Consultez la [FAQ](https://community.maarch.org/c/maarch-capture/f-a-q) sur notre site communautaire. Vous pourriez peut-être trouver la cause du problème et réparer vous-même les choses. Plus important encore, vérifiez si vous pouvez reproduire le problème dans la dernière version de Maarch.
+* Déterminez dans quelle fonctionnalité posant problème doit être signalée.
+* Effectuez une recherche rapide pour voir si le problème a déjà été signalé. Si c'est le cas, ajoutez un commentaire au problème existant au lieu d'ouvrir un nouveau.
 
-Explain the problem and include additional details to help maintainers reproduce the problem:
 
-* **Use a clear and descriptive title** for the issue to identify the problem.
-* **Describe the exact steps which reproduce the problem** in as many details as possible. For example, start by explaining how you started Maarch, e.g. which command method you used in the browser. When listing steps, **don't just say what you did, but explain how you did it**. For example, if you moved the cursor to the end of a line, explain if you used the mouse, or a keyboard shortcut, and if so which one?
-* **Provide specific examples to demonstrate the steps**. Include links to files or GitLab projects, or copy/pasteable snippets, which you use in those examples. If you're providing snippets in the issue, use [Markdown code blocks](https://help.github.com/articles/markdown-basics/#multiple-lines).
-* **Describe the behavior you observed after following the steps** and point out what exactly is the problem with that behavior.
-* **Explain which behavior you expected to see instead and why.**
-* **Include screenshots and animated GIFs** which show you following the described steps and clearly demonstrate the problem. If you use the keyboard while following the steps. You can use [this tool](http://www.cockos.com/licecap/) to record GIFs on macOS and Windows, and [this tool](https://github.com/colinkeenan/silentcast) or [this tool](https://github.com/GNOME/byzanz) on Linux.
-* **If you're reporting that Maarch crashed**, include a crash report with a stack trace from the operating system. Include the crash report in the issue in a [code block](https://help.github.com/articles/markdown-basics/#multiple-lines), a [file attachment](https://help.github.com/articles/file-attachments-on-issues-and-pull-requests/), or put it in a [gist](https://gist.github.com/) and provide link to that gist.
-* **If the problem is related to performance**, include a CPU profile capture and a screenshot with your report.
-* **If the Firefox or Chrome's developer tools pane is shown without you triggering it**, that normally means that an exception was thrown. The Console tab will include an entry for the exception. Expand the exception so that the stack trace is visible, and provide the full exception and stack trace in a [code blocks](https://help.github.com/articles/markdown-basics/#multiple-lines) and as a screenshot.
-* **If the problem wasn't triggered by a specific action**, describe what you were doing before the problem happened and share more information using the guidelines below.
+Les bugs peuvent être soumis sur notre [Site communautaire](https://community.maarch.org/c/maarch-capture).
 
-Provide more context by answering these questions:
+### Proposer des améliorations
+Cette section vous guide lors de la soumission d'une suggestion d'amélioration pour les produits Maarch, incluant des fonctionnalités complètement nouvelles et des améliorations mineures aux fonctionnalités existantes. 
 
-* **Did the problem start happening recently** (e.g. after updating to a new version of Maarch) or was this always a problem?
-* If the problem started happening recently, **can you reproduce the problem in an older version of Maarch?** What's the most recent version in which the problem doesn't happen?.
-* **Can you reliably reproduce the issue?** If not, provide details about how often the problem happens and under which conditions it normally happens.
+En suivant ces directives, les responsables de la maintenance et la communauté comprennent votre suggestion et trouvent des suggestions connexes.
 
-Include details about your configuration and environment:
+#### Avant de soumettre une amélioration
+* Consultez [Community.maarch.org](http://community.maarch.org) ou [notre documentation](https://docs.maarch.org/) pour obtenir des conseils - vous pourriez découvrir que l'amélioration est déjà disponible. Plus important encore, vérifiez si vous utilisez la dernière version de Maarch Courrier.
+* Effectuez une recherche rapide pour voir si l'amélioration a déjà été suggérée. Si c'est le cas, ajoutez un commentaire au ticket existant au lieu d'ouvrir un nouveau.
 
-* **Which version of Maarch are you using?**.
-* **What's the name and version of the OS and Maarch prerequisites you're using**?
-* **Are you running Maarch in a virtual machine?** If so, which VM software are you using and which operating systems and versions are used for the host and the guest?
 
-### Suggesting Enhancements
-
-This section guides you through submitting an enhancement suggestion for Maarch, including completely new features and minor improvements to existing functionality. Following these guidelines helps maintainers and the community understand your suggestion :pencil: and find related suggestions :mag_right:.
-
-Before creating enhancement suggestions, please check [this list](#before-submitting-an-enhancement-suggestion) as you might find out that you don't need to create one. When you are creating an enhancement suggestion, please [include as many details as possible](#how-do-i-submit-a-good-enhancement-suggestion). Fill in [the template](ISSUE_TEMPLATE.md), including the steps that you imagine you would take if the feature you're requesting existed.
-
-#### Before Submitting An Enhancement Suggestion
-
-* **Check the [Maarch wiki](http://wiki.maarch.org)** for tips — you might discover that the enhancement is already available. Most importantly, check if you're using the latest version of Maarch.
-* **Perform a [cursory search](https://labs.maarch.org/maarch/MaarchCapture/issues?q=+is%3Aissue+user%3Amaarch)** to see if the enhancement has already been suggested. If it has, add a comment to the existing issue instead of opening a new one.
-
-#### How Do I Submit A (Good) Enhancement Suggestion?
-
-Enhancement suggestions are tracked as [GitLab issues](https://labs.maarch.org/maarch/MaarchCapture/issues/). Create an issue on that repository and provide the following information:
-
-* **Use a clear and descriptive title** for the issue to identify the suggestion.
-* **Provide a step-by-step description of the suggested enhancement** in as many details as possible.
-* **Provide specific examples to demonstrate the steps**. Include copy/pasteable snippets which you use in those examples, as [Markdown code blocks](https://help.github.com/articles/markdown-basics/#multiple-lines).
-* **Describe the current behavior** and **explain which behavior you expected to see instead** and why.
-* **Include screenshots and animated GIFs** which help you demonstrate the steps or point out the part of Maarch which the suggestion is related to. You can use [this tool](http://www.cockos.com/licecap/) to record GIFs on macOS and Windows, and [this tool](https://github.com/colinkeenan/silentcast) or [this tool](https://github.com/GNOME/byzanz) on Linux.
-* **Explain why this enhancement would be useful** to most Maarch users and isn't something that can or should be implemented as a [community package](#maarch-and-packages).
-* **List some other text editors or applications where this enhancement exists.**
-* **Specify which version of Maarch you're using.**
-* **Specify the name and version of the OS you're using.**
-
-### Your First Code Contribution
-
-Unsure where to begin contributing to Maarch? You can start by looking through these `beginner` and `help-wanted` issues:
-
-* [Beginner issues][beginner] - issues which should only require a few lines of code, and a test or two.
-* [Help wanted issues][help-wanted] - issues which should be a bit more involved than `beginner` issues.
-
-Both issue lists are sorted by total number of comments. While not perfect, number of comments is a reasonable proxy for impact a given change will have.
-
-### Pull Requests
-
-* Fill in [the required template](PULL_REQUEST_TEMPLATE.md)
-* Include screenshots and animated GIFs in your pull request whenever possible.
-* Follow the [php](#php-styleguide) and [JavaScript](#javascript-styleguide) styleguides.
-* Document new code based on the
-  [Documentation Styleguide](#documentation-styleguide)
-* End files with a newline.
-
-## Styleguides
-
-### Git Commit Messages
-
-* Use the present tense ("Add feature" not "Added feature")
-* Use the imperative mood ("Move cursor to..." not "Moves cursor to...")
-* Limit the first line to 72 characters or less
-* Reference issues and pull requests liberally
-* When only changing documentation, include `[ci skip]` in the commit description
-* Consider starting the commit message with an applicable emoji:
-    * :art: `:art:` when improving the format/structure of the code
-    * :racehorse: `:racehorse:` when improving performance
-    * :non-potable_water: `:non-potable_water:` when plugging memory leaks
-    * :memo: `:memo:` when writing docs
-    * :penguin: `:penguin:` when fixing something on Linux
-    * :apple: `:apple:` when fixing something on macOS
-    * :checkered_flag: `:checkered_flag:` when fixing something on Windows
-    * :bug: `:bug:` when fixing a bug
-    * :fire: `:fire:` when removing code or files
-    * :green_heart: `:green_heart:` when fixing the CI build
-    * :white_check_mark: `:white_check_mark:` when adding tests
-    * :lock: `:lock:` when dealing with security
-    * :arrow_up: `:arrow_up:` when upgrading dependencies
-    * :arrow_down: `:arrow_down:` when downgrading dependencies
-    * :shirt: `:shirt:` when removing linter warnings
-
-### php Styleguide
-
-We are following stadards defined by Framework Interoperability Group - [PHP-FIG](http://www.php-fig.org). The group was bootstrapped by a number of framework developers at php|tek in 2009. Each voting member of the group represents a popular PHP framework (or similar) project. They are working together to create easily reusable code that can be used across other projects. 
-
-* PSR standards
-
-There are five PSR standards described by PHP-FIG.
-
-* PSR-0 / Autoloading standard
-
-The following describes the mandatory requirements that must be adhered to for autoloader interoperability. More information can be found [here](http://www.php-fig.org/psr/psr-0/).
-
-* PSR-1 / Basic Coding Standard
-
-This standard describes what should be considered the standard coding elements that are required to ensure a high level of technical interoperability between shared PHP code. It describes Class Names, Namespaces, Methods, Constants, Properties naming conventions. More information can be found [here](http://www.php-fig.org/psr/psr-1/).
-
-* PSR-2 / Coding Style Guide
-
-This guide extends and expands on [PSR-1](http://www.php-fig.org/psr/psr-1/), the basic coding standard. Provides a Coding Style Guide for projects looking to standardize their code. It additionaly includes definitions for Control Structures, Closures and other structures. More information can be found [here](http://www.php-fig.org/psr/psr-2/).
-
-* PSR-3 / Logger Interface
-
-Describes a common interface for logging libraries. More information can be found [here](http://www.php-fig.org/psr/psr-3/).
-
-* PSR-4 / Improved Autoloading
-
-This PSR describes a specification for autoloading classes from file paths. It is fully interoperable, and can be used in addition to any other autoloading specification, including [PSR-0](http://www.php-fig.org/psr/psr-0/). More information can be found [here](http://www.php-fig.org/psr/psr-4/).
-
-* Additional notes
-
-For objects properties and variables we are using camelCase convention.
-
-### JavaScript Styleguide
-
-All JavaScript must adhere to [JavaScript Standard Style](http://standardjs.com/).
-
-* Prefer the object spread operator (`{...anotherObj}`) to `Object.assign()`
-* Inline `export`s with expressions whenever possible
-  js
-  // Use this:
-  export default class ClassName {
-
-  }
-
-  // Instead of:
-  class ClassName {
-
-  }
-  export default ClassName
-
-### Documentation Styleguide
-
-TODO
+Les améliorations peuvent être soumises sur notre [Site communautaire](https://community.maarch.org/c/maarch-capture).
 
