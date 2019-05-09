@@ -1,6 +1,5 @@
-
 # Version
-`1.4`
+`$VERSION`
 
 # Prerequisit
 `PHP 7 or greater`
