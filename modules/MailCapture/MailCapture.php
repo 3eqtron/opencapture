@@ -1861,7 +1861,7 @@ class MailCapture
 <head>
    <meta name="AUTHOR" content="Maarch"/>
    <meta name="CHANGEDBY" content="Maarch"/>
-</hea>
+</head>
 <body>
 
 </body>

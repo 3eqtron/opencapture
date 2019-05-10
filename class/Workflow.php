@@ -1,10 +1,7 @@
 <?php
 
-class Workflow 
-    extends DOMDocument 
+class Workflow extends DOMDocument
 {
-    
-    
     private $XPath;
     private $Step;
     private $WFName;
@@ -39,7 +36,7 @@ class Workflow
         
         $Workflow->setAttribute('logMode', $log['logMode']);
         $_SESSION['logs']['logMode'] = $log['logMode'];
-        if($log['logMode'] == 'Maarch') {
+        if ($log['logMode'] == 'Maarch') {
             $Workflow->setAttribute('maarchLogParam', $log['maarchLogParam']);
             $_SESSION['logs']['maarchLogParam'] = $log['maarchLogParam'];
             $Workflow->setAttribute('maarchLoggerName', $log['maarchLoggerName']);
@@ -51,24 +48,24 @@ class Workflow
         $this->save();
     }
     
-    function load(
+    public function load(
         $id,
         $directory = null
     ) {
         $source = file_get_contents($directory . DIRECTORY_SEPARATOR . $id . '.xml');
 
-        $source = str_replace("&nbsp;"," ",$source);
-        $source = str_replace("&eacute;", "e",$source);
-        $source = str_replace("&egrave;","e",$source);
-        $source = str_replace("&ecirc;","e",$source);
-        $source = str_replace("&agrave;","a",$source);
-        $source = str_replace("&acirc;","a",$source);
-        $source = str_replace("&icirc;","i",$source);
-        $source = str_replace("&ocirc;","o",$source);
-        $source = str_replace("&ucirc;","u",$source);
-        $source = str_replace("&acute;","",$source);
-        $source = str_replace("&deg;","o",$source);
-        $source = str_replace("&rsquo;", "'",$source);
+        $source = str_replace("&nbsp;", " ", $source);
+        $source = str_replace("&eacute;", "e", $source);
+        $source = str_replace("&egrave;", "e", $source);
+        $source = str_replace("&ecirc;", "e", $source);
+        $source = str_replace("&agrave;", "a", $source);
+        $source = str_replace("&acirc;", "a", $source);
+        $source = str_replace("&icirc;", "i", $source);
+        $source = str_replace("&ocirc;", "o", $source);
+        $source = str_replace("&ucirc;", "u", $source);
+        $source = str_replace("&acute;", "", $source);
+        $source = str_replace("&deg;", "o", $source);
+        $source = str_replace("&rsquo;", "'", $source);
 
         unlink($directory . DIRECTORY_SEPARATOR . $id . '.xml');
 
@@ -80,11 +77,12 @@ class Workflow
         $this->XPath = new DOMXPath($this);
     }
     
-    function save(
-        $filename=false
+    public function save(
+        $filename = false
     ) {
-        if(!$filename)
+        if (!$filename) {
             $filename = $this->directory . DIRECTORY_SEPARATOR . $this->id . '.xml';
+        }
         parent::save($filename);
     }
     
@@ -108,7 +106,7 @@ class Workflow
         );
     }
     
-    function initStep(
+    public function initStep(
         $StepName
     ) {
         $Step = $this->createElement('Step');
@@ -122,34 +120,37 @@ class Workflow
         return $Step;
     }
        
-    function lastStep() {
+    public function lastStep()
+    {
         $Steps = $this->getElementsByTagName('Step');
-        if($Steps->length)
+        if ($Steps->length) {
             return $Steps->item(($Steps->length - 1));
+        }
     }
     
-    function __get(
+    public function __get(
         $name
     ) {
-        if($this->documentElement->hasAttribute($name))
+        if ($this->documentElement->hasAttribute($name)) {
             return $this->documentElement->getAttribute($name);
+        }
             
-        if(isset($this->{$name}))
+        if (isset($this->{$name})) {
             return $this->{$name};
+        }
     }
-        
 }
 
-class WorkflowElement
-    extends DOMElement
+class WorkflowElement extends DOMElement
 {
     public function __get(
         $name
     ) {
-        if($this->hasAttribute($name))
+        if ($this->hasAttribute($name)) {
             return $this->getAttribute($name);
+        }
 
-        return $this->{$name};   
+        return $this->{$name};
     }
     
     public function setStatus(
@@ -158,65 +159,78 @@ class WorkflowElement
     ) {
         $this->setAttribute('status', $status);
         
-        switch($status) {
-        case MC_STATUS_NOT_STARTED:
-            if(!$message) $message = 'Initializing...';
-            $level = 0;
-            break;
-        case MC_STATUS_FAILED_ON_START:
-            if(!$message) $message = 'Process failed on start!';
-            $level = 3;
-            break;
-        case MC_STATUS_IN_PROGRESS:
-            if(!$message) $message = 'Starting process...';
-            $level = 0;
-            break;
-        case MC_STATUS_ERROR:
-            if(!$message) $message = 'Process error! See previous messages for more information.';
-            $level = 3;
-            break;
-        case MC_STATUS_STOPPED:
-            if(!$message) $message = 'Process stopped.';
-            $level = 1;
-            break;
-        case MC_STATUS_COMPLETED:
-            if(!$message) $message = 'Process completed.';
-            $level = 0;
-            break;
-        case MC_STATUS_RETRYING:
-            if(!$message) $message = 'Retrying process...';
-            $level = 0;
-            break;
+        switch ($status) {
+            case MC_STATUS_NOT_STARTED:
+                if (!$message) {
+                    $message = 'Initializing...';
+                }
+                $level = 0;
+                break;
+            case MC_STATUS_FAILED_ON_START:
+                if (!$message) {
+                    $message = 'Process failed on start!';
+                }
+                $level = 3;
+                break;
+            case MC_STATUS_IN_PROGRESS:
+                if (!$message) {
+                    $message = 'Starting process...';
+                }
+                $level = 0;
+                break;
+            case MC_STATUS_ERROR:
+                if (!$message) {
+                    $message = 'Process error! See previous messages for more information.';
+                }
+                $level = 3;
+                break;
+            case MC_STATUS_STOPPED:
+                if (!$message) {
+                    $message = 'Process stopped.';
+                }
+                $level = 1;
+                break;
+            case MC_STATUS_COMPLETED:
+                if (!$message) {
+                    $message = 'Process completed.';
+                }
+                $level = 0;
+                break;
+            case MC_STATUS_RETRYING:
+                if (!$message) {
+                    $message = 'Retrying process...';
+                }
+                $level = 0;
+                break;
         }
         
         $this->logEvent(
             $message,
             $level
         );
-        
     }
     
     public function logEvent(
         $message,
         $level = 0
     ) {
-        switch($level) {
-        case 0: 
-            $lvlname = 'Notice';
-            $maarchLevel = 'INFO';
-            break;
-        case 1: 
-            $lvlname = 'Warning';
-            $maarchLevel = 'WARNING';
-            break;
-        case 2: 
-            $lvlname = 'Error';
-            $maarchLevel = 'ERROR';
-            break;
-        case 3: 
-            $lvlname = 'Fatal Error';
-            $maarchLevel = 'FATAL';
-            break;
+        switch ($level) {
+            case 0:
+                $lvlname = 'Notice';
+                $maarchLevel = 'INFO';
+                break;
+            case 1:
+                $lvlname = 'Warning';
+                $maarchLevel = 'WARNING';
+                break;
+            case 2:
+                $lvlname = 'Error';
+                $maarchLevel = 'ERROR';
+                break;
+            case 3:
+                $lvlname = 'Fatal Error';
+                $maarchLevel = 'FATAL';
+                break;
         }
         
         $date = date('c');
@@ -232,21 +246,25 @@ class WorkflowElement
         $this->ownerDocument->save();
         //echo 'logMode:' . $_SESSION['logs']['logMode'] . PHP_EOL;
         //echo 'message:' . $message . PHP_EOL;
-        if($_SESSION['logs']['logMode'] == 'Maarch') {
+        if ($_SESSION['logs']['logMode'] == 'Maarch') {
             if ($level > 0) {
                 $result = 'KO';
             } else {
                 $result = 'OK';
             }
-            $this->logEventWithLog4PHP($message, $result, $maarchLevel);
+            if (file_exists($_SESSION['logs']['maarchLogParam'])) {
+                $this->logEventWithLog4PHP($message, $result, $maarchLevel);
+            } else {
+                echo 'maarchLogParam ERROR => File does not exist : '.$_SESSION['logs']['maarchLogParam']."\n";
+            }
         }
         
         /* Log to txt */
-        if($log = $this->ownerDocument->documentElement->getAttribute('log')) {
+        if ($log = $this->ownerDocument->documentElement->getAttribute('log')) {
             $logFile = fopen($log, 'a');
-            if ( empty($logFile) ) {
+            if (empty($logFile)) {
                 echo "ERROR : fopen($log) failed\n";
-            } else if ( $logFile ) {
+            } elseif ($logFile) {
                 $logTxt = $date . " [" . (int)$level . "] " . $message . PHP_EOL;
                 fwrite($logFile, $logTxt);
                 fclose($logFile);
@@ -280,8 +298,8 @@ class WorkflowElement
             $remote_ip
         );
         $logLine = str_replace(
-            $searchPatterns, 
-            $replacePatterns, 
+            $searchPatterns,
+            $replacePatterns,
             "[%ACCESS_METHOD%][%RESULT%][%CODE_METIER%][%HOW%][%WHAT%][%REMOTE_IP%]"
         );
         $this->writeLog4php($logger, $logLine, $level);
@@ -294,7 +312,7 @@ class WorkflowElement
      * @param string $logLine Line we want to trace
      * @param enum $level Log level
      */
-    function writeLog4php($logger, $logLine, $level)
+    public function writeLog4php($logger, $logLine, $level)
     {
         $logLine = $this->wd_remove_accents($logLine);
         switch ($level) {
@@ -322,7 +340,7 @@ class WorkflowElement
      * @param String $str
      * @param String $charset
      */
-    function wd_remove_accents($str, $charset ='utf-8')
+    public function wd_remove_accents($str, $charset ='utf-8')
     {
         $str = htmlentities($str, ENT_NOQUOTES, "utf-8");
         $str = preg_replace(
@@ -331,7 +349,7 @@ class WorkflowElement
             $str
         );
         $str = preg_replace('#\&([A-za-z]{2})(?:lig)\;#', '\1', $str);
-        $str = preg_replace('#\&[^;]+\;#','', $str);
+        $str = preg_replace('#\&[^;]+\;#', '', $str);
         return $str;
     }
     
@@ -339,5 +357,4 @@ class WorkflowElement
     {
         return @$this->ownerDocument->saveXML($this);
     }
-    
-}  
+}

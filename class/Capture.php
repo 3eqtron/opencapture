@@ -54,21 +54,21 @@ class Capture extends DOMXPath
                 $tag = $tags[0][$i];
                 $instr = substr($tag, 1, strlen($tag) - 2);
                 switch ($instr) {
-                case 'timestamp':
-                    $val = date("U");
-                    break;
-                case 'date':
-                    $val = date("Ymd-His");
-                    break;
-                case 'batchname':
-                    $val = $BatchName;
-                    break;
-                case 'uniqid':
-                    $val = uniqid();
-                    break;
-                case 'rand':
-                    $val = mt_rand();
-                    break;
+                    case 'timestamp':
+                        $val = date("U");
+                        break;
+                    case 'date':
+                        $val = date("Y_m_d-H_i_s");
+                        break;
+                    case 'batchname':
+                        $val = $BatchName;
+                        break;
+                    case 'uniqid':
+                        $val = uniqid();
+                        break;
+                    case 'rand':
+                        $val = mt_rand();
+                        break;
                 }
                 $BatchId = str_replace($tag, $val, $BatchId);
             }
@@ -207,13 +207,11 @@ class Capture extends DOMXPath
         //echo "Capture::processWorkflow()" . PHP_EOL;
         
         $this->Workflow->setStatus(
-             MC_STATUS_IN_PROGRESS,
+            MC_STATUS_IN_PROGRESS,
             "(Re)Starting workflow " . $this->Workflow->name
         );
         
-        while (
-            $StepName = $this->nextStep()
-        ) {
+        while ($StepName = $this->nextStep()) {
             $this->processStep($StepName, $inputArgs);
         }
         
@@ -257,7 +255,7 @@ class Capture extends DOMXPath
         die();
     }
 
-    private function copyDir($dir2copy, $dirPaste, $excludeExt=false)
+    private function copyDir($dir2copy, $dirPaste, $excludeExt = false)
     {
         // On vérifie si $dir2copy est un dossier
         if (is_dir($dir2copy)) {
@@ -343,7 +341,7 @@ class Capture extends DOMXPath
     ) {
         $this->Workflow->logEvent($message, 2);
         $this->Step->setStatus(
-             MC_STATUS_ERROR,
+            MC_STATUS_ERROR,
             $message
         );
         $this->Workflow->setStatus(MC_STATUS_ERROR);
@@ -371,7 +369,7 @@ class Capture extends DOMXPath
     ) {
         $this->Workflow->logEvent($message, 2);
         $this->Step->setStatus(
-             MC_STATUS_ERROR,
+            MC_STATUS_ERROR,
             $message
         );
         $this->Workflow->setStatus(MC_STATUS_ERROR);
@@ -403,7 +401,7 @@ class Capture extends DOMXPath
         
         $Step = $this->Workflow->initStep($StepName);
         $Step->setStatus(
-             MC_STATUS_NOT_STARTED,
+            MC_STATUS_NOT_STARTED,
             "Initializing step " . $StepName
         );
         
@@ -420,14 +418,14 @@ class Capture extends DOMXPath
         # How to send information about Capture object, Batch and workflow to called module
         
         switch ($ModuleInterface) {
-        case 'session_id':
-            # For executables and .NET modules, acces through session_id
-            #   with a look in COOKIE sess_<id>
-            $inputs['session_id'] = session_id();
-            break;
+            case 'session_id':
+                # For executables and .NET modules, acces through session_id
+                #   with a look in COOKIE sess_<id>
+                $inputs['session_id'] = session_id();
+                break;
 
-        case 'none':
-        default:
+            case 'none':
+            default:
             # PHP modules can access in $_SESSION['capture']
         }
         
@@ -470,46 +468,46 @@ class Capture extends DOMXPath
         $starttime = microtime(true);
         
         $Step->setStatus(
-             MC_STATUS_IN_PROGRESS,
+            MC_STATUS_IN_PROGRESS,
             "Starting step " . $StepName
         );
 
         switch ($ModuleType) {
-        case 'class':
-            require_once $ModuleSrc;
-            $Module = new $ModuleName();
-            $ReflectionClass = new ReflectionClass($Module);
-            $ReflectionMethod = $ReflectionClass->getMethod($FuncName);
-            $output =
-                $ReflectionMethod->invokeArgs(
-                    $Module,
-                    $inputs
+            case 'class':
+                require_once $ModuleSrc;
+                $Module = new $ModuleName();
+                $ReflectionClass = new ReflectionClass($Module);
+                $ReflectionMethod = $ReflectionClass->getMethod($FuncName);
+                $output =
+                    $ReflectionMethod->invokeArgs(
+                        $Module,
+                        $inputs
+                    );
+                break;
+                
+            case "script":
+                require_once $ModuleSrc;
+                $output =
+                    call_user_func_array(
+                        $FuncName,
+                        $inputs
+                    );
+                break;
+                
+            case "exec":
+                //TO DO
+                exec(
+                    escapeshellcmd($command),
+                    $output,
+                    $StepResult
                 );
-            break;
-            
-        case "script":
-            require_once $ModuleSrc;
-            $output =
-                call_user_func_array(
-                    $FuncName,
-                    $inputs
-                );
-            break;
-            
-        case "exec":
-            //TO DO
-            exec(
-                escapeshellcmd($command),
-                $output,
-                $StepResult
-            );
-            break;
+                break;
         }
         $endtime = microtime(true);
         $processtime = number_format(($endtime - $starttime), 3);
         
         $Step->setStatus(
-             MC_STATUS_COMPLETED,
+            MC_STATUS_COMPLETED,
             'Step completed in ' .$processtime . ' seconds'
         );
         
@@ -596,18 +594,18 @@ class Capture extends DOMXPath
         # Retrieve the last step initialized on workflow
         if ($lastStep = $this->Workflow->lastStep()) {
             switch ($lastStep->status) {
-            case  MC_STATUS_COMPLETED:
-                $StepXPath = './step[@name="'.$lastStep->name.'"]/following-sibling::step';
-                break;
-                
-            case  MC_STATUS_NOT_STARTED:
-            case  MC_STATUS_FAILED_ON_START:
-            case  MC_STATUS_IN_PROGRESS:
-            case  MC_STATUS_ERROR:
-            case  MC_STATUS_STOPPED:
-            case  MC_STATUS_RETRYING:
-            default:
-                $StepXPath = './step[@name="'.$lastStep->name.'"]';
+                case MC_STATUS_COMPLETED:
+                    $StepXPath = './step[@name="'.$lastStep->name.'"]/following-sibling::step';
+                    break;
+                    
+                case MC_STATUS_NOT_STARTED:
+                case MC_STATUS_FAILED_ON_START:
+                case MC_STATUS_IN_PROGRESS:
+                case MC_STATUS_ERROR:
+                case MC_STATUS_STOPPED:
+                case MC_STATUS_RETRYING:
+                default:
+                    $StepXPath = './step[@name="'.$lastStep->name.'"]';
             }
         } else {
             $StepXPath = './step';
