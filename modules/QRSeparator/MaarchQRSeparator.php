@@ -2,18 +2,27 @@
 
 class QRSeparator
 {
+    public $qrcodePrefix = "false";
+
     public function __construct()
     {
         $this->Batch = $_SESSION['capture']->Batch;
         require __DIR__ . "/../../vendor/autoload.php";
     }
     
-    public function separatePDF($ScanSource, $ResultDirectory = false)
+    public function separatePDF($ScanSource, $qrcodePrefix, $ResultDirectory = false)
     {
+
         echo "Init process ...\n";
         $_SESSION['capture']->logEvent(
             "Init process ... "
         );
+
+        $this->qrcodePrefix = $qrcodePrefix;
+
+        if ($qrcodePrefix == "true") {
+            echo "Prefix MAARCH_ is enabled !\n";
+        }
 
         if (!is_readable($ScanSource)) {
             echo "Source directory is not valid !\n";
@@ -56,7 +65,6 @@ class QRSeparator
 
             //Ignore all files except pdf
             if (strtolower($array_files[1]) == 'pdf') {
-
                 //call split function to sepearate pages
                 try {
                     $this->split_pdf($ScanSource.$files[$key], sys_get_temp_dir().'/'.$key);
@@ -138,6 +146,7 @@ class QRSeparator
 
     public function construct_pdf($split_directory, $end_directory = false)
     {
+        print_r($this->qrcodePrefix);
         $end_directory = $end_directory ? $end_directory : sys_get_temp_dir().'/';
         
         //$new_pdf = new FPDI();
@@ -159,6 +168,18 @@ class QRSeparator
                 $pdfdata = file_get_contents($split_directory.$file);
 
                 $text = $qrcode->text();
+
+                var_dump($text);
+                
+                if ($this->qrcodePrefix == "true" && !empty($text)) {
+                    if (preg_match("/^MAARCH_/i", $text)) {
+                        $text = preg_replace("/^MAARCH_/i", '', $text);
+                        echo "Un résultat a été trouvé.";
+                    } else {
+                        $text = '';
+                        echo "Aucun résultat n'a été trouvé.";
+                    }
+                }
 
                 if (!empty($text)) {
                     $isCourrier = false;

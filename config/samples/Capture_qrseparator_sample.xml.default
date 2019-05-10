@@ -12,6 +12,7 @@
             <workflow name="SCAN_MASS" debug="false" logMode="Maarch" maarchLogParam="/var/www/html/MaarchCourrier/apps/maarch_entreprise/xml/log4php.xml" maarchLoggerName="loggerTechnique">
                 <step function="separatePDF" module="QRSeparator" name="separatePDF">
                     <input name="ScanSource">/opt/maarch/MaarchCapture/files/TEST_IMPORT/</input>
+                    <input name="qrcodePrefix">false</input>
                 </step>
                 <step function="processBatch" module="MaarchWSClient" name="SendToMaarch">
                     <input name="WSDL">MaarchRestWS</input>
