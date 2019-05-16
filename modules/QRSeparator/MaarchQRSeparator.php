@@ -168,8 +168,6 @@ class QRSeparator
                 $pdfdata = file_get_contents($split_directory.$file);
 
                 $text = $qrcode->text();
-
-                var_dump($text);
                 
                 if ($this->qrcodePrefix == "true" && !empty($text)) {
                     if (preg_match("/^MAARCH_/i", $text)) {
