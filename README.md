@@ -16,7 +16,7 @@
 
 # Install 
 ```
-git clone -b 1.4 https://labs.maarch.org/maarch/MaarchCapture
+git clone -b 1.5 https://labs.maarch.org/maarch/MaarchCapture
 ```
 
 # PDFLib 
