@@ -1,5 +1,5 @@
 # Version
-`1.4`
+`1.5`
 
 # Prerequisit
 `PHP 7 or greater`
