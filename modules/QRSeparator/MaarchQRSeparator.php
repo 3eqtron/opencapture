@@ -10,7 +10,7 @@ class QRSeparator
         require __DIR__ . "/../../vendor/autoload.php";
     }
     
-    public function separatePDF($ScanSource, $qrcodePrefix, $ResultDirectory = false)
+    public function separatePDF($ScanSource, $qrcodePrefix = "false", $ResultDirectory = false)
     {
 
         echo "Init process ...\n";
@@ -40,8 +40,7 @@ class QRSeparator
             exit();
         }
 
-        $files = array_diff(scandir($ScanSource), array('..', '.','FAILED'));
-        //print_r($files);
+        $files = array_diff(scandir($ScanSource), array('..', '.','FAILED', 'files_errors', 'files_noseparator'));
 
         if (empty($files)) {
             echo "No files to process ! End of process ...\n";
@@ -80,7 +79,28 @@ class QRSeparator
                     copy($ScanSource.$files[$key], $ScanSource.'FAILED/'.$files[$key]);
                 }
                 //merge pages previously splited
-                $this->construct_pdf(sys_get_temp_dir().'/'.$key, $ResultDirectory);
+                try {
+                    $result = $this->construct_pdf(sys_get_temp_dir().'/'.$key, $ResultDirectory);
+                } catch (Exception $e) {
+                    if (!is_dir($ScanSource.'files_errors/')) {
+                        mkdir($ScanSource.'files_errors/', 0755, true);
+                    }
+                    shell_exec('rm -Rf '.sys_get_temp_dir().'/'.$key);
+                    copy($ScanSource.$files[$key], $ScanSource.'files_errors/'.$files[$key]);
+                    unlink($ScanSource.$files[$key]);
+                    $num_file++;
+                    continue;
+                }
+                if ($result == 'NOSEPARATOR') {
+                    shell_exec('rm -Rf '.sys_get_temp_dir().'/'.$key);
+                    if (!is_dir($ScanSource.'files_noseparator/')) {
+                        mkdir($ScanSource.'files_noseparator/', 0755, true);
+                    }
+                    copy($ScanSource.$files[$key], $ScanSource.'files_noseparator/'.$files[$key]);
+                    unlink($ScanSource.$files[$key]);
+                    $num_file++;
+                    continue;
+                }
                 unlink($ScanSource.$files[$key]);
                 rmdir(realpath(sys_get_temp_dir().'/'.$key));
             } else {
@@ -165,7 +185,6 @@ class QRSeparator
 
                 //Attempt to extract QRCODE
                 $qrcode = new \Zxing\QrReader($split_directory.$file);
-                $pdfdata = file_get_contents($split_directory.$file);
 
                 $text = $qrcode->text();
                 
@@ -217,6 +236,7 @@ class QRSeparator
 
                     $tplidx = $new_pdf->importPage(1);
                     $new_pdf->useTemplate($tplidx);
+                    return 'NOSEPARATOR';
                 }
 
                 /*
