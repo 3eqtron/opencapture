@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MaarchWSClient>
+	<!-- REST FRONTAL -->
+    <WS name="MaarchRestWS" type="REST" uri="https://superadmin:superadmin@demo.maarchcourrier.com/rest/" />
+    <!-- SOAP FRONTAL -->
+    <WS name="MaarchSoapWS" type="SOAP" uri="https://demo.maarchcourrier.com/ws_server.php?WSDL" SSL="false" cacheUse="0" >
+        <proxy>
+            <user>superadmin</user>
+            <pass>superadmin</pass>
+            <timeout>600</timeout>
+        </proxy>
+    </WS>
+    <!-- REST SAMPLES -->
+    <process name="MaarchRestWSProcessFromScanReco">
+           <loop xpath="/Batch/Documents/Document">
+               <call name="/res" method="POST">
+                   <argument type="entity" eval="base64_encode(file_get_contents($Element-&gt;path))" name="encodedFile"/>
+                   <argument type="entity" name="data">
+                        <column>title</column>
+                        <value metadata="filename"/>
+                        <type>string</type>
+                   </argument>
+                   <argument type="entity" name="data">
+                        <column>res_id_master</column>
+                        <value metadata="destination"/>
+                        <type>integer</type>
+                   </argument>
+                   <argument type="entity" name="data">
+                        <column>coll_id</column>
+                        <value>letterbox_coll</value>
+                        <type>string</type>
+                   </argument>
+                   <argument type="entity" name="data">
+                        <column>attachment_type</column>
+                        <value>signed_response</value>
+                        <type>string</type>
+                   </argument>
+                   <argument type="entity" name="collId">letterbox_coll</argument>
+                   <argument type="entity" name="table">res_attachments</argument>
+                   <argument type="entity" name="fileFormat" attribute="extension"/>
+                   <argument type="entity" name="status">SIGN</argument>
+                   <return>
+                       <resId metadata="resId" />
+                   </return>
+               </call>
+           </loop>
+       </process>
+</MaarchWSClient>

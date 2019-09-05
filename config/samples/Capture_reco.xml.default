@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<capture>
+    <modules>
+        <module name="FileImport" src="modules/FileImport/FileImport.php" type="class"/>
+        <module name="MaarchWSClient" src="modules/MaarchWSClient/MaarchWSClient.php" type="class"/>
+        <module name="MailCapture" src="modules/MailCapture/MailCapture.php" type="class"/>
+        <module name="QRSeparator" src="modules/QRSeparator/MaarchQRSeparator.php" type="class"/>
+    </modules>
+    <batches>
+        <batch name="MAARCH_RECO_SCAN" directory="/opt/maarch/MaarchCapture/files/" id="{batchname}-{timestamp}-{rand}" lock="0">
+            <workflow name="MAARCH_RECO_SCAN" debug="true" logMode="default">
+                <step function="separatePDF" module="QRSeparator" name="separatePDF">
+                    <input name="ScanSource">/opt/maarch/MaarchCapture/files/TEST_IMPORT/</input>
+                    <input name="qrcodePrefix">false</input>
+                </step>
+                <step function="processBatch" module="MaarchWSClient" name="SendToMaarch">
+                    <input name="WSDL">MaarchRestWS</input>
+                    <input name="Process">MaarchRestWSProcessFromScanReco</input>
+                    <input name="CatchError">false</input>
+                    <input name="configFile">MaarchWSClient_standard_sample.xml</input>
+                </step>
+            </workflow>
+        </batch>
+    </batches>
+</capture>
