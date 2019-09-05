@@ -66,7 +66,7 @@ class QRSeparator
             if (strtolower($array_files[1]) == 'pdf') {
                 //call split function to sepearate pages
                 try {
-                    $this->split_pdf($ScanSource.$files[$key], sys_get_temp_dir().'/'.$key);
+                    $this->split_pdf($ScanSource.$files[$key], $this->Batch->directory . '/' . $key);
                 } catch (Exception $e) {
                     echo 'ERROR (move '.$files[$key].' to '.$ScanSource.'FAILED/) ! ',  $e->getMessage(), "\n";
                     $_SESSION['capture']->logEvent(
@@ -80,19 +80,20 @@ class QRSeparator
                 }
                 //merge pages previously splited
                 try {
-                    $result = $this->construct_pdf(sys_get_temp_dir().'/'.$key, $ResultDirectory);
+                    $result = $this->construct_pdf($this->Batch->directory . '/' . $key, $ResultDirectory);
                 } catch (Exception $e) {
                     if (!is_dir($ScanSource.'files_errors/')) {
                         mkdir($ScanSource.'files_errors/', 0755, true);
                     }
-                    shell_exec('rm -Rf '.sys_get_temp_dir().'/'.$key);
+                    echo 'FAILED construct_pdf' . PHP_EOL;
+                    //shell_exec('rm -Rf '. $this->Batch->directory . '/' . $key);
                     copy($ScanSource.$files[$key], $ScanSource.'files_errors/'.$files[$key]);
                     unlink($ScanSource.$files[$key]);
                     $num_file++;
                     continue;
                 }
                 if ($result == 'NOSEPARATOR') {
-                    shell_exec('rm -Rf '.sys_get_temp_dir().'/'.$key);
+                    //shell_exec('rm -Rf ' . $this->Batch->directory . '/' . $key);
                     if (!is_dir($ScanSource.'files_noseparator/')) {
                         mkdir($ScanSource.'files_noseparator/', 0755, true);
                     }
@@ -102,7 +103,7 @@ class QRSeparator
                     continue;
                 }
                 unlink($ScanSource.$files[$key]);
-                rmdir(realpath(sys_get_temp_dir().'/'.$key));
+                //rmdir(realpath($this->Batch->directory . '/' . $key));
             } else {
                 echo "No pdf format ! skipping ...\n";
                 $_SESSION['capture']->logEvent(
@@ -166,8 +167,8 @@ class QRSeparator
 
     public function construct_pdf($split_directory, $end_directory = false)
     {
-        print_r($this->qrcodePrefix);
-        $end_directory = $end_directory ? $end_directory : sys_get_temp_dir().'/';
+        echo 'qrcodePrefix ' . $this->qrcodePrefix . PHP_EOL;
+        $end_directory = $end_directory ? $end_directory : $this->Batch->directory . '/';
         
         //$new_pdf = new FPDI();
         $new_pdf = new \setasign\Fpdi\Fpdi('P', 'mm');
@@ -184,7 +185,15 @@ class QRSeparator
                 $next_filename = $i+1;
 
                 //Attempt to extract QRCODE
-                $qrcode = new \Zxing\QrReader($split_directory.$file);
+                try {
+                    $qrcode = new \Zxing\QrReader($split_directory.$file);
+                } catch (Exception $e) {
+                    echo 'Caught exception QrReader: ',  $e->getMessage(), "\n";
+                    $_SESSION['capture']->logEvent(
+                        "Caught exception QrReader: ".$e->getMessage()
+                    );
+                    return false;
+                }
 
                 $text = $qrcode->text();
                 
