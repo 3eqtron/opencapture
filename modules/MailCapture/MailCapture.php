@@ -1883,16 +1883,17 @@ class MailCapture
         $body = $htmlXpath->query('./body', $html)->item(0);
         if(!$body) {
             $contents = $html->childNodes;
-            $body = $htmlDoc->createElement('body');
-            $html->appendChild($body);
+            $body = $htmlDoc->createElement('body');            
             # Append original content to body
             for($i=0, $l=$contents->length; 
                 $i<$l; 
                 $i++ 
-            )
+            ) {
                 $body->appendChild(
                     $contents->item($i)
                 );
+            }
+            $html->appendChild($body);
         }
         
         # HEAD
