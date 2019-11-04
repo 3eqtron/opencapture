@@ -440,11 +440,12 @@ class Reader
 		if($this->TemplateUom == $this->ElementUom)
             return $value;
         
-        
+        $ratio = 1;
+
         switch($this->ElementUom) {
         # x -> dot
         case 'dot':
-            switch($this->templateUom) {
+            switch($this->TemplateUom) {
             case 'mm':
                 $ratio = (25.4 / $this->resolution);
                 break;
@@ -455,7 +456,7 @@ class Reader
             break;
             
         case 'mm':
-            switch($this->templateUom) {
+            switch($this->TemplateUom) {
             case 'dot':
                 $ratio = ($this->resolution / 25.4);
                 break;
@@ -1115,7 +1116,7 @@ class Reader
         $Caller
     ) {		
         $granularity = $Caller->getAttribute('granularity');
-        echo PHP_EOL . "Granularity from " . $Caller->nodeName . "->" . $granularity . PHP_EOL;
+
         $l = $WordList->length;
         $Result = false;
         for($i=0;$i<$l;$i++) {
