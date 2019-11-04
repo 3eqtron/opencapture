@@ -84,7 +84,7 @@ $ArgsParser->add_command(
 $CommandArgsParser->add_arg(
     "BatchName",
     array(
-        "short" => 'n',
+        "short" => 'b',
         "long" => 'BatchName',
         "default" => null,
         "help" => "Batch configuration name",
@@ -95,7 +95,7 @@ $CommandArgsParser->add_arg(
 $CommandArgsParser->add_arg(
     "ConfigName",
     array(
-        "short" => 'n',
+        "short" => 'c',
         "long" => 'ConfigName',
         "default" => 'Capture',
         "help" => "Capture configuration name",
