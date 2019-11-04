@@ -5,9 +5,12 @@ class TesseractOCR
     private $Batch;
     private $dpi;
     
-    function __construct()
+    protected $config;
+
+    public function __construct()
     {
         $this->Batch = $_SESSION['capture']->Batch;
+        $this->config = parse_ini_file(__DIR__.'/config.ini');
     }
     
     public function OCR(
@@ -48,12 +51,14 @@ class TesseractOCR
         $pl = $Pages->length;
         for($pi=0; $pi<$pl; $pi++) {
             $Page = $Pages->item($pi);
-            $this->OCRPage($Page);
+            $this->OCRPage($Page, $Element);
         }
     }
     
     function OCRPage(
-        $Page
+        $Page, 
+        $Document,
+        $dpi = 300
     ) {
         $pn = $Page->getAttribute('number');
         /********************************************************************************
@@ -84,18 +89,18 @@ class TesseractOCR
             
             $ext = $Image->getAttribute('extractedAs');
             $ImageFile = 
-                (string)$Batch->directory
-                . DIRECTORY_SEPARATOR . $DocId . '_' . $ImageId . $ext;
+                (string) $this->Batch->directory
+                . DIRECTORY_SEPARATOR . $Document->id . '_' . $ImageId . $ext;
             $OutFile =
-                (string)$Batch->directory 
-                . DIRECTORY_SEPARATOR . $DocId . '_O' . $ImageId;
+                (string) $this->Batch->directory
+                . DIRECTORY_SEPARATOR . $Document->id . '_' . $ImageId;
             
             /********************************************************************************
             ** Generate HOCR xhtml file
             ********************************************************************************/
             //exec('"bin/Tesseract-OCR/tesseract.exe" "'.$ImageFile.'" "'.$OutFile.'" nobatch makebox');
             exec(
-                '"' . __DIR__ . '/bin/Tesseract-OCR/tesseract.exe" "'.$ImageFile.'" "'.$OutFile.'" hocr'
+                $this->config['path'].'/tesseract.exe "'.$ImageFile.'" "'.$OutFile.'" hocr'
             );
             $HocrFile = $OutFile . '.html';
             if(!is_file($HocrFile))
@@ -116,7 +121,7 @@ class TesseractOCR
             for($tpi=0; $tpi<$tpl; $tpi++) {
                 $tesPara = $tesParas->item($tpi);
                 $Para = $this->Batch->createElement('Para');
-                $Content->appendChild($Para);
+                $Page->appendChild($Para);
                 $tesLines = 
                     $tesXPath->query(
                         './xhtml:span[@class="ocr_line"]',
@@ -147,11 +152,15 @@ class TesseractOCR
                         $lly = ($tesBox[4] / $dpi * 72) + $PlacedImageY - $PlacedImageHeight;
                         $urx = ($tesBox[3] / $dpi * 72) + $PlacedImageX;
                         $ury = ($tesBox[2] / $dpi * 72) + $PlacedImageY - $PlacedImageHeight;
+                        $w = $urx-$llx;
+                        $h = $lly-$ury;
                         
                         $Box->setAttribute('llx', round($llx, 2));
                         $Box->setAttribute('lly', round($lly, 2));
                         $Box->setAttribute('urx', round($urx, 2));
                         $Box->setAttribute('ury', round($ury, 2));
+                        $Box->setAttribute('w', round($w, 2));
+                        $Box->setAttribute('h', round($h, 2));
                         $Box->setAttribute('page', $pn);
                         $Word->appendChild($Box);
                     }
@@ -204,9 +213,6 @@ class TesseractOCR
             }
             fclose($tesFile);
             */
-        
         }
     }
-
 }
-	
