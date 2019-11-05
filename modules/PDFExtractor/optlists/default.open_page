@@ -1,0 +1,8 @@
+granularity=word 
+topdown={output=true}
+contentanalysis={punctuationbreaks=false numericentities=keep merge=2 keephyphenglyphs=true }
+layoutanalysis={layoutastable=true layoutcolumnhint=multicolumn layoutdetect=2 layoutrowhint={full separation=thick}}
+imageanalysis={smallimages={disable=false maxarea=500 maxcount=50} merge={disable=false gap=1.0}}
+tetml={glyphdetails={all} elements={line}}
+docstyle=generic
+ignoreinvisibletext=true

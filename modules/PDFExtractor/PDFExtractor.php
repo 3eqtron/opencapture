@@ -188,10 +188,11 @@ class PDFExtractor
                 // **********************************************************************
                 // Extract images
                 // **********************************************************************
+                $placed_images = 0;
                 for ($page_num=1; $page_num<=$num_pages; $page_num++) {
                     # open page to allow images[] array to contain merged images
                     $page = $this->open_page($doc, $page_num, (string)$this->get_optlist('open_page'));
-                    while ($this->get_image_info($page) == 1) {
+                    while ($this->get_image_info($page)) {
                         $placed_images++;
                     }
                     $this->close_page($page);
@@ -215,7 +216,7 @@ class PDFExtractor
                 }
 
                 //$this->Log("Get XML data...");
-                $tetml = $this->get_xml_data($doc, $this->get_optlist('get_xml_data'));
+                $tetml = $this->get_tetml($doc, '');
                 
                 //$this->Log("Close document...");
                 $this->close_document($doc);
@@ -292,7 +293,10 @@ class PDFExtractor
                 $tetDocument->getAttribute('PdfVersion')
             );
             $Element->setAttribute('OCR', true);
-            $Element->setAttribute('unit', 'dot');
+            $Element->setAttribute('uom', 'dot');
+            $Pages = $this->Batch->createElement("Pages");
+            $Element->appendChild($Pages);
+                
             
             # Import TETML Document DocInfo
             $tetDocInfos = $tetXPath->query('./DocInfo/*', $tetDocument);
@@ -314,7 +318,7 @@ class PDFExtractor
             for($pi=0; $pi<$pl; $pi++) {
                 $tetPage = $tetPages->item($pi);
                 $Page = $this->Batch->importNode($tetPage->cloneNode(false), true);
-                $this->Batch->appendContent($Page, 'Pages');
+                $Pages->appendChild($Page);
                 $Page->setAttribute("id", $pid);
                 $Page->setIdAttribute("id", true);
                 $pid++;
