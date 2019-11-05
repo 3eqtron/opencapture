@@ -14,6 +14,24 @@
     <Formatter name='devise' script='C:\xampp\htdocs\MaarchCapture\Scripts\formatters.php' func='format_currency'/-->
   </Formatters>
   <Templates>
+	<Template name='VINCENNE_DEMO' uom='dot'>
+      <Locators>
+        <Locator name='NUMFAC_locator' type="field" >
+            <Field x="95" y="142" height="12" width="50" />
+        </Locator>
+        <Locator name='NUMCLI_locator' type="field" >
+            <Field x="320" y="226" height="12" width="40" />
+        </Locator>
+        <Locator name='DATE_locator' type="field" >
+            <Field x="447" y="226" height="12" width="100" granularity="Line" />
+        </Locator>
+      </Locators>
+      <Exports>
+        <Export name='NUMFAC' locator="NUMFAC_locator" />
+        <Export name='NUMCLI' locator="NUMCLI_locator" />
+        <Export name='DATE' locator="DATE_locator" />
+      </Exports>
+    </Template>
     <Template name='APRIA_Sx810x' uom='lc'>
       <Locators>
         <Locator name='SOUS_ETAT' type="field" >

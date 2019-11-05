@@ -195,7 +195,7 @@ class Reader
         $l = $Evaluators->length;
 		for($i=0; $i<$l; $i++) {
             $Evaluator = $Evaluators->item($i);
-            $this->evaluate(
+            $this->evaluateElement(
                 $Evaluator,
                 $Element
             );
@@ -963,7 +963,7 @@ class Reader
 	// **********************************************************************
 	// EVALUATION functions
 	// **********************************************************************
-	function evaluate(
+	function evaluateElement(
         $Evaluator,
         $Element
     ) {
@@ -1174,7 +1174,7 @@ class Reader
             $Box->lly = $WordBox->lly;
             $Box->urx = $WordBox->urx;
             $Box->ury = $WordBox->ury;
-            $Box->page = $WordBox->page;
+            //$Box->page = $WordBox->page;
 		} 
         $Caller->appendChild($Result);
 		//$Result->setAttribute("confidence", 100);
