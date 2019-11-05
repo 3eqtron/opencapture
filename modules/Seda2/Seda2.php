@@ -59,6 +59,7 @@ class Seda2
 
         $doc->merge();
 
-        $doc->save($outfile);
+        $doc->save($_SESSION['capture']->Batch->directory.'/'.$outfile);
+        $_SESSION['capture']->Batch->addFile($_SESSION['capture']->Batch->directory.'/'.$outfile);
     }
 }
