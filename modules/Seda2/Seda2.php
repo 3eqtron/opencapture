@@ -1,23 +1,22 @@
 <?php 
 
-set_include_path(get_include_path().PATH_SEPARATOR.'C:\xampp\htdocs\MaarchRM\dependency\xml');
-require_once 'IncludeTrait.php';
-require_once 'TemplateParserTrait.php';
-require_once 'TemplateDataTrait.php';
-require_once 'TemplateTrait.php';
-require_once 'Comment.php';
-require_once 'CdataSection.php';
-require_once 'DocumentFragment.php';
-require_once 'Attr.php';
-require_once 'DocumentType.php';
-require_once 'Notation.php';
-require_once 'EntityReference.php';
-require_once 'Element.php';
-require_once 'Parser.php';
-require_once 'ProcessingInstruction.php';
-require_once 'Text.php';
-require_once 'XPath.php';
-require_once 'Document.php';
+require_once __DIR__.'/xml/IncludeTrait.php';
+require_once __DIR__.'/xml/TemplateParserTrait.php';
+require_once __DIR__.'/xml/TemplateDataTrait.php';
+require_once __DIR__.'/xml/TemplateTrait.php';
+require_once __DIR__.'/xml/Comment.php';
+require_once __DIR__.'/xml/CdataSection.php';
+require_once __DIR__.'/xml/DocumentFragment.php';
+require_once __DIR__.'/xml/Attr.php';
+require_once __DIR__.'/xml/DocumentType.php';
+require_once __DIR__.'/xml/Notation.php';
+require_once __DIR__.'/xml/EntityReference.php';
+require_once __DIR__.'/xml/Element.php';
+require_once __DIR__.'/xml/Parser.php';
+require_once __DIR__.'/xml/ProcessingInstruction.php';
+require_once __DIR__.'/xml/Text.php';
+require_once __DIR__.'/xml/XPath.php';
+require_once __DIR__.'/xml/Document.php';
 
 define('LAABS_NS_SEPARATOR', '/');
 
@@ -25,14 +24,12 @@ class Seda2
 {
     private $Batch;
 
-
-
     public function export($documents, $template, $outfile)
     {
-        $doc = new \dependency\XML\Document();
+        $doc = new \xml\Document();
 
         $doc->load($template);
-        $doc->XPath = new \dependency\XML\XPath($doc);
+        $doc->XPath = new \xml\XPath($doc);
 
         // Get data from XML elements
         foreach ($documents as $documentNode) {
