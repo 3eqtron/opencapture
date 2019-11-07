@@ -9,27 +9,35 @@
     <Database name='maarch_entreprise' type='postgresql' host='localhost' user='postgres' password='maarch' schema='public' />
   </Databases>
   <Formatters>
-    <!--Formatter name='date' script='C:\xampp\htdocs\MaarchCapture\Scripts\formatters.php' func='format_date'/>
-    <Formatter name='montants' script='C:\xampp\htdocs\MaarchCapture\Scripts\formatters.php' func='format_amounts'/>
+    <Formatter name='date' script='scripts/formatters.php' func='format_date'/>
+    <!--Formatter name='montants' script='C:\xampp\htdocs\MaarchCapture\Scripts\formatters.php' func='format_amounts'/>
     <Formatter name='devise' script='C:\xampp\htdocs\MaarchCapture\Scripts\formatters.php' func='format_currency'/-->
   </Formatters>
   <Templates>
 	<Template name='VINCENNE_DEMO' uom='dot'>
       <Locators>
-        <Locator name='NUMFAC_locator' type="field" >
-            <Field x="95" y="142" height="12" width="50" />
+        <Locator name='LocPeriodeDebut' type="field" >
+			<Field x="93" y="119" height="11" width="50" />
         </Locator>
-        <Locator name='NUMCLI_locator' type="field" >
-            <Field x="320" y="226" height="12" width="40" />
+		<Locator name='LocPeriodeFin' type="field" >
+			<Field x="150" y="119" height="11" width="50" />
         </Locator>
-        <Locator name='DATE_locator' type="field" >
-            <Field x="447" y="226" height="12" width="100" granularity="Line" />
+        <Locator name='LocMatricule' type="field" >
+			<Field x="25" y="155" height="11" width="50" />
+        </Locator>
+		<Locator name='LocNID' type="field" >
+			<Field x="105" y="155" height="11" width="80" />
+        </Locator>
+		<Locator name='LocNom' type="field" >
+			<Field x="340" y="155" height="11" width="120" />
         </Locator>
       </Locators>
       <Exports>
-        <Export name='NUMFAC' locator="NUMFAC_locator" />
-        <Export name='NUMCLI' locator="NUMCLI_locator" />
-        <Export name='DATE' locator="DATE_locator" />
+        <Export name='DebutPeriode' locator="LocPeriodeDebut" formatter="date" />
+        <Export name='FinPeriode' locator="LocPeriodeFin" formatter="date"/>
+        <Export name='Matricule' locator="LocMatricule" />
+        <Export name='NID' locator="LocNID" />
+		<Export name='Nom' locator="LocNom" />
       </Exports>
     </Template>
     <Template name='APRIA_Sx810x' uom='lc'>
