@@ -72,17 +72,14 @@ class Xpdf
     }
 
     public function pdftotext(
-        $Elements,
-        $dpi=300
+        $Elements
     ) {
         $this->Batch = $_SESSION['capture']->Batch;
-        
-        $this->dpi = $dpi;
-        
+               
         $_SESSION['capture']->logEvent(
             "Processing with XPDF to text..."
         );
-        
+
         /********************************************************************************
         ** Loop on Batch Documents and apply OCR on images
         ********************************************************************************/
@@ -92,10 +89,16 @@ class Xpdf
         $l = $Elements->length;
         for($i=0; $i<$l; $i++) {
             $Element = $Elements->item($i);
+            
             $pdfPath = $Element->getAttribute('path');
-            $txtPath = $pdfPath.'.txt';
-            $cmd = $this->config->path.'/pdftotext "'.$pdfPath.'" "'.$txtPath.'"';
+            $txtPath = substr($pdfPath, 0, -4);
+            
+            $cmd = $this->config['path'].'/pdftotext '.$pdfPath.' -';
             exec($cmd, $output, $return);
+            $text = implode("\r\n", $output);
+
+            $TextElement = $this->Batch->createElement('Text', $text);
+            $Element->appendChild($TextElement);
         }
     }
 }
