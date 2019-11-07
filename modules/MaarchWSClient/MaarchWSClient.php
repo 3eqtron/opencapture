@@ -297,6 +297,12 @@ class MaarchWSClient extends DOMXPath
             $httpRequest = new Maarch\Http\Message\Request($uriCalled);
             $httpRequest->withMethod($serviceMethod);
 
+            if (!empty($args['header'])) {
+                foreach ($args['header'] as $name => $value) {
+                    $httpRequest->withHeader($name, $value);
+                }
+            }
+
             // Compose query string
             if (!empty($args['query'])) {
                 $queryParts = [];
