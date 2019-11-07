@@ -35,7 +35,7 @@ class Seda2
         foreach ($documents as $documentNode) {
             $binaryDataObject = new StdClass();
             $binaryDataObject->id = $documentNode->getAttribute('id');
-            $binaryDataObject->path = $documentNode->getAttribute('path');
+            $binaryDataObject->path = basename($documentNode->getAttribute('path'));
             $binaryDataObject->filename = $documentNode->getAttribute('filename').'.'.$documentNode->getAttribute('extension');
             $binaryDataObject->hash = hash_file('sha256', $documentNode->getAttribute('path'));
             $binaryDataObject->size = filesize($documentNode->getAttribute('path'));
@@ -43,9 +43,13 @@ class Seda2
 
             $archiveUnit = new stdClass();
             $archiveUnit->id = "AU_".$documentNode->getAttribute('id');
-            $archiveUnit->numfac = $documentNode->getMetadata('NUMFAC');
-            $archiveUnit->numcli = $documentNode->getMetadata('NUMCLI');
-            $archiveUnit->date = $documentNode->getMetadata('DATE');
+
+            $archiveUnit->content = new stdClass();
+            $archiveUnit->content->acquiredDate = date('c');
+            foreach ($documentNode->getMetadata() as $metadataElement) {
+                $archiveUnit->content->{$metadataElement->nodeName} = $metadataElement->nodeValue;
+            }
+            $archiveUnit->dataObjectReference = [$binaryDataObject->id];
 
             $binaryDataObjects[] = $binaryDataObject;
             $archiveUnits[] = $archiveUnit;
