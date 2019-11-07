@@ -1,22 +1,22 @@
 <?php
 
 function format_date($input_date) {
-	$date_sep = '/';
-	$output_date = $input_date;
-	if(mb_strlen($input_date, 'UTF-8') <= 8) {
-		$parts = preg_split("#(\/|\-)#", $input_date);
-		$day = $parts[0];
-		$month = $parts[1];
-		$year = $parts[2];
-		if(strlen($day) === 1) $day = '0' . $day;
-		if(strlen($month) === 1) $month = '0' . $month;
-		if($year > date('y') + 10) {
-			$year = '19' . $year;
-		} else {
-			$year = '20' . $year;
-		}
-		$output_date = $day . $date_sep . $month . $date_sep . $year;
-	}
+	$date_sep = '-';
+	$parts = preg_split("#(\/|\-)#", $input_date);
+	$day = $parts[0];
+	$month = $parts[1];
+	$year = $parts[2];
+	if(strlen($day) === 1) $day = '0' . $day;
+	if(strlen($month) === 1) $month = '0' . $month;
+	if(strlen($year) == 2) {
+        if($year > date('y') + 10) {
+    		$year = '19' . $year;
+    	} else {
+    		$year = '20' . $year;
+    	}
+    }
+	$output_date = $year . $date_sep . $month . $date_sep . $day;
+
 	return $output_date;
 }
 
