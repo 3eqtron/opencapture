@@ -41,30 +41,10 @@
             <loop xpath="Attachments/Attachment">
                 <call name="/attachments" method="POST">
                     <argument type="entity" eval="base64_encode(file_get_contents($Element-&gt;path))" name="encodedFile"/>
-                    <argument type="entity" name="data">
-                        <column>title</column>
-                        <value metadata="filename"/>
-                        <type>string</type>
-                    </argument>
-                    <argument type="entity" name="data">
-                        <column>res_id_master</column>
-                        <value xvalue="ancestor::Document/Metadata/resId"/>
-                        <type>integer</type>
-                    </argument>
-                    <argument type="entity" name="data">
-                        <column>coll_id</column>
-                        <value>letterbox_coll</value>
-                        <type>string</type>
-                    </argument>
-                    <argument type="entity" name="data">
-                        <column>attachment_type</column>
-                        <value>incoming_mail_attachment</value>
-                        <type>string</type>
-                    </argument>
-                    <argument type="entity" name="collId">letterbox_coll</argument>
-                    <argument type="entity" name="table">res_attachments</argument>
-                    <argument type="entity" name="fileFormat" attribute="extension"/>
-                    <argument type="entity" name="status">TRA</argument>
+                    <argument type="entity" name="title" metadata="filename"/>
+                    <argument type="entity" name="resIdMaster" xvalue="ancestor::Document/Metadata/resId"/>
+                    <argument type="entity" name="type">incoming_mail_attachment</argument>
+                    <argument type="entity" name="format" attribute="extension"/>
                     <return>
                         <resId metadata="resId" />
                     </return>
