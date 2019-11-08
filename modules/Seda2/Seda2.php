@@ -64,6 +64,14 @@ class Seda2
         $doc->merge();
 
         $doc->save($_SESSION['capture']->Batch->directory.'/'.$outfile);
-        $_SESSION['capture']->Batch->addFile($_SESSION['capture']->Batch->directory.'/'.$outfile);
+        
+        $zipcmd = '7z a '.$_SESSION['capture']->Batch->directory.'/ArchiveTransfer.zip '.$_SESSION['capture']->Batch->directory.'/'.$outfile;
+        exec($zipcmd);
+        foreach ($documents as $documentNode) {
+            $zipcmd = '7z a '.$_SESSION['capture']->Batch->directory.'/ArchiveTransfer.zip '.$documentNode->getAttribute('path');
+            exec($zipcmd);
+        }
+
+        $_SESSION['capture']->Batch->addFile($_SESSION['capture']->Batch->directory.'/ArchiveTransfer.zip');
     }
 }
