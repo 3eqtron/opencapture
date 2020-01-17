@@ -2,6 +2,24 @@
 <MaarchWSClient>
     <!-- REST FRONTAL -->
     <WS name="MaarchRestWS" type="REST" uri="http://superadmin:superadmin@127.0.0.1/rest/" SSL="false" cacheUse="0" />
+    <!-- DEVELOP SAMPLES -->
+    <process name="MaarchRestWSProcessFromScan_Develop">
+        <loop xpath="/Batch/Documents/Document">
+            <call name="/resources" method="POST">
+                <argument type="entity" name="modelId">1</argument>
+                <argument type="entity" name="encodedFile" eval="base64_encode(file_get_contents($Element-&gt;path))"/>
+                <argument type="entity" name="doctype">108</argument>
+                <argument type="entity" name="destination">13</argument>
+                <argument type="entity" name="priority">poiuytre1391nbvc</argument>
+                <!-- <argument type="entity" name="destination" eval="explode('_', $Element-&gt;filename)&#91;0&#93;"/> -->
+                <argument type="entity" name="format" attribute="extension"/>
+                <argument type="entity" name="status">INIT</argument>
+                <return>
+                    <resId metadata="resId" />
+                </return>
+            </call>
+        </loop>
+    </process>
     <!-- REST SAMPLES -->
     <process name="MaarchRestWSProcessFromScan">
         <loop xpath="/Batch/Documents/Document">
