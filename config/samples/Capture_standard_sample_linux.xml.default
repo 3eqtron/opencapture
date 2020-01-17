@@ -29,16 +29,6 @@
                     <input name="CatchError">true</input>
                     <input name="configFile">MaarchWSClient_standard_sample.xml</input>
                 </step>
-
-                <!-- SOAP SAMPLE -->
-                <!-- 
-                <step name="SendToMaarch" module="MaarchWSClient" function="processBatch">
-                    <input name="WS">MaarchSoapWS</input>
-                    <input name="Process">MaarchSoapWSProcessFromScan</input>
-                    <input name="CatchError">true</input>
-                    <input name="configFile">MaarchWSClient_standard_sample.xml</input>
-                </step>
-                -->
             </workflow>
         </batch>
         <!-- MAIL TO MAARCHCOURRIER SAMPLE -->
@@ -50,24 +40,12 @@
                     <input name="configFile">MailCapture_standard_sample.xml</input>
                     <input name="folder">maarch/purge</input>
                 </step>
-                <!-- REST SAMPLE -->
-
                 <step name="SendToMaarch" module="MaarchWSClient" function="processBatch">
                     <input name="WS">MaarchRestWS</input>
                     <input name="Process">MaarchRestWSProcessFromMail</input>
                     <input name="CatchError">true</input>
                     <input name="configFile">MaarchWSClient_standard_sample.xml</input>
                 </step>
-
-                <!-- SOAP SAMPLE -->
-                <!-- 
-                <step name="SendToMaarch" module="MaarchWSClient" function="processBatch">
-                    <input name="WS">MaarchSoapWS</input>
-                    <input name="Process">MaarchSoapWSProcessFromMail</input>
-                    <input name="CatchError">true</input>
-                    <input name="configFile">MaarchWSClient_standard_sample.xml</input>
-                </step>
-                -->
             </workflow>
         </batch>
     </batches>

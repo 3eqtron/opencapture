@@ -44,12 +44,6 @@
                     <input name="CatchError">false</input>
                     <input name="configFile">MaarchWSClient_ci.xml</input>
                 </step>
-                <!-- <step name="SendToMaarch" module="MaarchWSClient" function="processBatch">
-                    <input name="WS">MaarchSoapWS</input>
-                    <input name="Process">MaarchSoapWSProcessFromScan</input>
-                    <input name="CatchError">false</input>
-                    <input name="configFile">MaarchWSClient_ci.xml</input>
-                </step> -->
             </workflow>
         </batch>
         <batch name="MAARCH_CI_MAIL_TO_MC" directory="/opt/maarch/MaarchCapture/files/" id="{batchname}-{timestamp}-{rand}" lock="0">
@@ -66,12 +60,6 @@
                     <input name="CatchError">false</input>
                     <input name="configFile">MaarchWSClient_ci.xml</input>
                 </step>
-                <!-- <step name="SendToMaarch" module="MaarchWSClient" function="processBatch">
-                    <input name="WS">MaarchSoapWS</input>
-                    <input name="Process">MaarchSoapWSProcessFromMail</input>
-                    <input name="CatchError">false</input>
-                    <input name="configFile">MaarchWSClient_ci.xml</input>
-                </step> -->
             </workflow>
         </batch>
     </batches>

@@ -1,5 +1,5 @@
 # Version
-`1.5`
+`develop`
 
 # Prerequisit
 `PHP 7 or greater`
@@ -16,7 +16,7 @@
 
 # Install 
 ```
-git clone -b 1.5 https://labs.maarch.org/maarch/MaarchCapture
+git clone -b develop https://labs.maarch.org/maarch/MaarchCapture
 ```
 
 # PDFLib 
