@@ -58,13 +58,13 @@
             </call>
             <loop xpath="Attachments/Attachment">
                 <call name="/attachments" method="POST">
-                    <argument type="entity" eval="base64_encode(file_get_contents($Element-&gt;path))" name="encodedFile"/>
-                    <argument type="entity" name="title" metadata="filename"/>
                     <argument type="entity" name="resIdMaster" xvalue="ancestor::Document/Metadata/resId"/>
                     <argument type="entity" name="type">incoming_mail_attachment</argument>
+                    <argument type="entity" name="encodedFile" eval="base64_encode(file_get_contents($Element-&gt;path))"/>
                     <argument type="entity" name="format" attribute="extension"/>
+                    <argument type="entity" name="title" metadata="filename"/>                    
                     <return>
-                        <resId metadata="resId" />
+                        <id metadata="resId" />
                     </return>
                 </call>
             </loop>
