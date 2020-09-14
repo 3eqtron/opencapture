@@ -9,6 +9,135 @@ class QRSeparator
         $this->Batch = $_SESSION['capture']->Batch;
         require __DIR__ . "/../../vendor/autoload.php";
     }
+
+    public function reconcil($ScanSource, $qrcodePrefix = "false", $ResultDirectory = false)
+    {
+        $result = '';
+        echo "Init process ...\n";
+        $_SESSION['capture']->logEvent(
+            "Init process ... "
+        );
+
+        $this->qrcodePrefix = $qrcodePrefix;
+
+        if ($qrcodePrefix == "true") {
+            echo "Prefix MAARCH_ is enabled !\n";
+        }
+
+        if (!is_readable($ScanSource)) {
+            echo "Source directory is not valid !\n";
+            $_SESSION['capture']->logEvent(
+                "Source directory is not valid !"
+            );
+            exit();
+        }
+
+        if (!is_readable($ScanSource)) {
+            echo "Result directory is not valid ! \n";
+            $_SESSION['capture']->logEvent(
+                "Result directory is not valid !"
+            );
+            exit();
+        }
+
+        $files = array_diff(scandir($ScanSource), array('..', '.','FAILED', 'files_errors', 'files_noseparator'));
+
+        if (empty($files)) {
+            echo "No files to process ! End of process ...\n";
+            $_SESSION['capture']->logEvent(
+                "No files to process ! End of process ..."
+            );
+            exit();
+        }
+
+        $num_file = 1;
+        foreach ($files as $key => $value) {
+            
+            $array_files = explode('.', $files[$key]);
+            //Ignore all files except pdf
+            if (strtolower($array_files[1]) == 'pdf') {
+                echo "\n\n * File n°".$num_file.": ".$files[$key]." *\n";
+                $_SESSION['capture']->logEvent(
+                    "* File n°".$num_file.": ".$files[$key]." *"
+                );
+                
+                try {
+                    copy($ScanSource.$files[$key], $this->Batch->directory . '/' . $key . '.pdf');
+                    echo "process file n°".$this->Batch->directory . '/' . $key . '.pdf'. PHP_EOL;
+                    //Attempt to extract QRCODE
+                    try {
+                        $qrcode = new \Zxing\QrReader($this->Batch->directory . '/' . $key.'.pdf');
+                    } catch (Exception $e) {
+                        echo 'Caught exception QrReader: ',  $e->getMessage(), "\n";
+                        $_SESSION['capture']->logEvent(
+                            "Caught exception QrReader: ".$e->getMessage()
+                        );
+                        return false;
+                    }
+
+                    $text = $qrcode->text();
+                    echo 'qrcode : ' . $text . PHP_EOL;
+                    
+                    if ($this->qrcodePrefix == "true" && !empty($text)) {
+                        if (preg_match("/^MAARCH_/i", $text)) {
+                            $text = preg_replace("/^MAARCH_/i", '', $text);
+                            echo "Un résultat a été trouvé.";
+                            $Document = $this->Batch->addDocument($this->Batch->directory . '/' . $key . '.pdf');
+                            $_SESSION['capture']->logEvent(
+                                "Document " . $Document->id  . " added with source " . $this->Batch->directory . '/' . $key . '.pdf'
+                            );
+                            $Document->setMetadata(
+                                "destination",
+                                $text
+                            );
+                        } elseif ($this->qrcodePrefix == "false" && !empty($text)) {
+                            $Document = $this->Batch->addDocument($this->Batch->directory . '/' . $key . '.pdf');
+                            $_SESSION['capture']->logEvent(
+                                "Document " . $Document->id  . " added with source " . $this->Batch->directory . '/' . $key . '.pdf'
+                            );
+                            $Document->setMetadata(
+                                "destination",
+                                $text
+                            );
+                        } else {
+                            $text = '';
+                            echo "Aucun résultat n'a été trouvé.";
+                        }
+                    }
+                } catch (Exception $e) {
+                    if (!is_dir($ScanSource.'files_errors/')) {
+                        mkdir($ScanSource.'files_errors/', 0755, true);
+                    }
+                    echo 'FAILED reco qr code' . PHP_EOL;
+                    copy($ScanSource.$files[$key], $ScanSource.'files_errors/'.$files[$key]);
+                    unlink($ScanSource.$files[$key]);
+                    $num_file++;
+                    continue;
+                }
+                if ($result == 'NOSEPARATOR') {
+                    if (!is_dir($ScanSource.'files_noseparator/')) {
+                        mkdir($ScanSource.'files_noseparator/', 0755, true);
+                    }
+                    copy($ScanSource.$files[$key], $ScanSource.'files_noseparator/'.$files[$key]);
+                    unlink($ScanSource.$files[$key]);
+                    $num_file++;
+                    continue;
+                }
+                unlink($ScanSource.$files[$key]);
+            } else {
+                echo $files[$key] . " : No pdf format ! skipping ...\n";
+                $_SESSION['capture']->logEvent(
+                    "No pdf format ! skipping ...\n"
+                );
+            }
+            $num_file++;
+        }
+
+        echo "End of process ...\n";
+        $_SESSION['capture']->logEvent(
+            "End of process ..."
+        );
+    }
     
     public function separatePDF($ScanSource, $qrcodePrefix = "false", $ResultDirectory = false)
     {
