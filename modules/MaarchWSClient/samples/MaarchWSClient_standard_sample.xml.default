@@ -38,6 +38,20 @@
             </call>
         </loop>
     </process>
+    <!-- RECONCIL SAMPLES -->
+    <process name="ReconcilWithQrCode">
+        <loop xpath="/Batch/Documents/Document">
+            <call name="/reconcil" method="POST">
+                <argument type="entity" name="chrono" metadata="destination"/>
+                <argument type="entity" name="encodedFile" eval="base64_encode(file_get_contents($Element-&gt;path))"/>
+                <argument type="entity" name="format" attribute="extension"/>
+                <argument type="entity" name="title" metadata="filename"/>                                     
+                <return>
+                    <id metadata="resId" />
+                </return>
+            </call>
+        </loop>
+    </process>
     <process name="MaarchRestWSProcessFromMail">
         <loop xpath="/Batch/Documents/Document">
             <call name="/resources" method="POST">
