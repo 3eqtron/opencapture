@@ -38,14 +38,18 @@
             </call>
         </loop>
     </process>
-    <!-- RECONCIL SAMPLES -->
-    <process name="ReconcilWithQrCode">
+    <!-- RECONCILE SAMPLES -->
+    <process name="ReconcileWithQrCode">
         <loop xpath="/Batch/Documents/Document">
-            <call name="/reconcil" method="POST">
-                <argument type="entity" name="chrono" metadata="destination"/>
+            <call name="/attachments" method="POST">
+                <argument type="entity" name="chrono" metadata="chrono"/>
                 <argument type="entity" name="encodedFile" eval="base64_encode(file_get_contents($Element-&gt;path))"/>
                 <argument type="entity" name="format" attribute="extension"/>
-                <argument type="entity" name="title" metadata="filename"/>                                     
+                <argument type="entity" name="title" metadata="filename"/>
+                <argument type="entity" name="resIdMaster" metadata="resIdMaster"/>
+                <argument type="entity" name="originId" metadata="originId"/>
+                <argument type="entity" name="title" metadata="title"/>
+                <argument type="entity" name="type">response_project</argument>
                 <return>
                     <id metadata="resId" />
                 </return>

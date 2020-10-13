@@ -10,7 +10,7 @@ class QRSeparator
         require __DIR__ . "/../../vendor/autoload.php";
     }
 
-    public function reconcil($ScanSource, $qrcodePrefix = "false", $ResultDirectory = false)
+    public function reconcile($ScanSource, $qrcodePrefix = "false", $ResultDirectory = false)
     {
         $result = '';
         echo "Init process ...\n";
@@ -52,7 +52,7 @@ class QRSeparator
 
         $num_file = 1;
         foreach ($files as $key => $value) {
-            
+
             $array_files = explode('.', $files[$key]);
             //Ignore all files except pdf
             if (strtolower($array_files[1]) == 'pdf') {
@@ -60,7 +60,7 @@ class QRSeparator
                 $_SESSION['capture']->logEvent(
                     "* File n°".$num_file.": ".$files[$key]." *"
                 );
-                
+
                 try {
                     copy($ScanSource.$files[$key], $this->Batch->directory . '/' . $key . '.pdf');
                     echo "process file n°".$this->Batch->directory . '/' . $key . '.pdf'. PHP_EOL;
@@ -77,32 +77,30 @@ class QRSeparator
 
                     $text = $qrcode->text();
                     echo 'qrcode : ' . $text . PHP_EOL;
-                    
-                    if ($this->qrcodePrefix == "true" && !empty($text)) {
-                        if (preg_match("/^MAARCH_/i", $text)) {
-                            $text = preg_replace("/^MAARCH_/i", '', $text);
-                            echo "Un résultat a été trouvé.";
-                            $Document = $this->Batch->addDocument($this->Batch->directory . '/' . $key . '.pdf');
-                            $_SESSION['capture']->logEvent(
-                                "Document " . $Document->id  . " added with source " . $this->Batch->directory . '/' . $key . '.pdf'
-                            );
-                            $Document->setMetadata(
-                                "destination",
-                                $text
-                            );
-                        } elseif ($this->qrcodePrefix == "false" && !empty($text)) {
-                            $Document = $this->Batch->addDocument($this->Batch->directory . '/' . $key . '.pdf');
-                            $_SESSION['capture']->logEvent(
-                                "Document " . $Document->id  . " added with source " . $this->Batch->directory . '/' . $key . '.pdf'
-                            );
-                            $Document->setMetadata(
-                                "destination",
-                                $text
-                            );
-                        } else {
-                            $text = '';
-                            echo "Aucun résultat n'a été trouvé.";
+
+                    $text = explode(';', $text);
+
+                    $resIdMaster = $text[1];
+                    $originId = $text[2];
+                    $title = $text[3];
+                    $chrono = $text[0];
+
+                    if (!empty($text)) {
+                        if ($this->qrcodePrefix == 'true' && preg_match("/^MAARCH_/i", $chrono)) {
+                            $chrono = preg_replace("/^MAARCH_/i", '', $chrono);
                         }
+                        echo "Un résultat a été trouvé.";
+                        $Document = $this->Batch->addDocument($this->Batch->directory . '/' . $key . '.pdf');
+                        $_SESSION['capture']->logEvent(
+                            "Document " . $Document->id  . " added with source " . $this->Batch->directory . '/' . $key . '.pdf'
+                        );
+
+                        $Document->setMetadata("chrono", $chrono);
+                        $Document->setMetadata("resIdMaster", $resIdMaster);
+                        $Document->setMetadata("originId", empty($originId) ? null : $originId);
+                        $Document->setMetadata("title", $title);
+                    } else {
+                        echo "Aucun résultat n'a été trouvé.";
                     }
                 } catch (Exception $e) {
                     if (!is_dir($ScanSource.'files_errors/')) {
