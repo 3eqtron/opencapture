@@ -78,14 +78,14 @@ class QRSeparator
                     $text = $qrcode->text();
                     echo 'qrcode : ' . $text . PHP_EOL;
 
-                    $text = explode(';', $text);
+                    $data = json_decode($text, true);
 
-                    $resIdMaster = $text[1];
-                    $originId = $text[2];
-                    $title = $text[3];
-                    $chrono = $text[0];
+                    $chrono = $data['chrono'];
+                    $resIdMaster = $data['resIdMaster'];
+                    $originId = $data['originId'];
+                    $title = $data['title'];
 
-                    if (!empty($text)) {
+                    if (!empty($data)) {
                         if ($this->qrcodePrefix == 'true' && preg_match("/^MAARCH_/i", $chrono)) {
                             $chrono = preg_replace("/^MAARCH_/i", '', $chrono);
                         }
