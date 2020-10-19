@@ -82,7 +82,7 @@ class QRSeparator
 
                     $chrono = $data['chrono'];
                     $resIdMaster = $data['resIdMaster'];
-                    $originId = $data['originId'];
+                    $originId = $data['resId'];
                     $title = $data['title'];
 
                     if (!empty($data)) {
