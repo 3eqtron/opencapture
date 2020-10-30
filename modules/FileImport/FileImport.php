@@ -33,7 +33,8 @@ class FileImport extends DOMXPath
         $Extensions           = '',
         $NbMaxFoldersToImport = 0,
         $DeleteSubFolders     = false,
-        $fileNameStructure    = ""
+        $fileNameStructure    = '',
+        $separator            = '_'
     ) {
         $this->Target               = $Target;
         $this->Action               = $Action;
@@ -44,6 +45,7 @@ class FileImport extends DOMXPath
         $this->NbMaxFoldersToImport = $NbMaxFoldersToImport;
         $this->DeleteSubFolders     = $DeleteSubFolders;
         $this->fileNameStructure    = $fileNameStructure;
+        $this->separator            = $separator;
         
         $_SESSION['capture']->logEvent(
             "Scanning directory $Directory for file import..."
@@ -192,8 +194,12 @@ class FileImport extends DOMXPath
                 $this->discard($entry_path, $entry_name);
                 if (!empty($this->fileNameStructure)) {
                     preg_match_all('/(?<=\[)(.*?)(?=\])/m', $this->fileNameStructure, $matches, PREG_PATTERN_ORDER);
-                    $pathInfo       = pathinfo($entry_name);
-                    $filenameValues = explode("_", $pathInfo['filename']);
+                    $pathInfo = pathinfo($entry_name);
+                    if(empty($this->separator))
+                    {
+                        $this->separator = "_";
+                    }
+                    $filenameValues = explode($this->separator, $pathInfo['filename']);
                     foreach ($filenameValues as $key => $value) {
                         $Content->setMetadata($matches[0][$key], $value);
                     }
