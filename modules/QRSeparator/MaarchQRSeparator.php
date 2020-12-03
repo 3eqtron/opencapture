@@ -77,6 +77,15 @@ class QRSeparator
 
                     $text = $qrcode->text();
                     echo 'qrcode : ' . $text . PHP_EOL;
+                    
+                    //lgi patch
+                    if ($text == '') {
+                        echo 'convert ' . $this->Batch->directory . '/' . $key . '.pdf' . PHP_EOL;
+                        exec('convert -density 300 ' .  $this->Batch->directory . '/' . $key . '.pdf ' . $this->Batch->directory . '/' . $key . '.png');
+                        exec('zbarimg ' . $this->Batch->directory . '/' . $key . '.png', $resultZbar);
+                        var_dump($resultZbar[0]);
+                        $text = str_replace('QR-Code:', '', $resultZbar[0]);
+                    }
 
                     $data = json_decode($text, true);
 
