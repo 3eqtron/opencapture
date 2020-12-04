@@ -335,9 +335,9 @@ class QRSeparator
 
                 //lgi patch
                 if ($text == '') {
-                    echo 'convert ' . $this->Batch->directory . '/' . $key . '.pdf' . PHP_EOL;
-                    exec('convert -density 300 ' .  $this->Batch->directory . '/' . $key . '.pdf ' . $this->Batch->directory . '/' . $key . '.png');
-                    exec('zbarimg ' . $this->Batch->directory . '/' . $key . '.png', $resultZbar);
+                    echo 'convert ' . $split_directory.$file . PHP_EOL;
+                    exec('convert -density 300 ' .  $split_directory.$file . '  -colorspace RGB ' . $split_directory . $file . '.png');
+                    exec('zbarimg ' . $split_directory . $file . '.png', $resultZbar);
                     var_dump($resultZbar[0]);
                     $text = str_replace('QR-Code:', '', $resultZbar[0]);
                 }
