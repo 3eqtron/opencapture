@@ -52,7 +52,8 @@ class QRSeparator
 
         $num_file = 1;
         foreach ($files as $key => $value) {
-
+            $text = '';
+            $resultZbar = '';
             $array_files = explode('.', $files[$key]);
             //Ignore all files except pdf
             if (strtolower($array_files[1]) == 'pdf') {
@@ -84,7 +85,14 @@ class QRSeparator
                         exec('convert -density 300 ' .  $this->Batch->directory . '/' . $key . '.pdf ' . $this->Batch->directory . '/' . $key . '.png');
                         exec('zbarimg ' . $this->Batch->directory . '/' . $key . '.png', $resultZbar);
                         var_dump($resultZbar[0]);
-                        $text = str_replace('QR-Code:', '', $resultZbar[0]);
+                        $textExploded = explode(':', $resultZbar[0]);
+                        //var_dump($textExploded);
+                        if (is_array($textExploded) && $textExploded[0] <> 'QR-Code') {
+                            echo 'NO QR CODE' . PHP_EOL;
+                            $text = '';
+                        } else {
+                            $text = str_replace('QR-Code:', '', $resultZbar[0]);
+                        }
                     }
 
                     $data = json_decode($text, true);
@@ -316,6 +324,8 @@ class QRSeparator
         $split_directory = $split_directory.'/';
 
         while ($i!=0) {
+            $text = '';
+            $resultZbar = '';
             if (is_file($split_directory.$i.'.pdf')) {
                 $file = $i.'.pdf';
                 $next_filename = $i+1;
@@ -335,13 +345,21 @@ class QRSeparator
 
                 //lgi patch
                 if ($text == '') {
-                    echo 'convert ' . $split_directory.$file . PHP_EOL;
+                    echo 'convert -density 300 ' .  $split_directory.$file . '  -colorspace RGB ' . $split_directory . $file . '.png' . PHP_EOL;
                     exec('convert -density 300 ' .  $split_directory.$file . '  -colorspace RGB ' . $split_directory . $file . '.png');
+                    echo 'zbarimg ' . $split_directory . $file . '.png' . PHP_EOL;
                     exec('zbarimg ' . $split_directory . $file . '.png', $resultZbar);
                     var_dump($resultZbar[0]);
-                    $text = str_replace('QR-Code:', '', $resultZbar[0]);
+                    $textExploded = explode(':', $resultZbar[0]);
+                    //var_dump($textExploded);
+                    if (is_array($textExploded) && $textExploded[0] <> 'QR-Code') {
+                        echo 'NO QR CODE' . PHP_EOL;
+                        $text = '';
+                    } else {
+                        $text = str_replace('QR-Code:', '', $resultZbar[0]);
+                    }
                 }
-                
+                var_dump($text);
                 if ($this->qrcodePrefix == "true" && !empty($text)) {
                     if (preg_match("/^MAARCH_/i", $text)) {
                         $text = preg_replace("/^MAARCH_/i", '', $text);
@@ -430,7 +448,7 @@ class QRSeparator
                 }
                 echo "Remove tmp file : ".$split_directory.$i.'.pdf';
                 echo "\n";
-                unlink($split_directory.$i.'.pdf');
+                //unlink($split_directory.$i.'.pdf');
             } else {
                 break;
             }
