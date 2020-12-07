@@ -360,6 +360,10 @@ class QRSeparator
                     }
                 }
                 var_dump($text);
+                if ($this->qrcodePrefix == "false" && !empty($text) && !is_numeric($text)) {
+                    echo 'not numeric ' .  $text . PHP_EOL;
+                    $text = '';
+                }
                 if ($this->qrcodePrefix == "true" && !empty($text)) {
                     if (preg_match("/^MAARCH_/i", $text)) {
                         $text = preg_replace("/^MAARCH_/i", '', $text);
