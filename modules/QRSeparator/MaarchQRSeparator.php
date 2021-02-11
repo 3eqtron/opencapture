@@ -76,15 +76,14 @@ class QRSeparator
                         return false;
                     }
 
-                    $text = $qrcode->text();
-                    echo 'qrcode : ' . $text . PHP_EOL;
-                    
-                    //lgi patch
-                    if ($text == '') {
-                        echo 'convert ' . $this->Batch->directory . '/' . $key . '.pdf' . PHP_EOL;
+                    try {
+                        $text = $qrcode->text();
+                    } catch (Exception $e) {
+                        //lgi patch
+//                        echo 'convert ' . $this->Batch->directory . '/' . $key . '.pdf' . PHP_EOL;
                         exec('convert -density 300 ' .  $this->Batch->directory . '/' . $key . '.pdf ' . $this->Batch->directory . '/' . $key . '.png');
                         exec('zbarimg ' . $this->Batch->directory . '/' . $key . '.png', $resultZbar);
-                        var_dump($resultZbar[0]);
+//                        var_dump($resultZbar[0]);
                         $textExploded = explode(':', $resultZbar[0]);
                         //var_dump($textExploded);
                         if (is_array($textExploded) && $textExploded[0] <> 'QR-Code') {
@@ -94,6 +93,8 @@ class QRSeparator
                             $text = str_replace('QR-Code:', '', $resultZbar[0]);
                         }
                     }
+
+                    echo 'QR code : ' . $text . PHP_EOL;
 
                     $data = json_decode($text, true);
 
