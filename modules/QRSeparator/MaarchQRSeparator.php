@@ -342,26 +342,37 @@ class QRSeparator
                     return false;
                 }
 
-                $text = $qrcode->text();
+                try {
+                    $text = $qrcode->text();
+                } catch (Exception $e) {
+                    $text = false;
+                }
 
-                //lgi patch
-                if ($text == '') {
-                    echo 'convert -density 300 ' .  $split_directory.$file . '  -colorspace RGB ' . $split_directory . $file . '.png' . PHP_EOL;
-                    exec('convert -density 300 ' .  $split_directory.$file . '  -colorspace RGB ' . $split_directory . $file . '.png');
-                    echo 'zbarimg ' . $split_directory . $file . '.png' . PHP_EOL;
+                if ($text === false) {
+                    // If library fails to read qr code in pdf, we try to read it with a different method by converting the pdf to an image
+//                    echo 'convert -density 30 ' . $split_directory . $file . '  -colorspace RGB ' . $split_directory . $file . '.png' . PHP_EOL;
+                    exec('convert -density 30 ' . $split_directory . $file . '  -colorspace RGB ' . $split_directory . $file . '.png');
+//                    echo 'zbarimg ' . $split_directory . $file . '.png' . PHP_EOL;
                     exec('zbarimg ' . $split_directory . $file . '.png', $resultZbar);
-                    var_dump($resultZbar[0]);
-                    $textExploded = explode(':', $resultZbar[0]);
-                    //var_dump($textExploded);
-                    if (is_array($textExploded) && $textExploded[0] <> 'QR-Code') {
-                        echo 'NO QR CODE' . PHP_EOL;
-                        $text = '';
+                    if (!empty($resultZbar)) {
+//                        var_dump($resultZbar[0]);
+                        $textExploded = explode(':', $resultZbar[0]);
+
+                        if (is_array($textExploded) && $textExploded[0] <> 'QR-Code') {
+//                            echo 'NO QR CODE' . PHP_EOL;
+                            $text = '';
+                        } else {
+                            $text = str_replace('QR-Code:', '', $resultZbar[0]);
+                        }
                     } else {
-                        $text = str_replace('QR-Code:', '', $resultZbar[0]);
+//                        echo "NO RESULT";
+                        $text = '';
                     }
                 }
-                var_dump($text);
-                if ($this->qrcodePrefix == "false" && !empty($text) && !is_numeric($text)) {
+
+                echo "QR code : " . $text . PHP_EOL;
+
+                if ($this->qrcodePrefix == "false" && !empty($text) && !is_numeric($text) && $text != 'GENERIQUE') {
                     echo 'not numeric ' .  $text . PHP_EOL;
                     $text = '';
                 }
