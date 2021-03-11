@@ -286,11 +286,14 @@ class QRSeparator
         for ($i = 1; $i <= $pagecount; $i++) {
             $new_pdf = new \setasign\Fpdi\Fpdi('P', 'mm');
 
-            $new_pdf->AddPage();
-            
             $new_pdf->setSourceFile($filename);
 
             $tplidx = $new_pdf->importPage($i);
+            $specs = $new_pdf->getTemplateSize($tplidx);
+
+            $orientation = $specs['height'] > $specs['width'] ? 'P' : 'L';
+            $new_pdf->AddPage($orientation);
+
             $new_pdf->useTemplate($tplidx);
 
             try {
