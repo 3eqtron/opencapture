@@ -294,7 +294,7 @@ class QRSeparator
             $orientation = $specs['height'] > $specs['width'] ? 'P' : 'L';
             $new_pdf->AddPage($orientation);
 
-            $new_pdf->useTemplate($tplidx);
+            $new_pdf->useTemplate($tplidx, null, null, null, null, true);
 
             try {
                 $new_filename = $end_directory.$i.".pdf";
