@@ -1,10 +1,13 @@
-; This file is use to configure the email that is send if the user don't exist
-; Only useful if you use the function checkUserMail in MailCapture.xml
+; This file is use to configure the email that is send for acknowledgement receipt
+; Only useful if you use the function notifyContact in Capture.xml
 ;
-; <messagerule name="from_maarch" info="fromaddress" op="checkUserMail" action="delete" >true</messagerule>
+; <step name="SendAR" module="MailCapture" function="notifyContact">
+;     <input name="ContentPath">/Batch/Documents/Document</input>
+;     <input name="type">acknowledgement_receipt</input>
+; </step>
 
+mail_from = '"NoReply" <NoReply@domain.com>'
 
-mail_object = "Reponse automatique"
+mail_reply_to = '"NoReply" <NoReply@domain.com>'
 
-
-mail_message = "votre courriel n'a pu Ítre versÈ dans Maarch car vous n'avez pas ÈtÈ reconnu en tant qu'utilisateur de l'application."
+mail_message = "<html><head></head><body style='background:white;color: #808080;font-size: 14px;text-align: justify;line-height: 25px;font-family: Trebuchet MS, Arial, Verdana, sans-serif;'>Bonjour,<br>Votre courriel a bien √©t√© re√ßu par l'administration centrale.<br>Une r√©ponse vous sera faite dans les plus brefs d√©lais.<br/>Cordialement.<br/><hr/><p style='text-align:center;'><i style='color:#A4A4A4;font-size:12px;'>Ceci est un message automatique, veuillez ne pas r√©pondre !<br/></i></p></body></html>"

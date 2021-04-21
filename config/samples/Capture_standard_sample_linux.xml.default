@@ -46,6 +46,11 @@
                     <input name="CatchError">true</input>
                     <input name="configFile">MaarchWSClient_standard_sample.xml</input>
                 </step>
+                <!-- AR -->
+                <!-- <step name="SendAR" module="MailCapture" function="notifyContact">
+                    <input name="ContentPath">/Batch/Documents/Document</input>
+                    <input name="type">acknowledgement_receipt</input>
+                </step> -->
             </workflow>
         </batch>
         <!-- RECONCILE WITH QRCODE-->

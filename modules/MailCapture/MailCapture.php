@@ -1,8 +1,7 @@
 <?php
 
-class MailCapture 
-    extends DOMXPath
-{ 
+class MailCapture extends DOMXPath
+{
     const MIME_TYPE_TEXT        = 0;
     const MIME_TYPE_MULTIPART   = 1;
     const MIME_TYPE_MESSAGE     = 2;
@@ -44,7 +43,7 @@ class MailCapture
     private $endFileName;
 
     public function __construct(
-    ){       
+    ) {
         $this->Batch = $_SESSION['capture']->Batch;
         
         if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . "MailCapture.xml")) {
@@ -58,12 +57,14 @@ class MailCapture
         
         // List encodings in upper case
         $this->encodings = mb_list_encodings();
-        foreach ($this->encodings as $encoding) 
+        foreach ($this->encodings as $encoding) {
             $this->encodings[] = strtoupper($encoding);
+        }
     }
                 
-    private function writeLog($message) {
-        if ( empty($this->logFile) ) {
+    private function writeLog($message)
+    {
+        if (empty($this->logFile)) {
             echo "ERROR: logFile not-open :message: '$message'\n";
             return false;
         }
@@ -71,7 +72,8 @@ class MailCapture
     }
     
     private function handle_imap_errors(
-        $func, $msgno = ''
+        $func,
+        $msgno = ''
     ) {
         $errors = array();
         $errors = imap_errors();
@@ -82,9 +84,9 @@ class MailCapture
         }
         $actual_errors = 0;
         $clearError = false;
-        for($i=0; $i<$num_errors; $i++) {
+        for ($i=0; $i<$num_errors; $i++) {
             $error = trim($errors[$i]);
-            if($error) {
+            if ($error) {
                 $this->imapErrorTriggered = true;
                 if (
                     1 === preg_match(
@@ -154,8 +156,8 @@ class MailCapture
                 && $this->folderError
             ) {
                 imap_mail_move(
-                    $this->imap_stream, 
-                    trim((string) $msgno), 
+                    $this->imap_stream,
+                    trim((string) $msgno),
                     $this->folderError
                 );
             }
@@ -170,17 +172,17 @@ class MailCapture
     * MAIN Mail Capture function
     * @param string $account : name of account defined in config file
     * @param string $action : 'move' or 'delete'
-    * @param string $folder : name of folder 
+    * @param string $folder : name of folder
     */
-    function CaptureMails(
+    public function CaptureMails(
         $account,
         $action,
-        $configFile=false,
-        $folder=false,
-        $attachmentsOutputDir=false,
-        $addHeaderInMailContent=true,
-        $folderError=false
-    ) {    
+        $configFile = false,
+        $folder = false,
+        $attachmentsOutputDir = false,
+        $addHeaderInMailContent = true,
+        $folderError = false
+    ) {
         if (empty($folder) || $folder == 'false') {
             $folder=false;
         }
@@ -201,7 +203,7 @@ class MailCapture
             $this->folderError = $folderError;
         }
 
-        $this->logFile = 
+        $this->logFile =
             fopen($this->Batch->directory . DIRECTORY_SEPARATOR . 'MailCapture.log', "w");
         
         if ($configFile) {
@@ -222,25 +224,25 @@ class MailCapture
         /**********************************************************************
         ** Load Account config
         **********************************************************************/
-        $accountConfig = 
+        $accountConfig =
             $this->query(
                 '/MailCapture/accounts/account[@name="'.$account.'"]'
             )->item(0);
-        if(!$accountConfig) {
+        if (!$accountConfig) {
             $_SESSION['capture']->sendError(
                 "E-mail account $account is not defined in configuration!"
             );
         }
        
-        $this->mailbox = 
+        $this->mailbox =
             $accountConfig->getElementsByTagName('mailbox')->item(0)->nodeValue;
             
-        $username = 
+        $username =
             $accountConfig->getElementsByTagName('username')->item(0)->nodeValue;
            
         $GLOBALS['username'] = $username;
                 
-        $password = 
+        $password =
             $accountConfig->getElementsByTagName('password')->item(0)->nodeValue;
 
         if (
@@ -248,7 +250,7 @@ class MailCapture
                 $accountConfig->getElementsByTagName('IMAP_CLIENT_CERT')->item(0)->nodeValue
             )
         ) {
-            $this->params['IMAP_CLIENT_CERT'] 
+            $this->params['IMAP_CLIENT_CERT']
                 = $accountConfig->getElementsByTagName('IMAP_CLIENT_CERT')->item(0)->nodeValue;
         }
 
@@ -257,23 +259,21 @@ class MailCapture
                 $accountConfig->getElementsByTagName('IMAP_CLIENT_KEY')->item(0)->nodeValue
             )
         ) {
-            $this->params['IMAP_CLIENT_KEY'] 
+            $this->params['IMAP_CLIENT_KEY']
                 = $accountConfig->getElementsByTagName('IMAP_CLIENT_KEY')->item(0)->nodeValue;
         }
-
-        //var_dump($this->params);
         
         /**********************************************************************
         ** Load Message rules config
         **********************************************************************/
-        $this->MsgRules = 
+        $this->MsgRules =
             $this->query(
                 '/MailCapture/messagerules/messagerule'
             );
         /**********************************************************************
         ** Load Message outputs
         **********************************************************************/
-        $this->MsgOutputs = 
+        $this->MsgOutputs =
             $this->query(
                 '/MailCapture/messageoutputs/messageoutput'
             );
@@ -281,13 +281,13 @@ class MailCapture
         /**********************************************************************
         ** Load attachment rules
         **********************************************************************/
-        $attRulesNode = 
+        $attRulesNode =
             $this->query(
                 '/MailCapture/attachmentrules'
             )->item(0);
         $this->AttMode = $attRulesNode->getAttribute('mode');
         
-        $this->AttRules = 
+        $this->AttRules =
             $this->query(
                 '/MailCapture/attachmentrules/attachmentrule'
             );
@@ -296,7 +296,7 @@ class MailCapture
         /**********************************************************************
         ** Load attachment outputs
         **********************************************************************/
-        $this->AttOutputs = 
+        $this->AttOutputs =
             $this->query(
                 '/MailCapture/attachmentoutputs/attachmentoutput'
             );
@@ -304,17 +304,17 @@ class MailCapture
         /**********************************************************************
         ** Open IMAP stream
         **********************************************************************/
-        $this->imap_stream = 
+        $this->imap_stream =
             imap_open(
-                $this->mailbox, 
-                $username, 
+                $this->mailbox,
+                $username,
                 $password,
                 0,
                 0,
                 $this->params
-            );  
+            );
         
-        if(!$this->imap_stream) {
+        if (!$this->imap_stream) {
             $this->handle_imap_errors("imap_open");
         } else {
             // clear errors
@@ -325,7 +325,7 @@ class MailCapture
         /**********************************************************************
         ** Get Folders and ACL for move options
         **********************************************************************/
-        $this->folders = 
+        $this->folders =
             imap_list(
                 $this->imap_stream,
                 $this->mailbox,
@@ -385,11 +385,11 @@ class MailCapture
         **********************************************************************/
         imap_expunge(
             $this->imap_stream
-        ); 
+        );
         $this->handle_imap_errors("imap_expunge");
         
         imap_close(
-            $this->imap_stream 
+            $this->imap_stream
         );
         $this->handle_imap_errors("imap_close");
         
@@ -397,14 +397,14 @@ class MailCapture
     }
 
     
-    function ackMail(
+    public function ackMail(
         $account,
         $action,
-        $configFile=false,
-        $folder=false,
-        $folderError=false
+        $configFile = false,
+        $folder = false,
+        $folderError = false
     ) {
-        $Elements = 
+        $Elements =
             $this->Batch->query(
                 '/Batch/Documents/Document'
             );
@@ -443,21 +443,20 @@ class MailCapture
         }
     }
 
-    function ProcessTheMail(
+    public function ProcessTheMail(
         $account,
         $action,
         $ackVal,
         $currentMsgId,
-        $configFile=false,
-        $folder=false
+        $configFile = false,
+        $folder = false
     ) {
-        
         echo 'ACKVAL ' . $ackVal . PHP_EOL;
         if (empty($folder) || $folder == 'false') {
             $folder=false;
         }
 
-        $this->logFile = 
+        $this->logFile =
             fopen($this->Batch->directory . DIRECTORY_SEPARATOR . 'MailCapture.log', "a");
 
         if ($configFile) {
@@ -473,23 +472,23 @@ class MailCapture
         /**********************************************************************
         ** Load Account config
         **********************************************************************/
-        $accountConfig = 
+        $accountConfig =
             $this->query(
                 '/MailCapture/accounts/account[@name="'.$account.'"]'
             )->item(0);
-        if(!$accountConfig) {
+        if (!$accountConfig) {
             $_SESSION['capture']->sendError(
                 "E-mail account $account is not defined in configuration!"
             );
         }
 
-        $this->mailbox = 
+        $this->mailbox =
             $accountConfig->getElementsByTagName('mailbox')->item(0)->nodeValue;
             
-        $username = 
+        $username =
             $accountConfig->getElementsByTagName('username')->item(0)->nodeValue;
             
-        $password = 
+        $password =
             $accountConfig->getElementsByTagName('password')->item(0)->nodeValue;
 
         if (
@@ -497,7 +496,7 @@ class MailCapture
                 $accountConfig->getElementsByTagName('IMAP_CLIENT_CERT')->item(0)->nodeValue
             )
         ) {
-            $this->params['IMAP_CLIENT_CERT'] 
+            $this->params['IMAP_CLIENT_CERT']
                 = $accountConfig->getElementsByTagName('IMAP_CLIENT_CERT')->item(0)->nodeValue;
         }
 
@@ -506,21 +505,21 @@ class MailCapture
                 $accountConfig->getElementsByTagName('IMAP_CLIENT_KEY')->item(0)->nodeValue
             )
         ) {
-            $this->params['IMAP_CLIENT_KEY'] 
+            $this->params['IMAP_CLIENT_KEY']
                 = $accountConfig->getElementsByTagName('IMAP_CLIENT_KEY')->item(0)->nodeValue;
         }
         
         /**********************************************************************
         ** Load Message rules config
         **********************************************************************/
-        $this->MsgRules = 
+        $this->MsgRules =
             $this->query(
                 '/MailCapture/messagerules/messagerule'
             );
         /**********************************************************************
         ** Load Message outputs
         **********************************************************************/
-        $this->MsgOutputs = 
+        $this->MsgOutputs =
             $this->query(
                 '/MailCapture/messageoutputs/messageoutput'
             );
@@ -528,13 +527,13 @@ class MailCapture
         /**********************************************************************
         ** Load attachment rules
         **********************************************************************/
-        $attRulesNode = 
+        $attRulesNode =
             $this->query(
                 '/MailCapture/attachmentrules'
             )->item(0);
         $this->AttMode = $attRulesNode->getAttribute('mode');
         
-        $this->AttRules = 
+        $this->AttRules =
             $this->query(
                 '/MailCapture/attachmentrules/attachmentrule'
             );
@@ -543,7 +542,7 @@ class MailCapture
         /**********************************************************************
         ** Load attachment outputs
         **********************************************************************/
-        $this->AttOutputs = 
+        $this->AttOutputs =
             $this->query(
                 '/MailCapture/attachmentoutputs/attachmentoutput'
             );
@@ -551,17 +550,17 @@ class MailCapture
         /**********************************************************************
         ** Open IMAP stream
         **********************************************************************/
-        $this->imap_stream = 
+        $this->imap_stream =
             imap_open(
-                $this->mailbox, 
-                $username, 
+                $this->mailbox,
+                $username,
                 $password,
                 0,
                 0,
                 $this->params
             );
         
-        if(!$this->imap_stream) {
+        if (!$this->imap_stream) {
             $this->handle_imap_errors("imap_open");
         } else {
             // clear errors
@@ -572,7 +571,7 @@ class MailCapture
         /**********************************************************************
         ** Get Folders and ACL for move options
         **********************************************************************/
-        $this->folders = 
+        $this->folders =
             imap_list(
                 $this->imap_stream,
                 $this->mailbox,
@@ -639,17 +638,17 @@ class MailCapture
         fclose($this->logFile);
     }
     
-    function purgeMail(
+    public function purgeMail(
         $account,
         $delay,
-        $configFile=false,
-        $folder=false
+        $configFile = false,
+        $folder = false
     ) {
         if (empty($folder) || $folder == 'false') {
             $folder=false;
         }
 
-        $this->logFile = 
+        $this->logFile =
             fopen($this->Batch->directory . DIRECTORY_SEPARATOR . 'MailCapture.log', "a+");
         
         if ($configFile) {
@@ -666,23 +665,23 @@ class MailCapture
         /**********************************************************************
         ** Load Account config
         **********************************************************************/
-        $accountConfig = 
+        $accountConfig =
             $this->query(
                 '/MailCapture/accounts/account[@name="'.$account.'"]'
             )->item(0);
-        if(!$accountConfig) {
+        if (!$accountConfig) {
             $_SESSION['capture']->sendError(
                 "E-mail account $account is not defined in configuration!"
             );
         }
        
-        $this->mailbox = 
+        $this->mailbox =
             $accountConfig->getElementsByTagName('mailbox')->item(0)->nodeValue;
             
-        $username = 
+        $username =
             $accountConfig->getElementsByTagName('username')->item(0)->nodeValue;
             
-        $password = 
+        $password =
             $accountConfig->getElementsByTagName('password')->item(0)->nodeValue;
 
         if (
@@ -690,7 +689,7 @@ class MailCapture
                 $accountConfig->getElementsByTagName('IMAP_CLIENT_CERT')->item(0)->nodeValue
             )
         ) {
-            $this->params['IMAP_CLIENT_CERT'] 
+            $this->params['IMAP_CLIENT_CERT']
                 = $accountConfig->getElementsByTagName('IMAP_CLIENT_CERT')->item(0)->nodeValue;
         }
 
@@ -699,7 +698,7 @@ class MailCapture
                 $accountConfig->getElementsByTagName('IMAP_CLIENT_KEY')->item(0)->nodeValue
             )
         ) {
-            $this->params['IMAP_CLIENT_KEY'] 
+            $this->params['IMAP_CLIENT_KEY']
                 = $accountConfig->getElementsByTagName('IMAP_CLIENT_KEY')->item(0)->nodeValue;
         }
 
@@ -709,21 +708,17 @@ class MailCapture
             $this->mailbox = str_ireplace($tabExplode[1], '', $this->mailbox) . $folder;
         }
         
-
-        // var_dump($this->mailbox);
-        // var_dump($this->params);
-        
         /**********************************************************************
         ** Load Message rules config
         **********************************************************************/
-        $this->MsgRules = 
+        $this->MsgRules =
             $this->query(
                 '/MailCapture/messagerules/messagerule'
             );
         /**********************************************************************
         ** Load Message outputs
         **********************************************************************/
-        $this->MsgOutputs = 
+        $this->MsgOutputs =
             $this->query(
                 '/MailCapture/messageoutputs/messageoutput'
             );
@@ -731,13 +726,13 @@ class MailCapture
         /**********************************************************************
         ** Load attachment rules
         **********************************************************************/
-        $attRulesNode = 
+        $attRulesNode =
             $this->query(
                 '/MailCapture/attachmentrules'
             )->item(0);
         $this->AttMode = $attRulesNode->getAttribute('mode');
         
-        $this->AttRules = 
+        $this->AttRules =
             $this->query(
                 '/MailCapture/attachmentrules/attachmentrule'
             );
@@ -746,7 +741,7 @@ class MailCapture
         /**********************************************************************
         ** Load attachment outputs
         **********************************************************************/
-        $this->AttOutputs = 
+        $this->AttOutputs =
             $this->query(
                 '/MailCapture/attachmentoutputs/attachmentoutput'
             );
@@ -754,17 +749,17 @@ class MailCapture
         /**********************************************************************
         ** Open IMAP stream
         **********************************************************************/
-        $this->imap_stream = 
+        $this->imap_stream =
             imap_open(
-                $this->mailbox, 
-                $username, 
+                $this->mailbox,
+                $username,
                 $password,
                 0,
                 0,
                 $this->params
-            );  
+            );
         
-        if(!$this->imap_stream) {
+        if (!$this->imap_stream) {
             $this->handle_imap_errors("imap_open");
         } else {
             // clear errors
@@ -775,7 +770,7 @@ class MailCapture
         /**********************************************************************
         ** Get Folders and ACL for move options
         **********************************************************************/
-        $this->folders = 
+        $this->folders =
             imap_list(
                 $this->imap_stream,
                 $this->mailbox,
@@ -803,9 +798,9 @@ class MailCapture
                 "Deleting message..."
             );
 
-            $imap_header = 
+            $imap_header =
                 imap_headerinfo(
-                    $this->imap_stream, 
+                    $this->imap_stream,
                     $Msgno
                 );
             $this->handle_imap_errors("imap_headerinfo", $Msgno);
@@ -825,10 +820,10 @@ class MailCapture
                     "Deleting message no " . $Msgno
                 );
                 imap_delete(
-                    $this->imap_stream, 
+                    $this->imap_stream,
                     $Msgno
                 );
-                $this->handle_imap_errors("imap_delete");    
+                $this->handle_imap_errors("imap_delete");
             } else {
                 //echo 'NO deleting message' . PHP_EOL;
             }
@@ -839,21 +834,19 @@ class MailCapture
         **********************************************************************/
         imap_expunge(
             $this->imap_stream
-        ); 
+        );
         $this->handle_imap_errors("imap_expunge");
         
         imap_close(
-            $this->imap_stream 
+            $this->imap_stream
         );
         $this->handle_imap_errors("imap_close");
         
         fclose($this->logFile);
     }
 
-    private function applyRule(
-        $strucure,
-        $rule
-    ) {
+    private function applyRule($strucure, $rule)
+    {
         $test = $rule->nodeValue;
         
         $value =
@@ -866,166 +859,101 @@ class MailCapture
         /**********************************************************************
         ** Test value
         **********************************************************************/
-        switch($rule->getAttribute('op')) {
-        case "=":
-            if($value == $test) $applies = true;
-            break;
-        case "&gt;=":
-            if($value >= $test) $applies = true;
-            break;
-        case "&lt;=":
-            if($value <= $test) $applies = true;
-            break;
-        case "&gt;":
-            if($value > $test) $applies = true;
-            break;
-        case "&lt;":
-            if($value < $test) $applies = true;
-            break;
-        case "!=":
-        case "&lt;&gt;":
-            if($value != $test) $applies = true;
-            break;
-        case "in":
-            if(in_array($value, explode(' ', $test))) {
-                $applies = true;
-                var_dump($test);
-                var_dump($value);
-                echo 'iiiiiiiiiiccciiiiiii';
-            }
-            break;
-        case "notin":
-            if(!in_array(strtolower($value), explode(' ', strtolower($test)))) $applies = true;
-            break;
-        case "contains":
-            if(strripos($value, $test) !== false) $applies = true;
-            break;
-          case "nocontains":
-            if(strripos($value, $test) === false) $applies = true;
-            break;
-          case "checkUserMail":
-            $mail = array();
-            $theString = str_replace(">", "", $value);
-            $mail = explode("<", $theString);
-
-            # WS
-            require_once('SOAP/Client.php');
-
-            $Config_Capture = new DOMDocument();
-            $Config_Capture->load("config" . DIRECTORY_SEPARATOR . $_SESSION['CaptureName']);
-            $xpath_Capture = new DOMXpath($Config_Capture);
-
-            $WSDL_Value = $xpath_Capture->query('//input[@name="WSDL"]')->item(0)->nodeValue;
-
-            $MaarchWSClientConfig = $xpath_Capture->query(
-                '//step[@name="SendToMaarch"]//input[@name="configFile"]'
-            )->item(0)->nodeValue;
-            if (!$MaarchWSClientConfig) {
-                $MaarchWSClientConfig = 'MaarchWSClient.xml';
-            }
-            $Config_WS = new DOMDocument();
-            $Config_WS->load("modules" . DIRECTORY_SEPARATOR .
-                "MaarchWSClient" . DIRECTORY_SEPARATOR . $MaarchWSClientConfig
-            );
-            $xpath_WS = new DOMXpath($Config_WS);
-
-            $WSDLConfig = $xpath_WS->query('//WSDL[@name="'.$WSDL_Value.'"]')->item(0);
-
-            $uri = $WSDLConfig->getAttribute('uri');
-
-            $proxyArgs = $xpath_WS->query('./proxy/*',$WSDLConfig);
-
-            $l = $proxyArgs->length;
-            $proxy = array();
-            for($i=0; $i<$l; $i++) {
-                $proxyArg = $proxyArgs->item($i);
-                $proxyArgName = $proxyArg->nodeName;
-                $proxyArgValue = $proxyArg->nodeValue;
-                $proxy[$proxyArgName] = (string)$proxyArgValue;
-            }    
-
-            $wsdl = new SOAP_WSDL($uri, $proxy, false);
-            $client = $wsdl->getProxy();
-            
-            $isUser = false;
-            $this->targetEntityId = "";
-            $userWS = $client->checkUserMail($mail[count($mail) -1]);
-
-            if (!$userWS->item->isUser && file_exists( __DIR__ . DIRECTORY_SEPARATOR . "externalContacts.xml")) {
-                $xmlfile = simplexml_load_file( __DIR__ . DIRECTORY_SEPARATOR . "externalContacts.xml");
-
-                foreach ($xmlfile->externalContact as $externalContact ) {
-                    if ($mail[count($mail) -1] == $externalContact->contactMail) {
-                        $isUser = true;
-                        $this->targetEntityId = $externalContact->targetEntityId;
-                        break;
-                    }
+        switch ($rule->getAttribute('op')) {
+            case "=":
+                if ($value == $test) {
+                    $applies = true;
                 }
-            } elseif($userWS->item->isUser){
-                // Primary entity is the first row
-                $this->targetEntityId = $userWS->item->userEntities[0]->ENTITY_ID;
-                $isUser = true;
-            }
-
-            if ($test == "true" && !$isUser) {
-
-                $filename = __DIR__ . DIRECTORY_SEPARATOR . "sendmail.ini";
-                $iniFile = parse_ini_file($filename);
-
-                //Use to send html mail
-                $headers  = 'MIME-Version: 1.0' . "\r\n";
-                $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-
-                mail($mail[count($mail) -1], $iniFile['mail_object'], $iniFile['mail_message'], $headers);
-            }
-
-            if (!$isUser) {
-                $applies = true;
-            }
-
-            break;
+                break;
+            case "&gt;=":
+                if ($value >= $test) {
+                    $applies = true;
+                }
+                break;
+            case "&lt;=":
+                if ($value <= $test) {
+                    $applies = true;
+                }
+                break;
+            case "&gt;":
+                if ($value > $test) {
+                    $applies = true;
+                }
+                break;
+            case "&lt;":
+                if ($value < $test) {
+                    $applies = true;
+                }
+                break;
+            case "!=":
+            case "&lt;&gt;":
+                if ($value != $test) {
+                    $applies = true;
+                }
+                break;
+            case "in":
+                if (in_array($value, explode(' ', $test))) {
+                    $applies = true;
+                }
+                break;
+            case "notin":
+                if (!in_array(strtolower($value), explode(' ', strtolower($test)))) {
+                    $applies = true;
+                }
+                break;
+            case "contains":
+                if (strripos($value, $test) !== false) {
+                    $applies = true;
+                }
+                break;
+            case "nocontains":
+                if (strripos($value, $test) === false) {
+                    $applies = true;
+                }
+                break;
         }
         
         /**********************************************************************
         ** If applies, action required
         **********************************************************************/
-        if(!$applies) return true;
+        if (!$applies) {
+            return true;
+        }
         
         $this->writeLog(
             "Rule " . $rule->getAttribute('name') . " applied"
         );
         
-        switch($rule->getAttribute('action')) {
-        case 'ignore':
-            break;
-            
-        case 'delete':
-            $this->writeLog(
-                "Deleting message..."
-            );
-            $res = 
-                imap_delete(
-                    $this->imap_stream, 
-                    (int)$strucure->Msgno
+        switch ($rule->getAttribute('action')) {
+            case 'ignore':
+                break;
+                
+            case 'delete':
+                $this->writeLog(
+                    "Deleting message..."
                 );
-            $this->handle_imap_errors("imap_delete");
-            break;
-        case 'move':
-            $this->writeLog(
-               "Moving message to ".$rule->getAttribute('folder')."..."
-            );
-            $res = 
-                imap_mail_move(
-                    $this->imap_stream, 
-                    (string)$strucure->Msgno, 
-                    $rule->getAttribute('folder')
+                $res =
+                    imap_delete(
+                        $this->imap_stream,
+                        (int)$strucure->Msgno
+                    );
+                $this->handle_imap_errors("imap_delete");
+                break;
+            case 'move':
+                $this->writeLog(
+                    "Moving message to ".$rule->getAttribute('folder')."..."
                 );
-            $this->handle_imap_errors("imap_mail_move");
-            break;
+                $res =
+                    imap_mail_move(
+                        $this->imap_stream,
+                        (string)$strucure->Msgno,
+                        $rule->getAttribute('folder')
+                    );
+                $this->handle_imap_errors("imap_mail_move");
+                break;
         }
         
         return false;
-        
     }
               
     private function captureMsg(
@@ -1034,9 +962,9 @@ class MailCapture
         /**********************************************************************
         ** Get message header info
         **********************************************************************/
-        $imap_header = 
+        $imap_header =
             imap_headerinfo(
-                $this->imap_stream, 
+                $this->imap_stream,
                 $Msgno
             );
         $this->handle_imap_errors("imap_headerinfo");
@@ -1045,16 +973,16 @@ class MailCapture
         /**********************************************************************
         ** Apply message rules (skip process if returns false)
         **********************************************************************/
-        for($msgRuleNo=0, $msgRulesLength=$this->MsgRules->length;
-            $msgRuleNo<$msgRulesLength; 
+        for ($msgRuleNo=0, $msgRulesLength=$this->MsgRules->length;
+            $msgRuleNo<$msgRulesLength;
             $msgRuleNo++
         ) {
-            $process = 
+            $process =
                 $this->applyRule(
                     $Msg,
                     $this->MsgRules->item($msgRuleNo)
                 );
-            if(!$process) {
+            if (!$process) {
                 $this->writeLog(
                     "Message $Msgno excluded by rule..."
                 );
@@ -1067,7 +995,7 @@ class MailCapture
         /**********************************************************************
         ** Create tmp folder
         **********************************************************************/
-        $Msg->uid = imap_uid ($this->imap_stream, $Msg->Msgno);
+        $Msg->uid = imap_uid($this->imap_stream, $Msg->Msgno);
         echo 'UID ' . $Msg->uid . PHP_EOL;
         $Msg->Msgid = preg_replace('/[<>\\/:\*\?"|]/', "", $Msg->message_id);
         $Msg->MsgDirectory = $this->Batch->directory . DIRECTORY_SEPARATOR . $Msg->Msgid;
@@ -1076,28 +1004,28 @@ class MailCapture
         /**********************************************************************
         ** Fetch complete structure parts (body/attachments)
         **********************************************************************/
-        $imap_structure = 
+        $imap_structure =
             imap_fetchstructure(
-                $this->imap_stream, 
+                $this->imap_stream,
                 $Msg->Msgno
             );
-        $this->handle_imap_errors("imap_fetchstructure",$Msg->Msgno);
+        $this->handle_imap_errors("imap_fetchstructure", $Msg->Msgno);
         $Msg->parts[0] = $imap_structure;
 
         $additionalHeader = explode("\n", imap_fetchheader($this->imap_stream, $Msgno));
         foreach ($additionalHeader as $value) {
             //if(stripos($value, "X-Priority")!== false || stripos($value, "X-Priority-Label")!== false || stripos($value, "X-Priority-TTL")!== false){
-            if(stripos($value, "X-Priority")!== false || stripos($value, "X-Priority-TTL")!== false){
+            if (stripos($value, "X-Priority")!== false || stripos($value, "X-Priority-TTL")!== false) {
                 $xpriorityHeader = explode(":", $value);
                 $xpriority       = explode(" ", trim($xpriorityHeader[1]));
-                if(is_numeric(trim($xpriority[0]))){
+                if (is_numeric(trim($xpriority[0]))) {
                     $Msg->xpriority  = trim($xpriority[0]);
                 }
                 break;
-            } else if(strpos($value, "Disposition-Notification-To")!== false){
+            } elseif (strpos($value, "Disposition-Notification-To")!== false) {
                 $Msg->disposition_notification_to = 3; // Accusé de lecture
                 break;
-            } else if(strpos($value, "Return-Receipt-To")!== false){
+            } elseif (strpos($value, "Return-Receipt-To")!== false) {
                 $Msg->return_receipt_to = 2; // Accusé de reception
                 break;
             }
@@ -1108,7 +1036,7 @@ class MailCapture
         **********************************************************************/
         $this->writeLog("Parse structure parts (body/attachments)...");
         $this->parse(
-            $Msg->parts[0], 
+            $Msg->parts[0],
             $partAdr = array()
         );
         $this->writeLog("End parse structure parts (body/attachments)...");
@@ -1116,7 +1044,7 @@ class MailCapture
         # Debug
         $MsgFile = $Msg->MsgDirectory . DIRECTORY_SEPARATOR . 'Msg_parser.txt';
         $MsgFileHdl = fopen($MsgFile, "w");
-        fputs($MsgFileHdl, print_r($Msg,true));
+        fputs($MsgFileHdl, print_r($Msg, true));
         fclose($MsgFileHdl);
         
         /**********************************************************************
@@ -1130,35 +1058,36 @@ class MailCapture
 
         $this->writeLog("Message have ".count($Msg->parser)." parts.");
         $aAttachmentsInfo = [];
-        foreach($Msg->parser as $part) {
+        foreach ($Msg->parser as $part) {
             $html_body = false;
             $plain_body = false;
             $it_part++;
             $this->writeLog("Part ".$it_part."/".count($Msg->parser)." in progress ...");
             $this->writeLog("SECTION => ".$part->section.", CONTENT_TYPE => ".strtoupper($part->disposition).", MIME_TYPE => ".$part->subtype);
-            switch(strtoupper($part->disposition)) {
+            switch (strtoupper($part->disposition)) {
             case 'BODY':
                 $isThereAnyBodyHere = true;
-                if($html_body) break;
+                if ($html_body) {
+                    break;
+                }
                 $this->writeLog("Disposition is BODY");
-                if($part->subtype == 'html') {
+                if ($part->subtype == 'html') {
                     $this->createHtml($part);
                     $html_body = true;
-                } 
-                elseif ($part->subtype == 'plain') {
+                } elseif ($part->subtype == 'plain') {
                     $plain_body = true;
                 }
-                if(!isset($Document) && ($html_body || $plain_body)) {
+                if (!isset($Document) && ($html_body || $plain_body)) {
                     $content = file_get_contents($part->filepath);
-                    if ( empty($content) ) {
+                    if (empty($content)) {
                         echo "ERROR: file_get_contents({$part->filepath}) failed\n";
                     }
 
-                    if(mb_detect_encoding($content, 'UTF-8, ISO-8859-1') == "ISO-8859-1"){
+                    if (mb_detect_encoding($content, 'UTF-8, ISO-8859-1') == "ISO-8859-1") {
                         $this->writeLog("Encodage : ".mb_detect_encoding($content, 'UTF-8, ISO-8859-1'));
 
                         $new = fopen($part->filepath, 'w+');
-                        if ( empty($new) ) {
+                        if (empty($new)) {
                             echo "ERROR: fopen({$part->filepath}, w+) failed\n";
                         } else {
                             fputs($new, utf8_encode($content));
@@ -1167,18 +1096,13 @@ class MailCapture
                     }
 
                     # add new document with first BODY part found
-                    $Document = 
-                        $this->Batch->addDocument(
-                            $part->filepath
-                        );
-                    $this->writeLog("Document " . $Document->id 
-                        . " added with source " . $part->filepath);
+                    $Document = $this->Batch->addDocument($part->filepath);
+                    $this->writeLog("Document " . $Document->id . " added with source " . $part->filepath);
 
-
-                    for($i=0, $num_MsgOutputs=$this->MsgOutputs->length;
-                        $i<$num_MsgOutputs; 
+                    for ($i=0, $num_MsgOutputs=$this->MsgOutputs->length;
+                        $i<$num_MsgOutputs;
                         $i++
-                    ){
+                    ) {
                         $MsgOutput = $this->MsgOutputs->item($i);
                         if ($this->attachmentsOutputDir && $MsgOutput->getAttribute('name') == 'end_file_name') {
                             $this->endFileName = $MsgOutput->nodeValue;
@@ -1193,14 +1117,12 @@ class MailCapture
 
 
                     //if ($this->targetEntityId <> "") {
-                        $Document->setMetadata(
-                            "targetEntityId", 
-                            $GLOBALS['username']
-                        );
-                    //}
-
-                } 
-                elseif($Document && $html_body) {
+                    $Document->setMetadata(
+                        "targetEntityId",
+                        $GLOBALS['username']
+                    );
+                //}
+                } elseif ($Document && $html_body) {
                     # Replace document source if HTML found after PLAIN
                     @unlink($Document->path);
 
@@ -1219,7 +1141,7 @@ class MailCapture
                         $metadatas_doc_date = $doc->createElement("p", "");
                         $body->item(0)->insertBefore($metadatas_doc_date, $body->item(0)->firstChild);
 
-                        if($metadatas_doc_date !== $body->item(0)->firstChild) {
+                        if ($metadatas_doc_date !== $body->item(0)->firstChild) {
                             //$newnode->parentNode->insertBefore( $newnode, $firstSibling );
                             $body->item(0)->insertBefore($metadatas_doc_date, $body->item(0)->firstChild);
                         }
@@ -1230,22 +1152,21 @@ class MailCapture
                         $metadatas_toaddress = $doc->createElement("div", "Pour      : ".$toaddress);
                         $body->item(0)->insertBefore($metadatas_toaddress, $body->item(0)->firstChild);
 
-                        $metadatas_doc_date = $doc->createElement("div",  "Date      : ".$doc_date);
+                        $metadatas_doc_date = $doc->createElement("div", "Date      : ".$doc_date);
                         $body->item(0)->insertBefore($metadatas_doc_date, $body->item(0)->firstChild);
 
-                        $metadatas_fromaddress= $doc->createElement("div","De        : ".$fromaddress);
+                        $metadatas_fromaddress= $doc->createElement("div", "De        : ".$fromaddress);
                         $body->item(0)->insertBefore($metadatas_fromaddress, $body->item(0)->firstChild);
 
-                        $metadatas_subject = $doc->createElement("div",    "Objet    : ".$subject);
+                        $metadatas_subject = $doc->createElement("div", "Objet    : ".$subject);
                         $body->item(0)->insertBefore($metadatas_subject, $body->item(0)->firstChild);
-
                     }
                     $doc->saveHTMLFile($part->filepath);
 
                     $Document->importResource($part->filepath);
-                    $this->writeLog("Document " . $Document->id 
+                    $this->writeLog("Document " . $Document->id
                         . " source replaced with " . $part->filepath);
-                }else{
+                } else {
                     $this->writeLog("mime_type : ".$part->subtype." is unsupported, no process found.");
                 }
                 if ($this->imapErrorTriggered) {
@@ -1261,7 +1182,7 @@ class MailCapture
             default:
                 //On récupère les informations de la pj pour éviter de récupérer 2 fois la meme pj car elle peut être en inline et attachment
                 $sAttachmentInfos = $part->subtype . '_' . $part->bytes;
-                if(file_exists($part->filepath)){
+                if (file_exists($part->filepath)) {
                     $sAttachmentInfos .= '_' . md5_file($part->filepath);
                 }
 
@@ -1271,7 +1192,7 @@ class MailCapture
                 } elseif (strtoupper($part->disposition) == 'INLINE' && !isset($aAttachmentsInfo[$sAttachmentInfos])) {
                     echo 'INLINE CASE -> IT IS AN ATTACHMENT' . PHP_EOL;
                     $this->writeLog('INLINE CASE -> IT IS AN ATTACHMENT');
-                } elseif(isset($aAttachmentsInfo[$sAttachmentInfos])){
+                } elseif (isset($aAttachmentsInfo[$sAttachmentInfos])) {
                     echo 'File already added => format_bytes_md5 : ' . $sAttachmentInfos . PHP_EOL;
                     $this->writeLog('File already added => format_bytes_md5 : ' . $sAttachmentInfos);
                     break;
@@ -1285,17 +1206,17 @@ class MailCapture
                 $aAttachmentsInfo[$sAttachmentInfos] = true;
 
                 if (!$isThereAnyBodyHere) {
-                    $Document = 
+                    $Document =
                         $this->Batch->addDocument(
                             $part->filepath
                         );
-                    $this->writeLog("Document with NO BODY " . $Document->id 
+                    $this->writeLog("Document with NO BODY " . $Document->id
                         . " added with source " . $part->filepath);
                         
-                    for($i=0, $num_MsgOutputs=$this->MsgOutputs->length;
-                        $i<$num_MsgOutputs; 
+                    for ($i=0, $num_MsgOutputs=$this->MsgOutputs->length;
+                        $i<$num_MsgOutputs;
                         $i++
-                    ){
+                    ) {
                         $MsgOutput = $this->MsgOutputs->item($i);
                         $this->addMetadata(
                             $MsgOutput,
@@ -1306,7 +1227,7 @@ class MailCapture
 
                     if ($this->targetEntityId <> "") {
                         $Document->setMetadata(
-                            "targetEntityId", 
+                            "targetEntityId",
                             $this->targetEntityId
                         );
                     }
@@ -1316,16 +1237,16 @@ class MailCapture
                 /**********************************************************************
                 ** Apply attachment rules (skip process if returns false)
                 **********************************************************************/
-                for($attRuleNo=0, $num_attRules = $this->AttRules->length;
-                    $attRuleNo<$num_attRules; 
+                for ($attRuleNo=0, $num_attRules = $this->AttRules->length;
+                    $attRuleNo<$num_attRules;
                     $attRuleNo++
                 ) {
-                    $process = 
+                    $process =
                         $this->applyRule(
                             $part,
                             $this->AttRules->item($attRuleNo)
                         );
-                    if(!$process) {
+                    if (!$process) {
                         $this->writeLog(
                             "Attachment part ".$part->section." (mimetype ".$part->mimetype.", extension ".$part->extension.") excluded by rule..."
                         );
@@ -1335,7 +1256,7 @@ class MailCapture
                         );
                         echo "Attachment part ".$part->section." (mimetype ".$part->mimetype.", extension ".$part->extension.") excluded by rule..." . PHP_EOL;
                         $Document->setMetadata(
-                            "attachmentRuleError", 
+                            "attachmentRuleError",
                             "Attachment part ".$part->section." (mimetype ".$part->mimetype.", extension ".$part->extension.") excluded by rule..."
                         );
 
@@ -1346,15 +1267,15 @@ class MailCapture
                 /**********************************************************************
                 ** Add Attachment to batch as new document or attachment to current
                 **********************************************************************/
-                switch($this->AttMode) { 
+                switch ($this->AttMode) {
                 case 'document':
                     $DocMetadata = $Document->getContainer('Metadata');
-                    $Attachment = 
+                    $Attachment =
                         $this->Batch->addDocument(
                             $part->filepath
                         );
-                    $this->writeLog("Attachment added as new Document with id " 
-                        . $Attachment->id . " from source ". $part->filepath);    
+                    $this->writeLog("Attachment added as new Document with id "
+                        . $Attachment->id . " from source ". $part->filepath);
                      
                     $AttMetadata = $Attachment->getContainer('Metadata');
                     $Attachment->replaceChild(
@@ -1365,22 +1286,22 @@ class MailCapture
                     
                 case 'attachment':
                 default:
-                    $Attachment = 
+                    $Attachment =
                         $Document->addAttachment(
                             $part->filepath
                         );
                     $extAtt = strtolower(pathinfo($part->filepath, PATHINFO_EXTENSION));
                     if ($this->attachmentsOutputDir && $extAtt <> 'txt') {
                         if ($this->endFileName <> '') {
-                            $fileName = 'maarchcapture_maarch_' 
+                            $fileName = 'maarchcapture_maarch_'
                                 . date('Ymd_His') . '_' . $Attachment->id
                                 . '_' . $this->endFileName
                                 . '.' . $extAtt;
                         } else {
-                            for($i=0, $num_MsgOutputs=$this->MsgOutputs->length;
-                                $i<$num_MsgOutputs; 
+                            for ($i=0, $num_MsgOutputs=$this->MsgOutputs->length;
+                                $i<$num_MsgOutputs;
                                 $i++
-                            ){
+                            ) {
                                 $MsgOutput = $this->MsgOutputs->item($i);
 
                                 if ($this->attachmentsOutputDir && $MsgOutput->getAttribute('name') == 'end_file_name') {
@@ -1388,42 +1309,42 @@ class MailCapture
                                 }
                             }
                             if ($this->endFileName <> '') {
-                                $fileName = 'maarchcapture_maarch_' 
+                                $fileName = 'maarchcapture_maarch_'
                                     . date('Ymd_His') . '_' . $Attachment->id
                                     . '_' . $this->endFileName
                                     . '.' . $extAtt;
                             } else {
-                                $fileName = 'maarchcapture_maarch_' 
+                                $fileName = 'maarchcapture_maarch_'
                                     . date('Ymd_His') . '_' . $Attachment->id
                                     . '.' . $extAtt;
                             }
                         }
 
                         if (!copy(
-                            $part->filepath, 
-                            $this->attachmentsOutputDir 
-                                . DIRECTORY_SEPARATOR 
+                            $part->filepath,
+                            $this->attachmentsOutputDir
+                                . DIRECTORY_SEPARATOR
                                 . $fileName
                         )) {
-                            $this->writeLog('PB !!! copy ' . $part->filepath . DIRECTORY_SEPARATOR 
-                                . $Attachment->id . ' to ' . $this->attachmentsOutputDir 
+                            $this->writeLog('PB !!! copy ' . $part->filepath . DIRECTORY_SEPARATOR
+                                . $Attachment->id . ' to ' . $this->attachmentsOutputDir
                                 . DIRECTORY_SEPARATOR . $fileName);
                         } else {
-                            $this->writeLog('copy ' . $part->filepath . DIRECTORY_SEPARATOR 
-                                . $Attachment->id . ' to ' . $this->attachmentsOutputDir 
+                            $this->writeLog('copy ' . $part->filepath . DIRECTORY_SEPARATOR
+                                . $Attachment->id . ' to ' . $this->attachmentsOutputDir
                                 . DIRECTORY_SEPARATOR . $fileName);
                         }
                     }
                     
-                    $this->writeLog("Attachment added as new Attachment with id " 
-                        . $Attachment->id . " from source ". $part->filepath);  
+                    $this->writeLog("Attachment added as new Attachment with id "
+                        . $Attachment->id . " from source ". $part->filepath);
                 }
                 
                 /**********************************************************************
                 ** Add attachment specific Metadata
                 **********************************************************************/
-                for($attOutputNo=0, $num_AttOutputs=$this->AttOutputs->length; 
-                    $attOutputNo<$num_AttOutputs; 
+                for ($attOutputNo=0, $num_AttOutputs=$this->AttOutputs->length;
+                    $attOutputNo<$num_AttOutputs;
                     $attOutputNo++
                 ) {
                     $AttOutput = $this->AttOutputs->item($attOutputNo);
@@ -1440,7 +1361,7 @@ class MailCapture
             }
         }
           
-          return true;          
+        return true;
     }
     
     private function parse(
@@ -1453,72 +1374,75 @@ class MailCapture
         # part address
         #*********************************************************************
         $partAdrString = implode('.', $partAdr);
-        if(!$partAdrString) $partAdrString = '1';
+        if (!$partAdrString) {
+            $partAdrString = '1';
+        }
         $part->section = $partAdrString;
         
         # Type
         #*********************************************************************
-        switch($part->type) {
-        case self::MIME_TYPE_TEXT:  
-            $part->typename = 'text';
-            break;
-        case self::MIME_TYPE_MULTIPART: 
-            $part->typename = 'multipart';
-            break;
-        case self::MIME_TYPE_MESSAGE: 
-            $part->typename = 'message';
-            break;
-        case self::MIME_TYPE_APPLICATION: 
-            $part->typename = 'application';
-            break;
-        case self::MIME_TYPE_AUDIO: 
-            $part->typename = 'audio';
-            break;
-        case self::MIME_TYPE_IMAGE:
-            $part->typename = 'image';
-            break;
-        case self::MIME_TYPE_VIDEO: 
-            $part->typename = 'video';
-            break;
-        case self::MIME_TYPE_OTHER: 
-            $part->typename = 'other';
-            break;
+        switch ($part->type) {
+            case self::MIME_TYPE_TEXT:
+                $part->typename = 'text';
+                break;
+            case self::MIME_TYPE_MULTIPART:
+                $part->typename = 'multipart';
+                break;
+            case self::MIME_TYPE_MESSAGE:
+                $part->typename = 'message';
+                break;
+            case self::MIME_TYPE_APPLICATION:
+                $part->typename = 'application';
+                break;
+            case self::MIME_TYPE_AUDIO:
+                $part->typename = 'audio';
+                break;
+            case self::MIME_TYPE_IMAGE:
+                $part->typename = 'image';
+                break;
+            case self::MIME_TYPE_VIDEO:
+                $part->typename = 'video';
+                break;
+            case self::MIME_TYPE_OTHER:
+                $part->typename = 'other';
+                break;
 
-        case self::MIME_TYPE_UNKNOWN: 
-        default:
-            $part->typename = 'unknown';
-            break;
+            case self::MIME_TYPE_UNKNOWN:
+            default:
+                $part->typename = 'unknown';
+                break;
         }
                 
         # Encoding
         #*********************************************************************
-        switch((integer)$part->encoding) {
-        case self::MIME_ENCODING_7BIT:
-            $part->encodingname = '7BIT';
-            break;
-        case self::MIME_ENCODING_8BIT: 
-            $part->encodingname = '8BIT';
-            break;
-        case self::MIME_ENCODING_BINARY: 
-            $part->encodingname = 'BINARY';
-            break;
-        case self::MIME_ENCODING_BASE64: 
-            $part->encodingname = 'BASE64';
-            break;
-        case self::MIME_ENCODING_QPRINT: 
-            $part->encodingname = 'QPRINT';
-            break;
-        case self::MIME_ENCODING_OTHER:
-            $part->encodingname = 'OTHER';
-            break;
+        switch ((integer)$part->encoding) {
+            case self::MIME_ENCODING_7BIT:
+                $part->encodingname = '7BIT';
+                break;
+            case self::MIME_ENCODING_8BIT:
+                $part->encodingname = '8BIT';
+                break;
+            case self::MIME_ENCODING_BINARY:
+                $part->encodingname = 'BINARY';
+                break;
+            case self::MIME_ENCODING_BASE64:
+                $part->encodingname = 'BASE64';
+                break;
+            case self::MIME_ENCODING_QPRINT:
+                $part->encodingname = 'QPRINT';
+                break;
+            case self::MIME_ENCODING_OTHER:
+                $part->encodingname = 'OTHER';
+                break;
         }
         
         # Subtype
         #*********************************************************************
-        if($part->ifsubtype)
+        if ($part->ifsubtype) {
             $part->subtype = strtolower($part->subtype);
-        else 
+        } else {
             $part->subtype = false;
+        }
             
         # Mimetype
         #*********************************************************************
@@ -1526,13 +1450,14 @@ class MailCapture
         
         # Disposition
         #*********************************************************************
-        if(!$part->ifdisposition)
+        if (!$part->ifdisposition) {
             $part->disposition = 'BODY';
+        }
             
         # Dparameters
         #*********************************************************************
-        if($part->ifdparameters) {
-            foreach($part->dparameters as $i => $dparameter) {
+        if ($part->ifdparameters) {
+            foreach ($part->dparameters as $i => $dparameter) {
                 $dparameterName = strtolower($dparameter->attribute);
                 $dparameterValue = $this->decode_string($dparameter->value);
                 $part->dparameters[$dparameterName] = $dparameterValue;
@@ -1541,8 +1466,8 @@ class MailCapture
         
         # Parameters
         #*********************************************************************
-        if($part->ifparameters) {
-            foreach($part->parameters as $parameter) {
+        if ($part->ifparameters) {
+            foreach ($part->parameters as $parameter) {
                 $parameterName = strtolower($parameter->attribute);
                 $parameterValue = $this->decode_string($parameter->value);
                 $part->parameters[$parameterName] = $parameterValue;
@@ -1551,32 +1476,35 @@ class MailCapture
         
         # Extension of file if no filename
         #*********************************************************************
-        if($part->subtype == 'plain')
+        if ($part->subtype == 'plain') {
             $part->extension = 'txt';
-        else if(isset($part->dparameters) && is_array($part->dparameters) && isset($part->dparameters['filename'])) 
+        } elseif (isset($part->dparameters) && is_array($part->dparameters) && isset($part->dparameters['filename'])) {
             $part->extension = substr(strrchr($part->dparameters['filename'], '.'), 1);
-        else if(is_array($part->parameters) && isset($part->parameters['name'])) 
+        } elseif (is_array($part->parameters) && isset($part->parameters['name'])) {
             $part->extension = substr(strrchr($part->parameters['name'], '.'), 1);
-        else
+        } else {
             $part->extension = $part->subtype;
+        }
         
         # CID / Filename
         #*********************************************************************
         $filename = false;
-        if($part->ifid)
+        if ($part->ifid) {
             $filename = substr($part->id, 1, strlen($part->id) -2);
-        else
+        } else {
             $filename = $part->section;
-        if($part->extension)
+        }
+        if ($part->extension) {
             $filename .= "." . $part->extension;
+        }
         $part->filepath = $this->Msg->MsgDirectory . DIRECTORY_SEPARATOR . $filename;
         
        
         # Get data
         #*********************************************************************
-        $encodeddata = 
+        $encodeddata =
             imap_fetchbody(
-                $this->imap_stream, 
+                $this->imap_stream,
                 $this->Msg->Msgno,
                 $part->section
             );
@@ -1584,70 +1512,70 @@ class MailCapture
         $part->data = $this->decode_data($encodeddata, $part->encoding);
         
         #*********************************************************************
-        # USE PARSED INFO 
+        # USE PARSED INFO
         #*********************************************************************
         # Output Data / parse subParts
         #*********************************************************************
-        switch((integer)$part->type) {
-        case self::MIME_TYPE_MULTIPART: 
-            $partCount = count($part->parts);
-            for($i=0; $i<$partCount; $i++) {
-                $subpart = $part->parts[$i];
-                $subpartAdr = $partAdr;
-                $subpartAdr[] = $i+1;
-                $this->parse(
-                    $subpart,
-                    $subpartAdr
-                );
-            }
-            break;
+        switch ((integer)$part->type) {
+            case self::MIME_TYPE_MULTIPART:
+                $partCount = count($part->parts);
+                for ($i=0; $i<$partCount; $i++) {
+                    $subpart = $part->parts[$i];
+                    $subpartAdr = $partAdr;
+                    $subpartAdr[] = $i+1;
+                    $this->parse(
+                        $subpart,
+                        $subpartAdr
+                    );
+                }
+                break;
+                
+            case self::MIME_TYPE_MESSAGE:
+                # What ?
+                break;
             
-        case self::MIME_TYPE_MESSAGE: 
-            # What ?
-            break;
-        
-        case self::MIME_TYPE_TEXT:  
-        case self::MIME_TYPE_APPLICATION: 
-        case self::MIME_TYPE_AUDIO: 
-        case self::MIME_TYPE_IMAGE: 
-        case self::MIME_TYPE_VIDEO: 
-        case self::MIME_TYPE_OTHER: 
-        case self::MIME_TYPE_UNKNOWN:
-        default: 
-            $fp = fopen($part->filepath, "w");
-            if ( empty($fp) ) {
-                echo "ERROR: fopen({$part->filepath}, w) failed\n";
-            } else {
-                fputs($fp, $part->data);
-                fclose($fp);
-            }
-            break;
+            case self::MIME_TYPE_TEXT:
+            case self::MIME_TYPE_APPLICATION:
+            case self::MIME_TYPE_AUDIO:
+            case self::MIME_TYPE_IMAGE:
+            case self::MIME_TYPE_VIDEO:
+            case self::MIME_TYPE_OTHER:
+            case self::MIME_TYPE_UNKNOWN:
+            default:
+                $fp = fopen($part->filepath, "w");
+                if (empty($fp)) {
+                    echo "ERROR: fopen({$part->filepath}, w) failed\n";
+                } else {
+                    fputs($fp, $part->data);
+                    fclose($fp);
+                }
+                break;
         }
                 
         $this->Msg->parser[] = &$part;
         
         $this->handle_imap_errors("imap_fetchbody", $this->Msg->Msgno);
-        
     }
     
-    function decode_mime(
+    public function decode_mime(
         $data
     ) {
-        if(is_object($data))
-            foreach($data as $propertyName => $propertyValue) {
+        if (is_object($data)) {
+            foreach ($data as $propertyName => $propertyValue) {
                 $data->$propertyName = $this->decode_mime($propertyValue);
             }
-        elseif(is_array($data))
-            foreach($data as $propertyName => $propertyValue) {
+        } elseif (is_array($data)) {
+            foreach ($data as $propertyName => $propertyValue) {
                 $data[$propertyName] = $this->decode_mime($propertyValue);
             }
-        else
+        } else {
             $data = iconv_mime_decode($data, 2, 'UTF-8');
+        }
         
         return $data;
     }
     
-    function decode_string(
+    public function decode_string(
         $string
     ) {
         $stringArr = imap_mime_header_decode($string);
@@ -1656,28 +1584,29 @@ class MailCapture
             $encoding = strtoupper($stringArr[$i]->charset);
             $text = $stringArr[$i]->text;
             switch ($encoding) {
-            case 'UTF-8': 
+            case 'UTF-8':
                 $decodedString.= $text;
                 break;
                 
-            case 'DEFAULT': 
+            case 'DEFAULT':
                 $decodedString.= utf8_encode(utf8_decode($text));
                 break;
                 
-            default: 
-                if (in_array($encoding, $this->encodings))
+            default:
+                if (in_array($encoding, $this->encodings)) {
                     $decodedString.= mb_convert_encoding($text, 'UTF-8', $encoding);
-                elseif ($conv = iconv($encoding, "UTF-8", $text))
+                } elseif ($conv = iconv($encoding, "UTF-8", $text)) {
                     $decodedString.= $conv;
-                else 
-                    $decodedString.= $text;  // Unknown charset
+                } else {
+                    $decodedString.= $text;
+                }  // Unknown charset
             }
         }
            
-        return $decodedString;   
+        return $decodedString;
     }
     
-    function decode_data(
+    public function decode_data(
         $encodeddata,
         $mimeencoding
     ) {
@@ -1687,7 +1616,7 @@ class MailCapture
             break;
             
         case self::MIME_ENCODING_8BIT:
-            $decodeddata = 
+            $decodeddata =
                 quoted_printable_decode(
                     imap_8bit($encodeddata)
                 );
@@ -1710,7 +1639,6 @@ class MailCapture
         }
         
         return $decodeddata;
-    
     }
     
     private function addMetadata(
@@ -1719,48 +1647,44 @@ class MailCapture
         $owner
     ) {
         # Structure Info
-        if($info = $output->getAttribute('info') )
-            $value = 
+        if ($info = $output->getAttribute('info')) {
+            $value =
                 $this->getInfo(
                     $info,
                     $structure
                 );
-        
-        else 
+        } else {
             $value = $output->nodeValue;
+        }
         
-        if($formatter = $output->getAttribute('formatter')) {
+        if ($formatter = $output->getAttribute('formatter')) {
             $formatterConfig =
                 $this->query(
                     '/MailCapture/formatters/formatter[@name="'.$formatter.'"]'
                 )->item(0);
-            if(!$formatterConfig) {
+            if (!$formatterConfig) {
                 $_SESSION['capture']->sendError(
                     "Undefined formatter $formatter"
                 );
             }
             $formatterScript = __DIR__ . DIRECTORY_SEPARATOR . $formatterConfig->getAttribute('script');
-            if(!is_file($formatterScript))
+            if (!is_file($formatterScript)) {
                 $_SESSION['capture']->sendError(
                     "Can not open formatter script $formatterScript"
                 );
+            }
  
             require_once $formatterScript;
             $formatterFunc = $formatterConfig->getAttribute('func');
             $value = call_user_func($formatterFunc, $value);
-        }   
+        }
         
         if (!is_bool($owner)) {
             $owner->setMetadata(
-                $output->getAttribute('name'), 
+                $output->getAttribute('name'),
                 $value
             );
-        } else {
-            //var_dump($owner);
-            //echo "is bool so no setMetadata ! ";
         }
-        
-    
     }
        
     private function getInfo(
@@ -1769,60 +1693,59 @@ class MailCapture
     ) {
         $infopath = explode('/', $info);
         $value = $structure;
-        foreach($infopath as $infostep) {
+        foreach ($infopath as $infostep) {
             if (isset($value->$infostep)) {
                 //echo "eval " . '$value = $value->' . $infostep . ";" . PHP_EOL;
                 eval('$value = $value->' . $infostep . ";");
             }
         }
         
-        if(is_scalar($value)) {
+        if (is_scalar($value)) {
             $value = html_entity_decode($value);
             return $value;
         }
     }
     
-    function createHtml(
+    public function createHtml(
         $part
     ) {
-        
         $htmldata = $part->data;
         
         //convert all chars in htmlentities if not in utf-8 encoding
-        $htmldata = str_replace("é", "&eacute;",$htmldata);
-        $htmldata = str_replace("è","&egrave;",$htmldata);
-        $htmldata = str_replace("ê","&ecirc;",$htmldata);
-        $htmldata = str_replace("ë","&euml;",$htmldata);
+        $htmldata = str_replace("é", "&eacute;", $htmldata);
+        $htmldata = str_replace("è", "&egrave;", $htmldata);
+        $htmldata = str_replace("ê", "&ecirc;", $htmldata);
+        $htmldata = str_replace("ë", "&euml;", $htmldata);
 
-        $htmldata = str_replace("É", "&Eacute;",$htmldata);
-        $htmldata = str_replace("È","&Egrave;",$htmldata);
-        $htmldata = str_replace("Ê","&Ecirc;",$htmldata);
-        $htmldata = str_replace("Ë","&Euml;",$htmldata);
+        $htmldata = str_replace("É", "&Eacute;", $htmldata);
+        $htmldata = str_replace("È", "&Egrave;", $htmldata);
+        $htmldata = str_replace("Ê", "&Ecirc;", $htmldata);
+        $htmldata = str_replace("Ë", "&Euml;", $htmldata);
 
-        $htmldata = str_replace("à","&agrave;",$htmldata);
-        $htmldata = str_replace("À","&Agrave;",$htmldata);
-        $htmldata = str_replace("â","&acirc;",$htmldata);
-        $htmldata = str_replace("î","&icirc;",$htmldata);
-        $htmldata = str_replace("ç","&ccedil;",$htmldata);
-        $htmldata = str_replace("ô","&ocirc;",$htmldata);
-        $htmldata = str_replace("Ô","&Ocirc;",$htmldata);
-        $htmldata = str_replace("ù","&ugrave;",$htmldata);
-        $htmldata = str_replace("Ù","&Ugrave;",$htmldata);
-        $htmldata = str_replace("û","&ucirc;",$htmldata);
-        $htmldata = str_replace("œ","&oelig;",$htmldata);
-        $htmldata = str_replace("æ","&aelig;",$htmldata);
+        $htmldata = str_replace("à", "&agrave;", $htmldata);
+        $htmldata = str_replace("À", "&Agrave;", $htmldata);
+        $htmldata = str_replace("â", "&acirc;", $htmldata);
+        $htmldata = str_replace("î", "&icirc;", $htmldata);
+        $htmldata = str_replace("ç", "&ccedil;", $htmldata);
+        $htmldata = str_replace("ô", "&ocirc;", $htmldata);
+        $htmldata = str_replace("Ô", "&Ocirc;", $htmldata);
+        $htmldata = str_replace("ù", "&ugrave;", $htmldata);
+        $htmldata = str_replace("Ù", "&Ugrave;", $htmldata);
+        $htmldata = str_replace("û", "&ucirc;", $htmldata);
+        $htmldata = str_replace("œ", "&oelig;", $htmldata);
+        $htmldata = str_replace("æ", "&aelig;", $htmldata);
 
-        $htmldata = str_replace("'","&lsquo;",$htmldata);
-        $htmldata = str_replace("’","&rsquo;",$htmldata);
-        $htmldata = str_replace("‘","&lsquo;",$htmldata);
-        $htmldata = str_replace("'","&lsquo;",$htmldata);
-        $htmldata = str_replace("“","&ldquo;",$htmldata);
-        $htmldata = str_replace("”","&rdquo;",$htmldata);
-        $htmldata = str_replace("–","&ndash;",$htmldata);
-        $htmldata = str_replace(chr(0xC2).chr(0xA0),"&nbsp;",$htmldata);
+        $htmldata = str_replace("'", "&lsquo;", $htmldata);
+        $htmldata = str_replace("’", "&rsquo;", $htmldata);
+        $htmldata = str_replace("‘", "&lsquo;", $htmldata);
+        $htmldata = str_replace("'", "&lsquo;", $htmldata);
+        $htmldata = str_replace("“", "&ldquo;", $htmldata);
+        $htmldata = str_replace("”", "&rdquo;", $htmldata);
+        $htmldata = str_replace("–", "&ndash;", $htmldata);
+        $htmldata = str_replace(chr(0xC2).chr(0xA0), "&nbsp;", $htmldata);
 
         echo "detect encoding" . PHP_EOL;
-        echo ("Encodage : " . mb_detect_encoding($htmldata, 'UTF-8, ISO-8859-1')) . PHP_EOL;
+        echo("Encodage : " . mb_detect_encoding($htmldata, 'UTF-8, ISO-8859-1')) . PHP_EOL;
 
         # Force UTF-8 encoding
         /*if(strtoupper($part->parameters['charset']) == 'UTF-8') {
@@ -1831,10 +1754,10 @@ class MailCapture
         }*/
         
 
-        if(mb_detect_encoding($htmldata, 'UTF-8, ISO-8859-1') == "ISO-8859-1"){
-            echo ("Resolve Encoding : " . mb_detect_encoding($htmldata, 'UTF-8, ISO-8859-1')) . PHP_EOL;
+        if (mb_detect_encoding($htmldata, 'UTF-8, ISO-8859-1') == "ISO-8859-1") {
+            echo("Resolve Encoding : " . mb_detect_encoding($htmldata, 'UTF-8, ISO-8859-1')) . PHP_EOL;
             utf8_encode($htmldata);
-            echo ("after resolve : " . mb_detect_encoding($htmldata, 'UTF-8, ISO-8859-1')) . PHP_EOL;
+            echo("after resolve : " . mb_detect_encoding($htmldata, 'UTF-8, ISO-8859-1')) . PHP_EOL;
         }
 
 
@@ -1876,18 +1799,16 @@ class MailCapture
         # Structure
         #********************************************************************************
         $html = $htmlDoc->documentElement;
-        //var_dump($htmldata);
-        //exit;
-        //var_dump($html);
+
         # BODY
         $body = $htmlXpath->query('./body', $html)->item(0);
-        if(!$body) {
+        if (!$body) {
             $contents = $html->childNodes;
             $body = $htmlDoc->createElement('body');
             # Append original content to body
-            for($i=0, $l=$contents->length; 
-                $i<$l; 
-                $i++ 
+            for ($i=0, $l=$contents->length;
+                $i<$l;
+                $i++
             ) {
                 $body->appendChild(
                     $contents->item($i)
@@ -1898,16 +1819,16 @@ class MailCapture
         
         # HEAD
         $head = $htmlXpath->query('./head', $html)->item(0);
-        if(!$head) {
+        if (!$head) {
             $head = $htmlDoc->createElement('head');
             $html->insertBefore($head, $body);
         }
         # META
         $meta = $htmlXpath->query('./meta[@http-equiv and @content]', $head)->item(0);
-        if(!$meta) {
+        if (!$meta) {
             $meta = $htmlDoc->createElement('meta');
-            $head->appendChild($meta);  
-        } 
+            $head->appendChild($meta);
+        }
         # Set encoding to UTF-8
         $meta->setAttribute('http-equiv', "Content-Type");
         $meta->setAttribute('content', "text/html; charset=UTF-8");
@@ -1926,14 +1847,13 @@ class MailCapture
         #********************************************************************************
         //echo PHP_EOL . 'avant inclusion fichiers' . PHP_EOL;
         $srcCidTags = $htmlXpath->query('/'.'/*[starts-with(@src, "cid:")]', $html);
-        for($i=0, $l=$srcCidTags->length; 
-                $i<$l; 
-                $i++ 
+        for ($i=0, $l=$srcCidTags->length;
+                $i<$l;
+                $i++
         ) {
             //echo ' element ' . $srcCidTags->item($i) . PHP_EOL;
             $srcCidTag = $srcCidTags->item($i);
             //echo 'an element : ' . PHP_EOL;
-            //var_dump($srcCidTag);
             $src = $srcCidTag->getAttribute('src');
             //echo 'src : ' . $src . PHP_EOL;
             
@@ -1944,26 +1864,26 @@ class MailCapture
             
             if (is_file($filename . '.jpg')) {
                 $filename .= '.jpg';
-                //echo 'the good filename : ' . $filename . PHP_EOL;
+            //echo 'the good filename : ' . $filename . PHP_EOL;
             } elseif (is_file($filename . '.jpeg')) {
                 $filename .= '.jpeg';
-                //echo 'the good filename : ' . $filename . PHP_EOL;
+            //echo 'the good filename : ' . $filename . PHP_EOL;
             } elseif (is_file($filename . '.png')) {
                 $filename .= '.png';
-                //echo 'the good filename : ' . $filename . PHP_EOL;
+            //echo 'the good filename : ' . $filename . PHP_EOL;
             } elseif (is_file($filename . '.gif')) {
                 $filename .= '.gif';
-                //echo 'the good filename : ' . $filename . PHP_EOL;
+            //echo 'the good filename : ' . $filename . PHP_EOL;
             } elseif (is_file($filename . '.bmp')) {
                 $filename .= '.bmp';
                 //echo 'the good filename : ' . $filename . PHP_EOL;
             }
             //echo 'is file : ' . is_file($filename) . PHP_EOL;
-            if(is_file($filename)) {
+            if (is_file($filename)) {
                 //echo 'iciiiiiiiiiiiiiiiiiiiiiiii ' . PHP_EOL;
                 $filecontent = chunk_split(base64_encode(file_get_contents($filename)));
                 //echo 'filecontent : ' . $filecontent . PHP_EOL;
-                $srcCidTag->setAttribute( 
+                $srcCidTag->setAttribute(
                     'src',
                     "data:image/gif;base64," . $filecontent
                 );
@@ -1989,11 +1909,11 @@ class MailCapture
     // Adresse: 11 boulevard du sud-est
     // Code postal: 92000
     // Ville: NANTERRE
-    // Pays: FRANCE 
-    function extractContactInfo($ContentPath)
+    // Pays: FRANCE
+    public function extractContactInfo($ContentPath)
     {
-         $Batch = $_SESSION['capture']->Batch;
-         $BatchId = $Batch->id;
+        $Batch = $_SESSION['capture']->Batch;
+        $BatchId = $Batch->id;
         // /********************************************************************************
         // ** Loop on DOCUMENT Elements
         // ********************************************************************************/
@@ -2008,24 +1928,24 @@ class MailCapture
             }
 
             $_SESSION['capture']->logEvent(
-                    "Open resource : " . $txtpath
-                );
+                "Open resource : " . $txtpath
+            );
 
             $txtmail = fopen($txtpath, 'r');
             $contents = fread($txtmail, filesize($txtpath));
 
             $_SESSION['capture']->logEvent(
-                    "Set Contact Metadata"
-                );
+                "Set Contact Metadata"
+            );
 
-         $contact_title = substr($contents, strpos($contents, "Civilité:") + 10);
+            $contact_title = substr($contents, strpos($contents, "Civilité:") + 10);
             $contact_title = substr($contact_title, 0, strpos($contact_title, "Nom:"));
 
-         if(trim($contact_title) == "Monsieur"){
-          $Element->setMetadata("contact_title", "title1");
-         }else{
-          $Element->setMetadata("contact_title", "title2");
-         }
+            if (trim($contact_title) == "Monsieur") {
+                $Element->setMetadata("contact_title", "title1");
+            } else {
+                $Element->setMetadata("contact_title", "title2");
+            }
             $contact_name = substr($contents, strpos($contents, "Nom:") + 4);
             $contact_name = substr($contact_name, 0, strpos($contact_name, "Prénom:"));
             $contact_name = preg_replace("/(\r\n|\n|\r)/", " ", $contact_name);
@@ -2091,21 +2011,18 @@ class MailCapture
             echo "1".$contact_country;*/
 
             fclose($txtmail);
-
         }
     }
 
     //Configuration du sendmail php obligatoire pour utiliser cette fonction !
-    function notifyContact($ContentPath)
+    public function notifyContact($ContentPath, $type = 'SVE')
     {
-        $Batch = $_SESSION['capture']->Batch;
-        $BatchId = $Batch->id;
         // /********************************************************************************
         // ** Loop on DOCUMENT Elements
         // ********************************************************************************/
         $OriginElements = $this->Batch->query($ContentPath);
         $l = $OriginElements->length;
-        for ($i=0;$i<$l;$i++) {
+        for ($i=0; $i<$l; $i++) {
             $Element = $OriginElements->item($i);
 
             //recuperation des element du formulaire contact
@@ -2115,58 +2032,71 @@ class MailCapture
             //recuperation du res_id de la step sendToMaarch
             $res_id = $Element->getMetadata("resId");
 
-            
-
-            if (!preg_match("#^[a-z0-9._-]+@(hotmail|live|msn).[a-z]{2,4}$#", $dest_mail)) // On filtre les serveurs qui rencontrent des bogues.
-            {
-                $passage_ligne = "\r\n";
+            // Only If document was saved
+            if (!empty($res_id)) {
+                if (!preg_match("#^[a-z0-9._-]+@(hotmail|live|msn).[a-z]{2,4}$#", $dest_mail)) { // On filtre les serveurs qui rencontrent des bogues.
+                    $passage_ligne = "\r\n";
+                } else {
+                    $passage_ligne = "\n";
+                }
+    
+                if ($type == 'SVE') {
+                    //=====Déclaration des messages au format texte et au format HTML.
+                    $message_txt = "Vous avez saisi par voie électronique [NOM DE LA COLLECTIVITE], enregistré le ".date('d/m/Y').". Votre saisie concerne « ".$subject." ».Le présent accusé de réception N°".$res_id." (que nous vous invitons à conserver) atteste de la réception de votre saisine par l’administration compétente et vous informe des prochaines étapes de la procédure. Cela ne préjuge pas de la complétude ou de la recevabilité du dossier qui dépend notamment de l’examen à venir des pièces fournies ou à fournir. Si l’instruction de votre dossier nécessite des informations ou pièces complémentaires, [NOM DE LA COLLECTIVITE] vous contactera afin de les obtenir, dans un délai de production qui vous sera mentionné. Cordialement. Ceci est un message automatique, veuillez ne pas répondre ! Pour tout renseignement concernant votre dossier, vous pouvez nous contacter par téléphone [COORDONNEES TELEPHONIQUES] ou par messagerie électronique [ADRESSE ELECTRONIQUE].";
+                    $message_html = "<html><head></head><body style='background:white;color: #808080;font-size: 14px;text-align: justify;line-height: 25px;font-family: Trebuchet MS, Arial, Verdana, sans-serif;'>Bonjour,<br/><p>Vous avez saisi par voie électronique [NOM DE LA COLLECTIVITE], enregistré le <b>".date('d/m/Y')."</b>.<br/>Votre saisie concerne « <b>".$subject."</b> ».</p><p>Le présent accusé de réception <b>N°".$res_id."</b> (que nous vous invitons à conserver) atteste de la réception de votre saisine par l’administration compétente et vous informe des prochaines étapes de la procédure.<br/><i style='color:red;'>Cela ne préjuge pas de la complétude ou de la recevabilité du dossier qui dépend notamment de l’examen à venir des pièces fournies ou à fournir.</i><br/>Si l’instruction de votre dossier nécessite des informations ou pièces complémentaires, [NOM DE LA COLLECTIVITE] vous contactera afin de les obtenir, dans un délai de production qui vous sera mentionné.</p><br/>Cordialement.<br/><hr/><p style='text-align:center;'><i style='color:#A4A4A4;font-size:12px;'>Ceci est un message automatique, veuillez ne pas répondre !<br/>Pour tout renseignement concernant votre dossier, vous pouvez nous contacter par téléphone [COORDONNEES TELEPHONIQUES] ou par messagerie électronique [ADRESSE ELECTRONIQUE].</i></p></body></html>";
+                //==========
+                } else {
+                    $filename = __DIR__ . DIRECTORY_SEPARATOR . "sendmail.ini";
+                    if (!is_readable($filename)) {
+                        $_SESSION['capture']->logEvent("Cannot send Acknowledgement Receipt. " . $filename . " is not readable", 2);
+                        return;
+                    }
+                    $iniFile = parse_ini_file($filename);
+    
+                    $message_html = $iniFile['mail_message'];
+                }
+                 
+                //=====Création de la boundary
+                $boundary = "-----=".md5(rand());
+                //==========
+                 
+                //=====Définition du sujet.
+                $sujet = "Accusé de dépôt : ".$subject;
+                //=========
+    
+                //=====Création du header de l'e-mail.
+                $fromHeader = $iniFile['mail_from'] ?? '"NoReply" <NoReply@gmail.com>';
+                $replyToHeader = $iniFile['mail_reply_to'] ?? '"NoReply" <NoReply@gmail.com>';
+                $header = "From: ".$fromHeader.$passage_ligne;
+                $header.= "Reply-to: ".$replyToHeader.$passage_ligne;
+                $header.= "MIME-Version: 1.0".$passage_ligne;
+                $header.= "Content-Type: multipart/alternative;".$passage_ligne." boundary=\"$boundary\"".$passage_ligne;
+                //==========
+                 
+                //=====Création du message.
+                $message = $passage_ligne."--".$boundary.$passage_ligne;
+                //=====Ajout du message au format texte.
+                if (!empty($message_txt)) {
+                    $message.= "Content-Type: text/plain; charset=UTF-8".$passage_ligne;
+                    $message.= "Content-Transfer-Encoding: 8bit".$passage_ligne;
+                    $message.= $passage_ligne.$message_txt.$passage_ligne;
+                }
+                //==========
+                $message.= $passage_ligne."--".$boundary.$passage_ligne;
+                //=====Ajout du message au format HTML
+                if (!empty($message_html)) {
+                    $message.= "Content-Type: text/html; charset=UTF-8".$passage_ligne;
+                    $message.= "Content-Transfer-Encoding: 8bit".$passage_ligne;
+                    $message.= $passage_ligne.$message_html.$passage_ligne;
+                }
+                //==========
+                $message.= $passage_ligne."--".$boundary."--".$passage_ligne;
+                $message.= $passage_ligne."--".$boundary."--".$passage_ligne;
+                //==========
+                 
+                //=====Envoi de l'e-mail.
+                mail($dest_mail, $sujet, $message, $header);
             }
-            else
-            {
-                $passage_ligne = "\n";
-            }
-
-            //=====Déclaration des messages au format texte et au format HTML.
-            $message_txt = "Vous avez saisi par voie électronique [NOM DE LA COLLECTIVITE], enregistré le ".date('d/m/Y').". Votre saisie concerne « ".$subject." ».Le présent accusé de réception N°".$res_id." (que nous vous invitons à conserver) atteste de la réception de votre saisine par l’administration compétente et vous informe des prochaines étapes de la procédure. Cela ne préjuge pas de la complétude ou de la recevabilité du dossier qui dépend notamment de l’examen à venir des pièces fournies ou à fournir. Si l’instruction de votre dossier nécessite des informations ou pièces complémentaires, [NOM DE LA COLLECTIVITE] vous contactera afin de les obtenir, dans un délai de production qui vous sera mentionné. Cordialement. Ceci est un message automatique, veuillez ne pas répondre ! Pour tout renseignement concernant votre dossier, vous pouvez nous contacter par téléphone [COORDONNEES TELEPHONIQUES] ou par messagerie électronique [ADRESSE ELECTRONIQUE].";
-            $message_html = "<html><head></head><body style='background:white;color: #808080;font-size: 14px;text-align: justify;line-height: 25px;font-family: Trebuchet MS, Arial, Verdana, sans-serif;'>Bonjour,<br/><p>Vous avez saisi par voie électronique [NOM DE LA COLLECTIVITE], enregistré le <b>".date('d/m/Y')."</b>.<br/>Votre saisie concerne « <b>".$subject."</b> ».</p><p>Le présent accusé de réception <b>N°".$res_id."</b> (que nous vous invitons à conserver) atteste de la réception de votre saisine par l’administration compétente et vous informe des prochaines étapes de la procédure.<br/><i style='color:red;'>Cela ne préjuge pas de la complétude ou de la recevabilité du dossier qui dépend notamment de l’examen à venir des pièces fournies ou à fournir.</i><br/>Si l’instruction de votre dossier nécessite des informations ou pièces complémentaires, [NOM DE LA COLLECTIVITE] vous contactera afin de les obtenir, dans un délai de production qui vous sera mentionné.</p><br/>Cordialement.<br/><hr/><p style='text-align:center;'><i style='color:#A4A4A4;font-size:12px;'>Ceci est un message automatique, veuillez ne pas répondre !<br/>Pour tout renseignement concernant votre dossier, vous pouvez nous contacter par téléphone [COORDONNEES TELEPHONIQUES] ou par messagerie électronique [ADRESSE ELECTRONIQUE].</i></p></body></html>";
-            //==========
-             
-            //=====Création de la boundary
-            $boundary = "-----=".md5(rand());
-            //==========
-             
-            //=====Définition du sujet.
-            $sujet = "Accusé de dépôt : ".$subject;
-            //=========
-             
-            //=====Création du header de l'e-mail.
-            $header = "From: \"NoReply\"<NoReply@gmail.com>".$passage_ligne;
-            $header.= "Reply-to: \"NoReply\" <NoReply@gmail.com>".$passage_ligne;
-            $header.= "MIME-Version: 1.0".$passage_ligne;
-            $header.= "Content-Type: multipart/alternative;".$passage_ligne." boundary=\"$boundary\"".$passage_ligne;
-            //==========
-             
-            //=====Création du message.
-            $message = $passage_ligne."--".$boundary.$passage_ligne;
-            //=====Ajout du message au format texte.
-            $message.= "Content-Type: text/plain; charset=\"ISO-8859-1\"".$passage_ligne;
-            $message.= "Content-Transfer-Encoding: 8bit".$passage_ligne;
-            $message.= $passage_ligne.$message_txt.$passage_ligne;
-            //==========
-            $message.= $passage_ligne."--".$boundary.$passage_ligne;
-            //=====Ajout du message au format HTML
-            $message.= "Content-Type: text/html; charset=\"ISO-8859-1\"".$passage_ligne;
-            $message.= "Content-Transfer-Encoding: 8bit".$passage_ligne;
-            $message.= $passage_ligne.$message_html.$passage_ligne;
-            //==========
-            $message.= $passage_ligne."--".$boundary."--".$passage_ligne;
-            $message.= $passage_ligne."--".$boundary."--".$passage_ligne;
-            //==========
-             
-            //=====Envoi de l'e-mail.
-            mail($dest_mail,$sujet,$message,$header);
-
         }
     }
-    
 }

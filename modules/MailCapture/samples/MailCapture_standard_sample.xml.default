@@ -24,6 +24,9 @@
         <messageoutput name="xpriority" info="xpriority" />
         <messageoutput name="message_id" info="message_id" />
         <messageoutput name="ccaddress" info="ccaddress" />
+        <!-- AR -->
+        <messageoutput name="email" info="fromaddress"/>
+        <messageoutput name="res_subject" info="subject" />
     </messageoutputs>
     <attachmentrules>
         <attachmentrule name="images" info="format" op="in">gif jpg jpeg png</attachmentrule>
