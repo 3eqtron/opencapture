@@ -291,8 +291,7 @@ class QRSeparator
             $tplidx = $new_pdf->importPage($i);
             $specs = $new_pdf->getTemplateSize($tplidx);
 
-            $orientation = $specs['height'] > $specs['width'] ? 'P' : 'L';
-            $new_pdf->AddPage($orientation);
+            $new_pdf->AddPage($specs['orientation']);
 
             $new_pdf->useTemplate($tplidx, null, null, null, null, true);
 
@@ -407,11 +406,11 @@ class QRSeparator
                     $_SESSION['capture']->logEvent(
                         "This is a maarch document page ! Add page to pdf ..."
                     );
-                    $new_pdf->AddPage();
 
                     $new_pdf->setSourceFile($split_directory.$file);
-
                     $tplidx = $new_pdf->importPage(1);
+                    $specs = $new_pdf->getTemplateSize($tplidx);
+                    $new_pdf->AddPage($specs['orientation']);
                     $new_pdf->useTemplate($tplidx);
                 } else {
                     // If not a separator and no previous pdf, merge actual pdf
@@ -421,11 +420,11 @@ class QRSeparator
                         "No separator found ! Add page to pdf ..."
                     );
                     $label[$z] = 'NOSEPARATOR';
-                    $new_pdf->AddPage();
 
                     $new_pdf->setSourceFile($split_directory.$file);
-
                     $tplidx = $new_pdf->importPage(1);
+                    $specs = $new_pdf->getTemplateSize($tplidx);
+                    $new_pdf->AddPage($specs['orientation']);
                     $new_pdf->useTemplate($tplidx);
                     return 'NOSEPARATOR';
                 }
