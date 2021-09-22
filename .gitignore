@@ -2,4 +2,5 @@ files/
 config/Capture.xml
 *.log
 *.sh
+!ci/*.sh
 *.xml
