@@ -52,10 +52,8 @@ job_php-7.3:
 logs:
   image: debian:10-slim
   stage: sync
-  except:
-    - schedules
-    - tags
-    - master
+  rules:
+    - if: '$CI_COMMIT_BRANCH != "master" && $CI_PIPELINE_SOURCE != "schedule" && $CI_PIPELINE_SOURCE != "merge_request_event" && $CI_COMMIT_TAG =~ "/^$/"'
   before_script:
     - apt-get update -y
     - apt install -y curl
@@ -90,8 +88,8 @@ logs:
 new_branch:
  image: debian:10-slim
  stage: sync
- only:
-   - branches
+ rules:
+   - if: '$CI_COMMIT_BRANCH =~ /(feat|fix)\/[0-9]{4,5}\//'
  before_script:
    # Install git and curl command
    - apt-get update -yqq > /dev/null
