@@ -8,8 +8,7 @@ variables:
   POSTGRES_PASSWORD: ""
 
 stages:
-  - logs
-  - new_branch
+  - sync
   - test
 
 before_script:
@@ -75,7 +74,7 @@ logs:
         fi; \
       fi
     - echo $ISSUE_ID
-    - NOTE_MESSAGE="Commit ajouté sur la branche **$CI_COMMIT_REF_NAME** de **$CI_PROJECT_NAME**"
+    - NOTE_MESSAGE="Commit ajouté sur la branche **$CI_COMMIT_REF_NAME** de **$CI_PROJECT_NAME** par $CI_COMMIT_AUTHOR"
     - COMMIT_URL="$CI_PROJECT_URL/commit/$CI_COMMIT_SHA"
     - echo $NOTE_MESSAGE
     - echo "$CI_COMMIT_MESSAGE"
@@ -90,7 +89,7 @@ logs:
 
 new_branch:
  image: debian:10-slim
- stage: new_branch
+ stage: sync
  only:
    - branches
  before_script:

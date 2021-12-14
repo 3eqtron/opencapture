@@ -42,7 +42,7 @@ else
 
     SUBJECT=`cat issue_$US.json | jq -r '.issue.subject'`
 
-    BODY="{\"id\":\"$CI_PROJECT_ID\",\"source_branch\":\"$CI_COMMIT_REF_NAME\",\"target_branch\":\"$BRANCH\",\"title\":\"WIP:$CI_COMMIT_REF_NAME\",\"description\":\"$SUBJECT\n=> https://forge.maarch.org/issues/$US\",\"remove_source_branch\":\"true\"}"
+    BODY="{\"id\":\"$CI_PROJECT_ID\",\"source_branch\":\"$CI_COMMIT_REF_NAME\",\"target_branch\":\"$BRANCH\",\"title\":\"Draft:$CI_COMMIT_REF_NAME\",\"description\":\"$SUBJECT\n=> https://forge.maarch.org/issues/$US\",\"remove_source_branch\":\"true\"}"
 
     echo $BODY
 
