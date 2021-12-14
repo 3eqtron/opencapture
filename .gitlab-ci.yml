@@ -51,7 +51,7 @@ job_php-7.3:
 
 logs:
   image: debian:10-slim
-  stage: logs
+  stage: sync
   except:
     - schedules
     - tags
