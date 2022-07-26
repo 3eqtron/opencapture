@@ -37,7 +37,7 @@ require_once "tools/log4php/Logger.php";
 /******************************************************************************
 **	DEFINE COMMANDS AND ARGS
 ******************************************************************************/
-require_once "Maarch_CLITools/ArgsParser.php";
+require_once "tools/Maarch_CLITools/ArgsParser.php";
 $ArgsParser = new ArgsParser();
 $CommandArgsParser = new ArgsParser();
 
