@@ -1,8 +1,8 @@
 <?php
 
 // Microsoft Exchange mailbox client classes
-require './EWS/Mailbox.php';
-require './EWS/Item.php';
+require 'modules/MailCapture/EWS/Mailbox.php';
+require 'modules/MailCapture/EWS/Item.php';
 
 class MailCapture extends DOMXPath
 {
@@ -242,12 +242,12 @@ class MailCapture extends DOMXPath
             $accountConfig->getElementsByTagName('mailbox')->item(0)->nodeValue;
 
         $protocol = 'imap';
-        if (strpos($this->mailbox, 'http://') !== false || strpos($this->mailbox, 'https://') !== false) {
+        if (strpos($this->mailbox, 'EWS') === 0) {
             // using Microsoft Exchange
             $protocol = 'ews';
 
-            $captureFolder = preg_replace('/\{.+\}(.+)/', '\1', $this->mailbox);
-            $this->mailbox = preg_replace('/\{(.+)\}/', '\1', $this->mailbox);
+            $captureFolder = preg_replace('/EWS\{.+\}(.+)/', '\1', $this->mailbox);
+            $this->mailbox = preg_replace('/EWS\{(.+)\}.+/', '\1', $this->mailbox);
 
             $exchangeVersion = $accountConfig->getElementsByTagName('exchangeversion')->item(0)->nodeValue;
             if (empty($captureFolder) || empty($this->mailbox) || empty($exchangeVersion)) {
@@ -426,7 +426,7 @@ class MailCapture extends DOMXPath
                 if ($action === 'move') {
                     $ewsMailbox->moveItemToNamedFolder($ewsItem, $folder);
                 } elseif ($action === 'delete') {
-                    // TODO
+                    $ewsMailbox->deleteItem($ewsItem);
                 }
             }
         }

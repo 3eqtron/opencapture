@@ -1,5 +1,5 @@
 <?php
-require '../../../vendor/autoload.php';
+require 'vendor/autoload.php';
 
 use \jamesiarmes\PhpEws\Request\GetAttachmentType;
 use \jamesiarmes\PhpEws\ArrayType\NonEmptyArrayOfRequestAttachmentIdsType;

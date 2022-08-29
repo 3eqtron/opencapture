@@ -1,11 +1,12 @@
 <?php
-require '../../../vendor/autoload.php';
+require 'vendor/autoload.php';
 
 use \jamesiarmes\PhpEws\Client;
 use \jamesiarmes\PhpEws\Request\FindFolderType;
 use \jamesiarmes\PhpEws\Request\FindItemType;
 use \jamesiarmes\PhpEws\Request\GetItemType;
 use \jamesiarmes\PhpEws\Request\MoveItemType;
+use jamesiarmes\PhpEws\Request\DeleteItemType;
 use \jamesiarmes\PhpEws\Enumeration\FolderQueryTraversalType;
 use \jamesiarmes\PhpEws\Enumeration\ItemQueryTraversalType;
 use \jamesiarmes\PhpEws\Enumeration\BodyTypeResponseType;
@@ -18,6 +19,7 @@ use \jamesiarmes\PhpEws\Enumeration\DistinguishedFolderIdNameType;
 use \jamesiarmes\PhpEws\Type\FolderResponseShapeType;
 use \jamesiarmes\PhpEws\Type\ItemResponseShapeType;
 use \jamesiarmes\PhpEws\Enumeration\DefaultShapeNamesType;
+use jamesiarmes\PhpEws\Enumeration\DisposalType;
 
 /**
  * ExchangeMailbox class: an Exchage mailbox wrapper
@@ -130,6 +132,19 @@ class ExchangeMailbox {
 		$response = $this->client->MoveItem($request);
 
 		$item->setItemId($response->ResponseMessages->MoveItemResponseMessage[0]->Items->Message[0]->ItemId->Id);
+
+		return true;
+	}
+
+	public function deleteItem($item) {
+		$request = new DeleteItemType();
+		$request->DeleteType = DisposalType::MOVE_TO_DELETED_ITEMS;
+		$request->ItemIds = new NonEmptyArrayOfBaseItemIdsType();
+		$itemId = new ItemIdType();
+		$itemId->Id = $item->getItemId();
+		$request->ItemIds->ItemId[] = $itemId;
+
+		$this->client->DeleteItem($request);
 
 		return true;
 	}
