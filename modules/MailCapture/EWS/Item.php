@@ -1,10 +1,10 @@
 <?php
 require 'vendor/autoload.php';
 
-use \jamesiarmes\PhpEws\Request\GetAttachmentType;
-use \jamesiarmes\PhpEws\ArrayType\NonEmptyArrayOfRequestAttachmentIdsType;
-use \jamesiarmes\PhpEws\Type\RequestAttachmentIdType;
-use \jamesiarmes\PhpEws\Enumeration\ImportanceChoicesType;
+use jamesiarmes\PhpEws\Request\GetAttachmentType;
+use jamesiarmes\PhpEws\ArrayType\NonEmptyArrayOfRequestAttachmentIdsType;
+use jamesiarmes\PhpEws\Type\RequestAttachmentIdType;
+use jamesiarmes\PhpEws\Enumeration\ImportanceChoicesType;
 
 /**
  * ExchangeItem class: an Exchange item (an email message) wrapper

@@ -1,24 +1,24 @@
 <?php
 require 'vendor/autoload.php';
 
-use \jamesiarmes\PhpEws\Client;
-use \jamesiarmes\PhpEws\Request\FindFolderType;
-use \jamesiarmes\PhpEws\Request\FindItemType;
-use \jamesiarmes\PhpEws\Request\GetItemType;
-use \jamesiarmes\PhpEws\Request\MoveItemType;
+use jamesiarmes\PhpEws\Client;
+use jamesiarmes\PhpEws\Request\FindFolderType;
+use jamesiarmes\PhpEws\Request\FindItemType;
+use jamesiarmes\PhpEws\Request\GetItemType;
+use jamesiarmes\PhpEws\Request\MoveItemType;
 use jamesiarmes\PhpEws\Request\DeleteItemType;
-use \jamesiarmes\PhpEws\Enumeration\FolderQueryTraversalType;
-use \jamesiarmes\PhpEws\Enumeration\ItemQueryTraversalType;
-use \jamesiarmes\PhpEws\Enumeration\BodyTypeResponseType;
-use \jamesiarmes\PhpEws\ArrayType\NonEmptyArrayOfBaseFolderIdsType;
-use \jamesiarmes\PhpEws\ArrayType\NonEmptyArrayOfBaseItemIdsType;
-use \jamesiarmes\PhpEws\Type\DistinguishedFolderIdType;
-use \jamesiarmes\PhpEws\Type\TargetFolderIdType;
-use \jamesiarmes\PhpEws\Type\ItemIdType;
-use \jamesiarmes\PhpEws\Enumeration\DistinguishedFolderIdNameType;
-use \jamesiarmes\PhpEws\Type\FolderResponseShapeType;
-use \jamesiarmes\PhpEws\Type\ItemResponseShapeType;
-use \jamesiarmes\PhpEws\Enumeration\DefaultShapeNamesType;
+use jamesiarmes\PhpEws\Enumeration\FolderQueryTraversalType;
+use jamesiarmes\PhpEws\Enumeration\ItemQueryTraversalType;
+use jamesiarmes\PhpEws\Enumeration\BodyTypeResponseType;
+use jamesiarmes\PhpEws\ArrayType\NonEmptyArrayOfBaseFolderIdsType;
+use jamesiarmes\PhpEws\ArrayType\NonEmptyArrayOfBaseItemIdsType;
+use jamesiarmes\PhpEws\Type\DistinguishedFolderIdType;
+use jamesiarmes\PhpEws\Type\TargetFolderIdType;
+use jamesiarmes\PhpEws\Type\ItemIdType;
+use jamesiarmes\PhpEws\Enumeration\DistinguishedFolderIdNameType;
+use jamesiarmes\PhpEws\Type\FolderResponseShapeType;
+use jamesiarmes\PhpEws\Type\ItemResponseShapeType;
+use jamesiarmes\PhpEws\Enumeration\DefaultShapeNamesType;
 use jamesiarmes\PhpEws\Enumeration\DisposalType;
 
 /**
