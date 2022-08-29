@@ -15,6 +15,11 @@ class ComposerStaticInit344e76765a40d8ec1e6e142d7d1fcb44
         array (
             'setasign\\Fpdi\\' => 14,
         ),
+        'j' => 
+        array (
+            'jamesiarmes\\PhpNtlm\\' => 20,
+            'jamesiarmes\\PhpEws\\' => 19,
+        ),
         'Z' => 
         array (
             'Zxing\\' => 6,
@@ -26,6 +31,14 @@ class ComposerStaticInit344e76765a40d8ec1e6e142d7d1fcb44
         array (
             0 => __DIR__ . '/..' . '/setasign/fpdi/src',
         ),
+        'jamesiarmes\\PhpNtlm\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/jamesiarmes/php-ntlm/src',
+        ),
+        'jamesiarmes\\PhpEws\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/php-ews/php-ews/src',
+        ),
         'Zxing\\' => 
         array (
             0 => __DIR__ . '/..' . '/khanamiryan/qrcode-detector-decoder/lib',
@@ -33,6 +46,7 @@ class ComposerStaticInit344e76765a40d8ec1e6e142d7d1fcb44
     );
 
     public static $classMap = array (
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'Datamatrix' => __DIR__ . '/..' . '/tecnickcom/tcpdf/include/barcodes/datamatrix.php',
         'FPDF' => __DIR__ . '/..' . '/setasign/fpdf/fpdf.php',
         'PDF417' => __DIR__ . '/..' . '/tecnickcom/tcpdf/include/barcodes/pdf417.php',

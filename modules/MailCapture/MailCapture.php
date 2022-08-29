@@ -1,5 +1,9 @@
 <?php
 
+// Microsoft Exchange mailbox client classes
+require './EWS/Mailbox.php';
+require './EWS/Item.php';
+
 class MailCapture extends DOMXPath
 {
     const MIME_TYPE_TEXT        = 0;
@@ -236,7 +240,21 @@ class MailCapture extends DOMXPath
        
         $this->mailbox =
             $accountConfig->getElementsByTagName('mailbox')->item(0)->nodeValue;
-            
+
+        $protocol = 'imap';
+        if (strpos($this->mailbox, 'http://') !== false || strpos($this->mailbox, 'https://') !== false) {
+            // using Microsoft Exchange
+            $protocol = 'ews';
+
+            $captureFolder = preg_replace('/\{.+\}(.+)/', '\1', $this->mailbox);
+            $this->mailbox = preg_replace('/\{(.+)\}/', '\1', $this->mailbox);
+
+            $exchangeVersion = $accountConfig->getElementsByTagName('exchangeversion')->item(0)->nodeValue;
+            if (empty($captureFolder) || empty($this->mailbox) || empty($exchangeVersion)) {
+                $_SESSION['capture']->sendError('MS Exchange mailbox configuration is invalid!');
+            }
+        }
+
         $username =
             $accountConfig->getElementsByTagName('username')->item(0)->nodeValue;
            
@@ -244,7 +262,7 @@ class MailCapture extends DOMXPath
                 
         $password =
             $accountConfig->getElementsByTagName('password')->item(0)->nodeValue;
-
+        
         if (
             !empty(
                 $accountConfig->getElementsByTagName('IMAP_CLIENT_CERT')->item(0)->nodeValue
@@ -300,99 +318,119 @@ class MailCapture extends DOMXPath
             $this->query(
                 '/MailCapture/attachmentoutputs/attachmentoutput'
             );
-        
-        /**********************************************************************
-        ** Open IMAP stream
-        **********************************************************************/
-        $this->imap_stream =
-            imap_open(
-                $this->mailbox,
-                $username,
-                $password,
-                0,
-                0,
-                $this->params
-            );
-        
-        if (!$this->imap_stream) {
-            $this->handle_imap_errors("imap_open");
-        } else {
-            // clear errors
-            $errors = imap_errors();
-        }
 
-        
-        /**********************************************************************
-        ** Get Folders and ACL for move options
-        **********************************************************************/
-        $this->folders =
-            imap_list(
-                $this->imap_stream,
-                $this->mailbox,
-                "*"
-            );
-        $this->handle_imap_errors("imap_list");
-               
-        /**********************************************************************
-        ** Loop on messages
-        **********************************************************************/
-        $num_msgs = imap_num_msg($this->imap_stream);
-        $this->writeLog(
-            $num_msgs . " messages in mailbox"
-        );
-        for ($Msgno=1; $Msgno<=$num_msgs; $Msgno++) {
-            $this->writeLog(
-                "Process message no " . $Msgno
-            );
-            $this->imapErrorTriggered = false;
-            $capture = $this->captureMsg($Msgno);
-            
+        if ($protocol === 'imap') {
             /**********************************************************************
-            ** Action after process
+            ** Open IMAP stream
             **********************************************************************/
-            if ($capture) {
-                switch ($action) {
-                    case 'move':
-                        $this->writeLog("Moving message to $folder...");
-                        imap_mail_move(
-                            $this->imap_stream,
-                            $Msgno,
-                            $folder
-                        );
-                        $this->handle_imap_errors("imap_mail_move");
-                        break;
-                         
-                    case 'delete':
-                        $this->writeLog(
-                            "Deleting message..."
-                        );
-                        imap_delete(
-                            $this->imap_stream,
-                            $Msgno
-                        );
-                        $this->handle_imap_errors("imap_delete");
-                        break;
+            $this->imap_stream =
+                imap_open(
+                    $this->mailbox,
+                    $username,
+                    $password,
+                    0,
+                    0,
+                    $this->params
+                );
 
-                    case 'none':
-                    default:
-                        break;
+            if (!$this->imap_stream) {
+                $this->handle_imap_errors("imap_open");
+            } else {
+                // clear errors
+                $errors = imap_errors();
+            }
+
+            /**********************************************************************
+            ** Get Folders and ACL for move options
+            **********************************************************************/
+            $this->folders =
+                imap_list(
+                    $this->imap_stream,
+                    $this->mailbox,
+                    "*"
+                );
+            $this->handle_imap_errors("imap_list");
+
+            /**********************************************************************
+            ** Loop on messages
+            **********************************************************************/
+            $num_msgs = imap_num_msg($this->imap_stream);
+            $this->writeLog(
+                $num_msgs . " messages in mailbox"
+            );
+            for ($Msgno=1; $Msgno<=$num_msgs; $Msgno++) {
+                $this->writeLog(
+                    "Process message no " . $Msgno
+                );
+                $this->imapErrorTriggered = false;
+                $capture = $this->captureMsg($Msgno);
+                
+                /**********************************************************************
+                ** Action after process
+                **********************************************************************/
+                if ($capture) {
+                    switch ($action) {
+                        case 'move':
+                            $this->writeLog("Moving message to $folder...");
+                            imap_mail_move(
+                                $this->imap_stream,
+                                $Msgno,
+                                $folder
+                            );
+                            $this->handle_imap_errors("imap_mail_move");
+                            break;
+
+                        case 'delete':
+                            $this->writeLog(
+                                "Deleting message..."
+                            );
+                            imap_delete(
+                                $this->imap_stream,
+                                $Msgno
+                            );
+                            $this->handle_imap_errors("imap_delete");
+                            break;
+
+                        case 'none':
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            /**********************************************************************
+            ** Actually delete tagged messages, get logs and close connection
+            **********************************************************************/
+            imap_expunge(
+                $this->imap_stream
+            );
+            $this->handle_imap_errors("imap_expunge");
+
+            imap_close(
+                $this->imap_stream
+            );
+            $this->handle_imap_errors("imap_close");
+        } elseif ($protocol === 'ews') {
+            // load Exchange mailbox
+            $ewsMailbox = new ExchangeMailbox($this->mailbox, $username, $password, $exchangeVersion);
+
+            // load emails in mailbox
+            $ewsItems = $ewsMailbox->getItemsByFolderName($captureFolder);
+            $this->writeLog(count($ewsItems) . 'messages in mailbox');
+
+            foreach ($ewsItems as $ewsItem) {
+                // capture mail
+                // TODO
+
+                // move or delete mail
+                if ($action === 'move') {
+                    $ewsMailbox->moveItemToNamedFolder($ewsItem, $folder);
+                } elseif ($action === 'delete') {
+                    // TODO
                 }
             }
         }
-        
-        /**********************************************************************
-        ** Actually delete tagged messages, get logs and close connection
-        **********************************************************************/
-        imap_expunge(
-            $this->imap_stream
-        );
-        $this->handle_imap_errors("imap_expunge");
-        
-        imap_close(
-            $this->imap_stream
-        );
-        $this->handle_imap_errors("imap_close");
-        
+
         fclose($this->logFile);
     }
 
@@ -1780,16 +1818,16 @@ class MailCapture extends DOMXPath
         $tmpVar = trim($htmldata);
         if (empty($tmpVar)) {
             $htmldata = '<!DOCTYPE html>
-<html>
-<head>
-   <meta name="AUTHOR" content="Maarch"/>
-   <meta name="CHANGEDBY" content="Maarch"/>
-</head>
-<body>
+                <html>
+                <head>
+                <meta name="AUTHOR" content="Maarch"/>
+                <meta name="CHANGEDBY" content="Maarch"/>
+                </head>
+                <body>
 
-</body>
-</html>
-';
+                </body>
+                </html>
+            ';
         }
 
         $htmlDoc = new DOMDocument();
