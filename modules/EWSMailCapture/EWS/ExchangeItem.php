@@ -79,6 +79,10 @@ class ExchangeItem {
 		return $this->attachments;
 	}
 
+	public function getAttachmentsCount() {
+		return count($this->attachments);
+	}
+
 	public function isUrgent() {
 		return $this->urgent;
 	}

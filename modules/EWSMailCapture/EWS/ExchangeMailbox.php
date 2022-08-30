@@ -27,14 +27,12 @@ use jamesiarmes\PhpEws\Enumeration\DisposalType;
  * @since October 2020
  */
 class ExchangeMailbox {
-	private $address;
 	private $client;
 	private $folders;
 
 	public function __construct($host, $address, $password, $version) {
 		$this->client = new Client($host, $address, $password, $version);
 		$this->client->setCurlOptions([CURLOPT_SSL_VERIFYPEER => false]);
-		$this->address = $address;
 		$this->discoverFolders();
 	}
 
