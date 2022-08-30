@@ -161,9 +161,9 @@ class ExchangeItem {
 				$attRes = $response->ResponseMessages->GetAttachmentResponseMessage[0]->Attachments->FileAttachment[0];
 
 				$this->attachments[] = [
-					'id'      => $attRes->AttachmentId->Id,
-					'name'    => $attRes->Name,
-					'content' => $attRes->Content
+					'id'       => $attRes->AttachmentId->Id,
+					'filename' => $attRes->Name,
+					'content'  => $attRes->Content
 				];
 			}
 		}

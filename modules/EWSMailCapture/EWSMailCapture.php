@@ -112,9 +112,9 @@ class EWSMailCapture
 
             $attCount = $ewsItem->getAttachmentsCount();
             foreach ($ewsItem->getAttachments() as $ewsAttI => $ewsAttachment) {
-                $this->writeLog('processing attachment ' . ($ewsAttI + 1) . '/' . $attCount . ': ' . $ewsAttachment['name']);
+                $this->writeLog('processing attachment ' . ($ewsAttI + 1) . '/' . $attCount . ': ' . $ewsAttachment['filename']);
 
-                $filePath = $batch->directory . DIRECTORY_SEPARATOR . 'BODY_' . $ewsItemI . '_ATT_' . $ewsAttI . '.' . pathinfo($ewsAttachment['name'], PATHINFO_EXTENSION);
+                $filePath = $batch->directory . DIRECTORY_SEPARATOR . 'BODY_' . $ewsItemI . '_ATT_' . $ewsAttI . '.' . pathinfo($ewsAttachment['filename'], PATHINFO_EXTENSION);
                 if (file_put_contents($filePath, $ewsAttachment['content']) === false) {
                     $_SESSION['capture']->sendError('failed to save email attachment as file: ' . $ewsItem->getSubject($ewsAttI));
                 }
@@ -131,8 +131,8 @@ class EWSMailCapture
                 }
 
                 $attachment = $document->addAttachment($filePath);
-                $attachment->setMetadata('filename', pathinfo($ewsAttachment['name'], PATHINFO_BASENAME));
-                $attachment->setMetadata('extension', pathinfo($ewsAttachment['name'], PATHINFO_EXTENSION));
+                $attachment->setMetadata('filename', pathinfo($ewsAttachment['filename'], PATHINFO_BASENAME));
+                $attachment->setMetadata('extension', pathinfo($ewsAttachment['filename'], PATHINFO_EXTENSION));
 
                 foreach ($attachmentMetadata as $name => $metadata) {
                     if ($metadata['type'] === 'const') {
@@ -149,6 +149,7 @@ class EWSMailCapture
                 $ewsMailbox->deleteItem($ewsItem);
             }
         }
+        $this->writeLog('done');
     }
 
     // return true to skip message
