@@ -19,7 +19,6 @@ class EWSMailCapture
             $_SESSION['capture']->sendError('Configuration file ' . $configFile . ' not found');
         }
 
-        // load config
         $accountConfig = $xmlConfig->xpath('/EWSMailCapture/accounts/account[@name="'.$account.'"]')[0] ?? null;
         if (!$accountConfig) {
             $_SESSION['capture']->sendError("E-mail account $account is not defined in configuration!");
@@ -33,7 +32,10 @@ class EWSMailCapture
         $password = (string) ($accountConfig->xpath('password')[0] ?? '');
         $exchangeVersion = (string) ($accountConfig->xpath('exchangeversion')[0] ?? '');
 
-        $messageOutputs = $xmlConfig->xpath('/EWSMailCapture/messageoutputs/messageoutput');
+        $messageRules = $xmlConfig->xpath('/EWSMailCapture/messagerules/messagerule') ?: [];
+        $attachmentRules = $xmlConfig->xpath('/EWSMailCapture/attachmentrules/attachmentrule') ?: [];
+
+        $messageOutputs = $xmlConfig->xpath('/EWSMailCapture/messageoutputs/messageoutput') ?: [];
         $messageMetadata = [];
         foreach ($messageOutputs as $messageOutput) {
             $name = (string) ($messageOutput->attributes()['name'] ?? null);
@@ -53,7 +55,7 @@ class EWSMailCapture
             }
         }
 
-        $attachmentOutputs = $xmlConfig->xpath('/EWSMailCapture/attachmentoutputs/attachmentoutput');
+        $attachmentOutputs = $xmlConfig->xpath('/EWSMailCapture/attachmentoutputs/attachmentoutput') ?: [];
         $attachmentMetadata = [];
         foreach ($attachmentOutputs as $attachmentOutput) {
             $name = (string) ($attachmentOutput->attributes()['name'] ?? null);
@@ -77,17 +79,23 @@ class EWSMailCapture
             $_SESSION['capture']->sendError('MS Exchange mailbox configuration is invalid!');
         }
 
-        // load Exchange mailbox
         $ewsMailbox = new ExchangeMailbox($mailbox, $username, $password, $exchangeVersion);
 
-        // load emails in mailbox
         $ewsItems = $ewsMailbox->getItemsByFolderName($captureFolder);
         $itemCount = count($ewsItems);
         $this->writeLog($itemCount . ' messages in mailbox');
 
         foreach ($ewsItems as $ewsItemI => $ewsItem) {
-            // capture mail for MaarchWSClient input
             $this->writeLog('processing email ' . ($ewsItemI + 1) . '/' . $itemCount . ': ' . $ewsItem->getSubject());
+
+            foreach ($messageRules as $messageRule) {
+                $skip = $this->applyMessageRule($messageRule, $ewsItem, $ewsMailbox);
+                if ($skip) {
+                    $this->writeLog('SKIPPING due to rule: ' . ($messageRule->attributes()['name'] ?? 'UNKNOWN'));
+                    continue 2;
+                }
+            }
+
             $filePath = $batch->directory . DIRECTORY_SEPARATOR . 'BODY_' . $ewsItemI . '.html';
             if (file_put_contents($filePath, $ewsItem->getBody()) === false) {
                 $_SESSION['capture']->sendError('failed to save email body as file: ' . $ewsItem->getSubject());
@@ -98,46 +106,30 @@ class EWSMailCapture
                 if ($metadata['type'] === 'const') {
                     $document->setMetadata($name, $metadata['value']);
                 } elseif ($metadata['type'] === 'var') {
-                    switch ($metadata['value']) {
-                        case 'date':
-                            $value = $ewsItem->getISODate();
-                            break;
-                        case 'subject':
-                            $value = $ewsItem->getSubject();
-                            break;
-                        case 'fromaddress':
-                            $value = $ewsItem->getSenderEmailAddress();
-                            break;
-                        case 'from[0]/personal':
-                            $value = $ewsItem->getSenderName();
-                            break;
-                        case 'toaddress':
-                            $value = $ewsItem->getToAddress();
-                            break;
-                        case 'xpriority':
-                            $value = $ewsItem->getImportance();
-                            break;
-                        case 'message_id':
-                            $value = $ewsItem->getItemId();
-                            break;
-                        case 'ccaddress':
-                            $value = $ewsItem->getCcAddress();
-                            break;
-                        default:
-                            $value = '';
-                            break;
-                    }
-                    $document->setMetadata($name, $value);
+                    $document->setMetadata($name, $ewsItem->get($metadata['value']));
                 }
             }
 
             $attCount = $ewsItem->getAttachmentsCount();
             foreach ($ewsItem->getAttachments() as $ewsAttI => $ewsAttachment) {
-                $this->writeLog('  processing attachment ' . ($ewsAttI + 1) . '/' . $attCount . ': ' . $ewsAttachment['name']);
+                $this->writeLog('processing attachment ' . ($ewsAttI + 1) . '/' . $attCount . ': ' . $ewsAttachment['name']);
+
                 $filePath = $batch->directory . DIRECTORY_SEPARATOR . 'BODY_' . $ewsItemI . '_ATT_' . $ewsAttI . '.' . pathinfo($ewsAttachment['name'], PATHINFO_EXTENSION);
                 if (file_put_contents($filePath, $ewsAttachment['content']) === false) {
                     $_SESSION['capture']->sendError('failed to save email attachment as file: ' . $ewsItem->getSubject($ewsAttI));
                 }
+
+                if (!empty($attachmentRules)) {
+                    $skip = true;
+                    foreach ($attachmentRules as $attachmentRule) {
+                        $skip = $skip && $this->applyAttachmentRule($attachmentRule, $filePath);
+                    }
+                    if ($skip) {
+                        $this->writeLog('SKIPPING attachment due to attachment rules!');
+                        continue;
+                    }
+                }
+
                 $attachment = $document->addAttachment($filePath);
                 $attachment->setMetadata('filename', pathinfo($ewsAttachment['name'], PATHINFO_BASENAME));
                 $attachment->setMetadata('extension', pathinfo($ewsAttachment['name'], PATHINFO_EXTENSION));
@@ -149,18 +141,134 @@ class EWSMailCapture
                 }
             }
 
-            // move or delete mail
             if ($action === 'move') {
-                $this->writeLog('  moving email to purge folder: ' . $folder);
+                $this->writeLog('moving email to purge folder: ' . $folder);
                 $ewsMailbox->moveItemToNamedFolder($ewsItem, $folder);
             } elseif ($action === 'delete') {
-                $this->writeLog('  moving email to trash');
+                $this->writeLog('moving email to trash');
                 $ewsMailbox->deleteItem($ewsItem);
             }
         }
     }
 
-    private function writeLog($str) {
+    // return true to skip message
+    private function applyMessageRule($messageRule, $ewsItem, $ewsMailbox)
+    {
+        $test     = (string) $messageRule;
+        $value    = $ewsItem->get((string) ($messageRule->attributes()['info'] ?? ''));
+        $operator = (string) ($messageRule->attributes()['op'] ?? '=');
+        $action   = (string) ($messageRule->attributes()['action'] ?? 'none');
+        $name     = (string) ($messageRule->attributes()['name'] ?? 'UNKNOWN');
+        if (empty($test) || empty($value)) {
+            return false;
+        }
+
+        $applies = false;
+        switch ($operator) {
+            case "=":
+                if ($value == $test) {
+                    $applies = true;
+                }
+                break;
+            case "&gt;=":
+                if ($value >= $test) {
+                    $applies = true;
+                }
+                break;
+            case "&lt;=":
+                if ($value <= $test) {
+                    $applies = true;
+                }
+                break;
+            case "&gt;":
+                if ($value > $test) {
+                    $applies = true;
+                }
+                break;
+            case "&lt;":
+                if ($value < $test) {
+                    $applies = true;
+                }
+                break;
+            case "!=":
+            case "&lt;&gt;":
+                if ($value != $test) {
+                    $applies = true;
+                }
+                break;
+            case "in":
+                if (in_array($value, explode(' ', $test))) {
+                    $applies = true;
+                }
+                break;
+            case "notin":
+                if (!in_array(strtolower($value), explode(' ', strtolower($test)))) {
+                    $applies = true;
+                }
+                break;
+            case "contains":
+                if (strripos($value, $test) !== false) {
+                    $applies = true;
+                }
+                break;
+            case "nocontains":
+                if (strripos($value, $test) === false) {
+                    $applies = true;
+                }
+                break;
+        }
+
+        if (!$applies) {
+            return false;
+        }
+
+        $this->writeLog('Rule ' . $name . ' applied');
+
+        switch ($action) {
+            case 'delete':
+                $this->writeLog('moving mail to trash.');
+                $ewsMailbox->deleteItem($ewsItem);
+                $skip = true;
+                break;
+            case 'move':
+                $folder = (string) ($messageRule->attributes()['folder'] ?? '');
+                if (!empty($folder)) {
+                    $this->writeLog('moving mail to ' . $folder);
+                    $ewsMailbox->moveItemToNamedFolder($ewsItem, $folder);
+                } else {
+                    $this->writeLog('WARNING: move action with no specified folder!');
+                }
+                $skip = true;
+                break;
+            default:
+                $this->writeLog('no rule action');
+                $skip = false;
+                break;
+        }
+
+        return $skip;
+    }
+
+    // return true to skip attachment
+    private function applyAttachmentRule($attachmentRule, $filePath)
+    {
+        $name   = (string) $attachmentRule->attributes()['name'] ?? '';
+        $info   = (string) $attachmentRule->attributes()['info'] ?? '';
+        $op     = (string) $attachmentRule->attributes()['op'] ?? '';
+        $values = explode(' ', (string) $attachmentRule ?? '');
+        if (empty($name) || $info !== 'format' || $op !== 'in') {
+            $this->writeLog('invalid rule: ' . ($name ?: 'UNKNOWN'));
+        }
+        $mime = explode('/', mime_content_type($filePath))[1] ?? null;
+        if (empty($mime) || !in_array($mime, $values)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function writeLog($str)
+    {
         $str = '[' . date('c') . '] EWSMailCapture: ' . $str . PHP_EOL;
         echo $str;
         file_put_contents($this->logFile, $str, FILE_APPEND);

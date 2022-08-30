@@ -20,6 +20,8 @@ class ExchangeItem {
 	private $body;
 	private $attachments;
 	private $urgent;
+	private $toAddress;
+	private $ccAddress;
 
 	public function __construct($message, $client) {
 		$this->itemId = $message->ItemId->Id;
@@ -33,7 +35,7 @@ class ExchangeItem {
 			}, $message->ToRecipients->Mailbox));
 		}
 		if (empty($message->CcRecipients)) {
-			$this->CcAddress = '';
+			$this->ccAddress = '';
 		} else {
 			$this->ccAddress = implode('; ', array_map(function ($emailAddress) {
 				return $emailAddress->EmailAddress;
@@ -49,6 +51,38 @@ class ExchangeItem {
 			$this->populateAttachments($message->Attachments, $client);
 		} else {
 			$this->attachments = [];
+		}
+	}
+
+	public function get($key) {
+		switch ($key) {
+			case 'date':
+				return $this->getISODate();
+				break;
+			case 'subject':
+				return $this->getSubject();
+				break;
+			case 'fromaddress':
+				return $this->getSenderEmailAddress();
+				break;
+			case 'from[0]/personal':
+				return $this->getSenderName();
+				break;
+			case 'toaddress':
+				return $this->getToAddress();
+				break;
+			case 'xpriority':
+				return $this->getImportance();
+				break;
+			case 'message_id':
+				return $this->getItemId();
+				break;
+			case 'ccaddress':
+				return $this->getCcAddress();
+				break;
+			default:
+				return '';
+				break;
 		}
 	}
 
@@ -78,7 +112,7 @@ class ExchangeItem {
 
 	public function getSubject($attI = null) {
 		if (is_int($attI) && $attI >= 0 && $attI < count($this->attachments)) {
-			return $this->subject.' ('.($attI+1).'/'.count($this->attachments).') : '.$this->attachments[$attI]['name'];
+			return $this->subject . ' (' . ($attI + 1) . '/' . count($this->attachments) . ') : ' . $this->attachments[$attI]['name'];
 		}
 		return $this->subject;
 	}
@@ -127,9 +161,9 @@ class ExchangeItem {
 				$attRes = $response->ResponseMessages->GetAttachmentResponseMessage[0]->Attachments->FileAttachment[0];
 
 				$this->attachments[] = [
-					'id' => $attRes->AttachmentId->Id,
-					'name' => $attRes->Name,
-					'content' => $attRes->Content,
+					'id'      => $attRes->AttachmentId->Id,
+					'name'    => $attRes->Name,
+					'content' => $attRes->Content
 				];
 			}
 		}
