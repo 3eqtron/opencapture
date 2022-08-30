@@ -25,11 +25,26 @@ class ExchangeItem {
 		$this->itemId = $message->ItemId->Id;
 		$this->senderName = $message->From->Mailbox->Name;
 		$this->senderEmailAddress = $message->From->Mailbox->EmailAddress;
+		if (empty($message->ToRecipients)) {
+			$this->toAddress = '';
+		} else {
+			$this->toAddress = implode('; ', array_map(function ($emailAddress) {
+				return $emailAddress->EmailAddress;
+			}, $message->ToRecipients->Mailbox));
+		}
+		if (empty($message->CcRecipients)) {
+			$this->CcAddress = '';
+		} else {
+			$this->ccAddress = implode('; ', array_map(function ($emailAddress) {
+				return $emailAddress->EmailAddress;
+			}, $message->CcRecipients->Mailbox));
+		}
 		$this->subject = $message->Subject;
 		$this->isoDate = $message->DateTimeSent;
 		$this->body = $message->Body->_;
 		$this->urgent = $message->Importance === ImportanceChoicesType::HIGH;
 		$this->urgent = $this->urgent || 1 === preg_match('/urgent/i', $this->subject);
+		$this->importance = $message->Importance;
 		if (!empty($message->Attachments)) {
 			$this->populateAttachments($message->Attachments, $client);
 		} else {
@@ -53,16 +68,17 @@ class ExchangeItem {
 		return $this->senderEmailAddress;
 	}
 
-	public function getSenderAsMaarchContact() {
-		return (object) [
-			'lastname' => $this->senderName,
-			'email' => $this->senderEmailAddress,
-		];
+	public function getToAddress() {
+		return $this->toAddress;
+	}
+
+	public function getCcAddress() {
+		return $this->ccAddress;
 	}
 
 	public function getSubject($attI = null) {
 		if (is_int($attI) && $attI >= 0 && $attI < count($this->attachments)) {
-			return $this->subject.' ('.($attI+1).'/'.count($this->attachments).') : '.$this->attachments[$attI]['name'];
+			return $this->subject.' ('.($attI+1).'/'.count($this->attachments).') : '.$this->attachments[$attI]['name'];
 		}
 		return $this->subject;
 	}
@@ -75,16 +91,20 @@ class ExchangeItem {
 		return $this->body;
 	}
 
+	public function getImportance() {
+		return $this->importance;
+	}
+
+	public function isUrgent() {
+		return $this->urgent;
+	}
+
 	public function getAttachments() {
 		return $this->attachments;
 	}
 
 	public function getAttachmentsCount() {
 		return count($this->attachments);
-	}
-
-	public function isUrgent() {
-		return $this->urgent;
 	}
 
 	/**
@@ -97,8 +117,6 @@ class ExchangeItem {
 		}
 		if (!empty($rawAttachments->FileAttachment)) {
 			foreach ($rawAttachments->FileAttachment as $fa) {
-				$attachment = ['name' => $fa->Name];
-
 				$request = new GetAttachmentType();
 				$request->AttachmentIds = new NonEmptyArrayOfRequestAttachmentIdsType();
 				$attachmentId = new RequestAttachmentIdType();

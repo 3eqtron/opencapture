@@ -24,7 +24,16 @@
         <messageoutput name="doc_date" info="date" formatter="date"/>
         <messageoutput name="type_id">108</messageoutput>
         <messageoutput name="destination">6</messageoutput>
-        <messageoutput name="subject" info="subject"/>
+        <messageoutput name="subject" info="subject" />
+        <messageoutput name="fromaddress" info="fromaddress"/>
+        <messageoutput name="frompersonal" info="from[0]/personal" />
+        <messageoutput name="toaddress" info="toaddress" />
+        <messageoutput name="xpriority" info="xpriority" />
+        <messageoutput name="message_id" info="message_id" />
+        <messageoutput name="ccaddress" info="ccaddress" />
+        <!-- AR -->
+        <messageoutput name="email" info="fromaddress"/>
+        <messageoutput name="res_subject" info="subject" />
     </messageoutputs>
     <attachmentoutputs mode="attachment">
         <attachmentoutput name="status">TRA</attachmentoutput>

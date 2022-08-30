@@ -102,20 +102,26 @@ class EWSMailCapture
                         case 'date':
                             $value = $ewsItem->getISODate();
                             break;
-                        case 'type_id':
-                        case 'destination':
                         case 'subject':
                             $value = $ewsItem->getSubject();
                             break;
                         case 'fromaddress':
-                        case 'frompersonal':
+                            $value = $ewsItem->getSenderEmailAddress();
+                            break;
+                        case 'from[0]/personal':
+                            $value = $ewsItem->getSenderName();
+                            break;
                         case 'toaddress':
+                            $value = $ewsItem->getToAddress();
+                            break;
                         case 'xpriority':
+                            $value = $ewsItem->getImportance();
+                            break;
                         case 'message_id':
+                            $value = $ewsItem->getItemId();
+                            break;
                         case 'ccaddress':
-                        case 'email':
-                        case 'res_subject':
-                            $value = $ewsItem->getSubject();
+                            $value = $ewsItem->getCcAddress();
                             break;
                         default:
                             $value = '';
