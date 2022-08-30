@@ -33,6 +33,46 @@ class EWSMailCapture
         $password = (string) ($accountConfig->xpath('password')[0] ?? '');
         $exchangeVersion = (string) ($accountConfig->xpath('exchangeversion')[0] ?? '');
 
+        $messageOutputs = $xmlConfig->xpath('/EWSMailCapture/messageoutputs/messageoutput');
+        $messageMetadata = [];
+        foreach ($messageOutputs as $messageOutput) {
+            $name = (string) ($messageOutput->attributes()['name'] ?? null);
+            if (empty($name)) {
+                continue;
+            }
+
+            $value = (string) $messageOutput;
+            if (!empty($value)) {
+                $messageMetadata[$name] = ['type' => 'const', 'value' => $value];
+                continue;
+            }
+
+            $info = $messageOutput->attributes()['info'];
+            if (!empty($info)) {
+                $messageMetadata[$name] = ['type' => 'var', 'value' => $info];
+            }
+        }
+
+        $attachmentOutputs = $xmlConfig->xpath('/EWSMailCapture/attachmentoutputs/attachmentoutput');
+        $attachmentMetadata = [];
+        foreach ($attachmentOutputs as $attachmentOutput) {
+            $name = (string) ($attachmentOutput->attributes()['name'] ?? null);
+            if (empty($name)) {
+                continue;
+            }
+
+            $value = (string) $attachmentOutput;
+            if (!empty($value)) {
+                $attachmentMetadata[$name] = ['type' => 'const', 'value' => $value];
+                continue;
+            }
+
+            $info = $attachmentOutput->attributes()['info'];
+            if (!empty($info)) {
+                $attachmentMetadata[$name] = ['type' => 'var', 'value' => $info];
+            }
+        }
+
         if (empty($mailbox) || empty($captureFolder) || empty($exchangeVersion) || empty($username) || empty($password)) {
             $_SESSION['capture']->sendError('MS Exchange mailbox configuration is invalid!');
         }
@@ -53,8 +93,37 @@ class EWSMailCapture
                 $_SESSION['capture']->sendError('failed to save email body as file: ' . $ewsItem->getSubject());
             }
             $document = $batch->addDocument($filePath);
-            $document->setMetadata('subject', $ewsItem->getSubject());
-            $document->setMetadata('doc_date', $ewsItem->getISODate());
+
+            foreach ($messageMetadata as $name => $metadata) {
+                if ($metadata['type'] === 'const') {
+                    $document->setMetadata($name, $metadata['value']);
+                } elseif ($metadata['type'] === 'var') {
+                    switch ($metadata['value']) {
+                        case 'date':
+                            $value = $ewsItem->getISODate();
+                            break;
+                        case 'type_id':
+                        case 'destination':
+                        case 'subject':
+                            $value = $ewsItem->getSubject();
+                            break;
+                        case 'fromaddress':
+                        case 'frompersonal':
+                        case 'toaddress':
+                        case 'xpriority':
+                        case 'message_id':
+                        case 'ccaddress':
+                        case 'email':
+                        case 'res_subject':
+                            $value = $ewsItem->getSubject();
+                            break;
+                        default:
+                            $value = '';
+                            break;
+                    }
+                    $document->setMetadata($name, $value);
+                }
+            }
 
             $attCount = $ewsItem->getAttachmentsCount();
             foreach ($ewsItem->getAttachments() as $ewsAttI => $ewsAttachment) {
@@ -66,6 +135,12 @@ class EWSMailCapture
                 $attachment = $document->addAttachment($filePath);
                 $attachment->setMetadata('filename', pathinfo($ewsAttachment['name'], PATHINFO_BASENAME));
                 $attachment->setMetadata('extension', pathinfo($ewsAttachment['name'], PATHINFO_EXTENSION));
+
+                foreach ($attachmentMetadata as $name => $metadata) {
+                    if ($metadata['type'] === 'const') {
+                        $attachment->setMetadata($name, $metadata['value']);
+                    }
+                }
             }
 
             // move or delete mail
