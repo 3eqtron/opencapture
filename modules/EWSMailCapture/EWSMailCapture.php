@@ -96,8 +96,24 @@ class EWSMailCapture
                 }
             }
 
-            $filePath = $batch->directory . DIRECTORY_SEPARATOR . 'BODY_' . $ewsItemI . '.html';
-            if (file_put_contents($filePath, $ewsItem->getBody()) === false) {
+            $headerStr = "\n\n";
+            $headerStr .= 'Le : ' . $ewsItem->getISODate() . "\n";
+            $headerStr .= 'De : ' . $ewsItem->getSenderName() . ' &lt;' . $ewsItem->getSenderEmailAddress() . '&gt;' . "\n";
+            $headerStr .= 'À : ' . $ewsItem->getToAddress() . "\n";
+            $headerStr .= 'Cc : ' . $ewsItem->getCcAddress() . "\n";
+            $headerStr .= 'Objet : ' . $ewsItem->getSubject() . "\n";
+            $body = $ewsItem->getBody();
+            if (stripos($body, '</html>') !== false) {
+                $extension = 'html';
+                $headerStr = str_replace("\n", '<br>', $headerStr) . '<hr><br><br>';
+                $body = preg_replace('/(<body.+?>)/', '\1' . $headerStr, $body);
+            } else {
+                $extension = 'txt';
+                $body = $headerStr . $ewsItem->getBody() . "------\n\n";
+            }
+
+            $filePath = $batch->directory . DIRECTORY_SEPARATOR . 'BODY_' . $ewsItemI . '.' . $extension;
+            if (file_put_contents($filePath, $body) === false) {
                 $_SESSION['capture']->sendError('failed to save email body as file: ' . $ewsItem->getSubject());
             }
             $document = $batch->addDocument($filePath);
