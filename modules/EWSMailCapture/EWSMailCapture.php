@@ -24,11 +24,11 @@ class EWSMailCapture
             $_SESSION['capture']->sendError("E-mail account $account is not defined in configuration!");
         }
 
-        $mailbox = (string) ($accountConfig->xpath('//mailbox')[0] ?? '');
+        $mailbox = (string) ($accountConfig->xpath('mailbox')[0] ?? '');
         $captureFolder = preg_replace('/\{.+\}(.+)/', '\1', $mailbox);
         $mailbox = preg_replace('/\{(.+)\}.+/', '\1', $mailbox);
 
-        $username = (string) ($accountConfig->xpath('//username')[0] ?? '');
+        $username = (string) ($accountConfig->xpath('username')[0] ?? '');
         $password = (string) ($accountConfig->xpath('password')[0] ?? '');
         $exchangeVersion = (string) ($accountConfig->xpath('exchangeversion')[0] ?? '');
 
