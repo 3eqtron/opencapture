@@ -8,7 +8,7 @@ class EWSMailCapture
 {
     private $logFile;
 
-    public function CaptureMails($account, $action, $configFile, $folder)
+    public function CaptureMails($account, $action, $configFile, $folder, $addHeaderInMailContent)
     {
         $batch = $_SESSION['capture']->Batch;
         $this->logFile = $batch->directory . DIRECTORY_SEPARATOR . 'EWSMailCapture.log';
@@ -96,20 +96,21 @@ class EWSMailCapture
                 }
             }
 
-            $headerStr = "\n\n";
-            $headerStr .= 'Le : ' . $ewsItem->getISODate() . "\n";
-            $headerStr .= 'De : ' . $ewsItem->getSenderName() . ' &lt;' . $ewsItem->getSenderEmailAddress() . '&gt;' . "\n";
-            $headerStr .= 'À : ' . $ewsItem->getToAddress() . "\n";
-            $headerStr .= 'Cc : ' . $ewsItem->getCcAddress() . "\n";
-            $headerStr .= 'Objet : ' . $ewsItem->getSubject() . "\n";
             $body = $ewsItem->getBody();
-            if (stripos($body, '</html>') !== false) {
-                $extension = 'html';
-                $headerStr = str_replace("\n", '<br>', $headerStr) . '<hr><br><br>';
-                $body = preg_replace('/(<body.+?>)/', '\1' . $headerStr, $body);
-            } else {
-                $extension = 'txt';
-                $body = $headerStr . $ewsItem->getBody() . "------\n\n";
+            $extension = stripos($body, '</html>') !== false ? 'html' : 'txt';
+            if (!empty($addHeaderInMailContent) && $addHeaderInMailContent == 'true') {
+                $headerStr = "\n\n";
+                $headerStr .= 'Le : ' . $ewsItem->getISODate() . "\n";
+                $headerStr .= 'De : ' . $ewsItem->getSenderName() . ' &lt;' . $ewsItem->getSenderEmailAddress() . '&gt;' . "\n";
+                $headerStr .= 'À : ' . $ewsItem->getToAddress() . "\n";
+                $headerStr .= 'Cc : ' . $ewsItem->getCcAddress() . "\n";
+                $headerStr .= 'Objet : ' . $ewsItem->getSubject() . "\n";
+                if ($extension == 'html') {
+                    $headerStr = str_replace(['<', '>', "\n"], ['&lt;', '&gt;', '<br>'], $headerStr) . '<hr><br><br>';
+                    $body = preg_replace('/(<body.+?>)/', '\1' . $headerStr, $body);
+                } else {
+                    $body = $headerStr . "------\n\n" . $ewsItem->getBody();
+                }
             }
 
             $filePath = $batch->directory . DIRECTORY_SEPARATOR . 'BODY_' . $ewsItemI . '.' . $extension;

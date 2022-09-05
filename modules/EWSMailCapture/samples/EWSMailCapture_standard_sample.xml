@@ -24,7 +24,7 @@
         <messagerule name="NO_CC_IN_SUBJECT" info="subject" action="none" folder="tmp" op="contains">Cc</messagerule>
     </messagerules>
     <messageoutputs>
-        <messageoutput name="doc_date" info="date" formatter="date"/>
+        <messageoutput name="doc_date" info="date"/>
         <messageoutput name="type_id">108</messageoutput>
         <messageoutput name="destination">6</messageoutput>
         <messageoutput name="subject" info="subject"/>
