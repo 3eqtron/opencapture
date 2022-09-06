@@ -128,6 +128,7 @@ class EWSMailCapture
             }
 
             $attCount = $ewsItem->getAttachmentsCount();
+            $this->writeLog('inline attachments: ' . $ewsItem->getInlineAttachmentsCount());
             foreach ($ewsItem->getAttachments() as $ewsAttI => $ewsAttachment) {
                 $this->writeLog('processing attachment ' . ($ewsAttI + 1) . '/' . $attCount . ': ' . $ewsAttachment['filename']);
 

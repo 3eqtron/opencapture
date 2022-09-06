@@ -19,6 +19,7 @@ class ExchangeItem {
 	private $isoDate;
 	private $body;
 	private $attachments;
+	private $inlineAttachmentsCount;
 	private $urgent;
 	private $toAddress;
 	private $ccAddress;
@@ -47,6 +48,7 @@ class ExchangeItem {
 		$this->urgent = $message->Importance === ImportanceChoicesType::HIGH;
 		$this->urgent = $this->urgent || 1 === preg_match('/urgent/i', $this->subject);
 		$this->importance = $message->Importance;
+		$this->inlineAttachmentsCount = 0;
 		if (!empty($message->Attachments)) {
 			$this->populateAttachments($message->Attachments, $client);
 		} else {
@@ -141,6 +143,10 @@ class ExchangeItem {
 		return count($this->attachments);
 	}
 
+	public function getInlineAttachmentsCount() {
+		return $this->inlineAttachmentsCount;
+	}
+
 	/**
 	 * this function fetches attachments ids, names and contents
 	 */
@@ -160,11 +166,18 @@ class ExchangeItem {
 				$response = $client->GetAttachment($request);
 				$attRes = $response->ResponseMessages->GetAttachmentResponseMessage[0]->Attachments->FileAttachment[0];
 
-				$this->attachments[] = [
-					'id'       => $attRes->AttachmentId->Id,
-					'filename' => $attRes->Name,
-					'content'  => $attRes->Content
-				];
+				if (!$attRes->IsInline) {
+					$this->attachments[] = [
+						'id'       => $attRes->AttachmentId->Id,
+						'filename' => $attRes->Name,
+						'content'  => $attRes->Content
+					];
+				} else {
+					$search  = '"cid:' . $attRes->ContentId . '"';
+					$replace = '"data:' . $attRes->ContentType . ';base64,' . base64_encode($attRes->Content) . '"';
+					$this->body = str_replace($search, $replace, $this->body);
+					$this->inlineAttachmentsCount++;
+				}
 			}
 		}
 		/* ItemAttachment’s don’t seem useful
