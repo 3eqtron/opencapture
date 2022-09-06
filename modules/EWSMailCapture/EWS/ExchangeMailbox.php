@@ -49,12 +49,46 @@ class ExchangeMailbox {
 		$response = $this->client->FindFolder($request);
 
 		$folders = $response->ResponseMessages->FindFolderResponseMessage[0]->RootFolder->Folders->Folder;
+
+		$foldersPaths = [];
 		foreach ($folders as $folder) {
-			$this->folders[$folder->DisplayName] = $folder->FolderId;
+			$displayName = !empty($folder->FolderClass) ? $folder->DisplayName : '';
+			$displayName = str_replace('/', '\/', $displayName);
+
+			foreach ($foldersPaths as $folderPath) {
+				if ($folder->ParentFolderId->Id == $folderPath['id']->Id) {
+					$foldersPaths[] = [
+						'id'       => $folder->FolderId,
+						'parentId' => $folder->ParentFolderId,
+						'path'     => $folderPath['path'] . '/' . $displayName
+					];
+					continue 2;
+				} elseif ($folder->FolderId->Id == $folderPath['parentId']->Id) {
+					$folderPath['path'] = $displayName . '/' . $folderPath['path'];
+					continue 2;
+				}
+			}
+			$foldersPaths[] = [
+				'id'       => $folder->FolderId,
+				'parentId' => $folder->ParentFolderId,
+				'path'     => $displayName
+			];
+		}
+		$foldersPaths = array_map(function ($folderPath) {
+		$folderPath['path'] = trim($folderPath['path'], '/');
+			return $folderPath;
+		}, $foldersPaths);
+		$foldersPaths = array_filter($foldersPaths, function ($folderPath) {
+			return !empty($folderPath['path']);
+		});
+
+		foreach ($foldersPaths as $folderPath) {
+			$this->folders[$folderPath['path']] = $folderPath['id'];
 		}
 	}
 
 	private function getFolderIdByName($folderName) {
+		$folderName = trim($folderName, '/');
 		return array_key_exists($folderName, $this->folders) ? $this->folders[$folderName] : null;
 	}
 
