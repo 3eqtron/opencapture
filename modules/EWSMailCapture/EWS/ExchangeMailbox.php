@@ -99,7 +99,7 @@ class ExchangeMailbox {
 			$useInbox = true;
 		}
 		if (!$useInbox && empty($folderId)) {
-			return null;
+			return [];
 		}
 		$request = new FindItemType();
 		$request->ParentFolderIds = new NonEmptyArrayOfBaseFolderIdsType();
