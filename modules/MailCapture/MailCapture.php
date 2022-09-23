@@ -236,7 +236,7 @@ class MailCapture extends DOMXPath
        
         $this->mailbox =
             $accountConfig->getElementsByTagName('mailbox')->item(0)->nodeValue;
-            
+
         $username =
             $accountConfig->getElementsByTagName('username')->item(0)->nodeValue;
            
@@ -244,7 +244,7 @@ class MailCapture extends DOMXPath
                 
         $password =
             $accountConfig->getElementsByTagName('password')->item(0)->nodeValue;
-
+        
         if (
             !empty(
                 $accountConfig->getElementsByTagName('IMAP_CLIENT_CERT')->item(0)->nodeValue
@@ -300,7 +300,7 @@ class MailCapture extends DOMXPath
             $this->query(
                 '/MailCapture/attachmentoutputs/attachmentoutput'
             );
-        
+
         /**********************************************************************
         ** Open IMAP stream
         **********************************************************************/
@@ -313,7 +313,7 @@ class MailCapture extends DOMXPath
                 0,
                 $this->params
             );
-        
+
         if (!$this->imap_stream) {
             $this->handle_imap_errors("imap_open");
         } else {
@@ -321,7 +321,6 @@ class MailCapture extends DOMXPath
             $errors = imap_errors();
         }
 
-        
         /**********************************************************************
         ** Get Folders and ACL for move options
         **********************************************************************/
@@ -332,7 +331,7 @@ class MailCapture extends DOMXPath
                 "*"
             );
         $this->handle_imap_errors("imap_list");
-               
+
         /**********************************************************************
         ** Loop on messages
         **********************************************************************/
@@ -361,7 +360,7 @@ class MailCapture extends DOMXPath
                         );
                         $this->handle_imap_errors("imap_mail_move");
                         break;
-                         
+
                     case 'delete':
                         $this->writeLog(
                             "Deleting message..."
@@ -379,7 +378,7 @@ class MailCapture extends DOMXPath
                 }
             }
         }
-        
+
         /**********************************************************************
         ** Actually delete tagged messages, get logs and close connection
         **********************************************************************/
@@ -387,12 +386,12 @@ class MailCapture extends DOMXPath
             $this->imap_stream
         );
         $this->handle_imap_errors("imap_expunge");
-        
+
         imap_close(
             $this->imap_stream
         );
         $this->handle_imap_errors("imap_close");
-        
+
         fclose($this->logFile);
     }
 
@@ -1780,16 +1779,16 @@ class MailCapture extends DOMXPath
         $tmpVar = trim($htmldata);
         if (empty($tmpVar)) {
             $htmldata = '<!DOCTYPE html>
-<html>
-<head>
-   <meta name="AUTHOR" content="Maarch"/>
-   <meta name="CHANGEDBY" content="Maarch"/>
-</head>
-<body>
+                <html>
+                <head>
+                <meta name="AUTHOR" content="Maarch"/>
+                <meta name="CHANGEDBY" content="Maarch"/>
+                </head>
+                <body>
 
-</body>
-</html>
-';
+                </body>
+                </html>
+            ';
         }
 
         $htmlDoc = new DOMDocument();
