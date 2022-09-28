@@ -1,6 +1,0 @@
-#!/bin/sh
-
-cd /var/www/html/maarchcapture
-php ./modules/analyse/main.php
-
-chmod +x ./scripts/analyse.sh
