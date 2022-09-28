@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<capture>
+    <modules>
+        <module name="FileImport" src="modules/FileImport/FileImport.php" type="class"/>
+        <module name="MaarchWSClient" src="modules/MaarchWSClient/MaarchWSClient.php" type="class"/>
+        <module name="MailCapture" src="modules/MailCapture/MailCapture.php" type="class"/>
+        <module name="QRSeparator" src="modules/QRSeparator/MaarchQRSeparator.php" type="class"/>
+    </modules>
+    <batches>
+
+    <!--  lecture des scans entrant avec séparateurs qrcode  -->
+        <batch name="SCAN_MASS" directory="/opt/maarch/MaarchCapture/files/" id="{batchname}-{timestamp}-{rand}" lock="0">
+            <workflow name="SCAN_MASS" debug="false" logMode="Maarch" maarchLogParam="/var/www/html/MaarchCourrier/apps/maarch_entreprise/xml/log4php.default.xml" maarchLoggerName="loggerTechnique">
+                <step function="separatePDF" module="QRSeparator" name="separatePDF">
+                    <input name="ScanSource">/opt/maarch/scanentrantqr/</input>
+                    <input name="qrcodePrefix">false</input>
+                </step>
+                 <step function="processBatch" module="MaarchWSClient" name="SendToMaarch">
+                    <input name="WSDL">MaarchRestWS</input>
+                    <input name="Process">MaarchRestWSProcessFromScan</input>
+                    <input name="CatchError">false</input>
+                    <input name="configFile">MaarchWSClient.xml</input>
+                    <input name="configPath">/opt/maarch/MaarchCapture/config/confModules</input>
+                </step>
+            </workflow>
+        </batch>
+
+        <!-- SCAN TO MAARCHCOURRIER SAMPLE -->
+        <batch name="MAARCH_SCAN_TO_MC" directory="/opt/maarch/MaarchCapture/files/" id="{batchname}-{timestamp}-{rand}" lock="0">
+            <workflow name="MAARCH_SCAN_TO_MC" debug="true" logMode="Maarch" maarchLogParam="/var/www/html/MaarchCourrier/apps/maarch_entreprise/xml/log4php.xml" maarchLoggerName="loggerTechnique">
+                <step name="ImportFiles" module='FileImport' function="ImportFiles">
+                    <input name="Directory">/opt/maarch/scan/</input>
+                    <input name="Target">Document</input>
+                    <input name="Action">move</input>
+                    <input name="MoveDirectory">/opt/maarch/scan/backup/</input>
+                    <input name="Recursive">0</input>
+                    <input name="CreateFolders">0</input>
+                    <input name="Extensions"></input>
+                    <input name="NbMaxFoldersToImport">0</input>
+                    <input name="DeleteSubFolders">false</input>
+                    <input name="fileNameStructure">[destination]_[barcode]</input><!-- extension is automatically set in extension metadata -->
+                </step>
+                <!-- REST SAMPLE -->
+
+                <step name="SendToMaarch" module="MaarchWSClient" function="processBatch">
+                    <input name="WS">MaarchRestWS</input>
+                    <input name="Process">MaarchRestWSProcessFromScan</input>
+                    <input name="CatchError">true</input>
+                    <input name="configFile">MaarchWSClient.xml</input>
+                    <!-- <input name="configPath">/opt/maarch/MaarchCapture/config/</input> -->
+                </step>
+            </workflow>
+        </batch>
+        <!-- MAIL TO MAARCHCOURRIER SAMPLE -->
+        <batch name="MAARCH_MAIL_TO_MC" directory="/opt/maarch/MaarchCapture/files/" id="{batchname}-{timestamp}-{rand}" lock="0">
+            <workflow name="MAARCH_MAIL_TO_MC" debug="true" logMode="Maarch" maarchLogParam="/var/www/html/MaarchCourrier/apps/maarch_entreprise/xml/log4php.xml" maarchLoggerName="loggerTechnique">
+                <step function="CaptureMails" module="MailCapture" name="CAPTURE_MAIL_1">
+                    <input name="account">account_1</input>
+                    <input name="Action">move</input>
+                    <input name="configFile">MailCapture.xml</input>
+                    <input name="folder">maarch/purge</input>
+                    <input name="attachmentsOutputDir">false</input>
+                    <input name="addHeaderInMailContent">true</input>
+                    <input name="folderError">false</input>
+                    <input name="configPath">/opt/maarch/MaarchCapture/config/confModules/</input>
+                </step>
+                <step name="SendToMaarch" module="MaarchWSClient" function="processBatch">
+                    <input name="WS">MaarchRestWS</input>
+                    <input name="Process">MaarchRestWSProcessFromMail</input>
+                    <input name="CatchError">true</input>
+                    <input name="configFile">MaarchWSClient.xml</input>
+                </step>
+                <!-- AR -->
+                <!-- <step name="SendAR" module="MailCapture" function="notifyContact">
+                    <input name="ContentPath">/Batch/Documents/Document</input>
+                    <input name="type">acknowledgement_receipt</input>
+                </step> -->
+            </workflow>
+        </batch>
+        <!-- RECONCILE WITH QRCODE-->
+        <batch name="RECONCILE_QR" directory="/opt/maarch/MaarchCapture/files/" id="{batchname}-{timestamp}-{rand}" lock="0">
+            <workflow name="RECONCILE_QR" debug="true" logMode="Maarch" maarchLogParam="/var/www/html/MaarchCourrier/apps/maarch_entreprise/xml/log4php.xml" maarchLoggerName="loggerTechnique">
+                <step function="reconcile" module="QRSeparator" name="reconcile">
+                    <input name="ScanSource">/opt/maarch/MaarchCapture/files/TEST_IMPORT/</input>
+                    <input name="qrcodePrefix">true</input>
+                </step>
+                <step function="processBatch" module="MaarchWSClient" name="SendToMaarch">
+                    <input name="WSDL">MaarchRestWS</input>
+                    <input name="Process">ReconcileWithQrCode</input>
+                    <input name="CatchError">false</input>
+                    <input name="configFile">MaarchWSClient.xml</input>
+                </step>
+            </workflow>
+        </batch>
+
+        <!--  RECONCILE UPDATE COURRIER WITH QRCODE -->
+        <batch name="UPDATE_COURRIER" directory="/opt/maarch/MaarchCapture/files/" id="{batchname}-{timestamp}-{rand}" lock="0">
+            <workflow name="UPDATE_COURRIER" debug="true" logMode="Maarch" maarchLogParam="/var/www/html/MaarchCourrier/apps/maarch_entreprise/xml/log4php.xml" maarchLoggerName="loggerTechnique">
+                <step function="reconcile" module="QRSeparator" name="reconcile">
+                    <input name="ScanSource">/opt/maarch/MaarchCapture/files/TEST_IMPORT/</input>
+                    <input name="qrcodePrefix">true</input>
+                </step>
+                <step function="processBatch" module="MaarchWSClient" name="SendToMaarch">
+                    <input name="WSDL">MaarchRestWS</input>
+                    <input name="Process">ReconcilCourrier</input>
+                    <input name="CatchError">true</input>
+                    <input name="configFile">MaarchWSClient.xml</input>
+                </step>
+            </workflow>
+        </batch>
+    </batches>
+</capture>
