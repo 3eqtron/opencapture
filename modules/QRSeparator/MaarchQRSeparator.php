@@ -80,18 +80,29 @@ class QRSeparator
                     try {
                         $text = $qrcode->text();
                     } catch (Exception $e) {
-                        //lgi patch
-//                        echo 'convert ' . $this->Batch->directory . '/' . $key . '.pdf' . PHP_EOL;
-                        exec('convert -density 300 ' .  $this->Batch->directory . '/' . $key . '.pdf ' . $this->Batch->directory . '/' . $key . '.png');
-                        exec('zbarimg ' . $this->Batch->directory . '/' . $key . '.png', $resultZbar);
-//                        var_dump($resultZbar[0]);
-                        $textExploded = explode(':', $resultZbar[0]);
-                        //var_dump($textExploded);
-                        if (is_array($textExploded) && $textExploded[0] <> 'QR-Code') {
-                            echo 'NO QR CODE' . PHP_EOL;
-                            $text = '';
+                        $text = false;
+                    }
+    
+                    if ($text === false) {
+                        // If library fails to read qr code in pdf, we try to read it with a different method by converting the pdf to an image
+                        exec('convert -density 150 ' . $this->Batch->directory . '/' . $key.'.pdf[0] -colorspace RGB ' . $this->Batch->directory . '/' . $key . '.png');
+                        
+                        $imageFileFirstPage = $this->Batch->directory . '/' . $key . '.png';
+                        
+                        exec('zbarimg ' . $imageFileFirstPage, $resultZbar);
+
+                        if (!empty($resultZbar)) {
+                            $textExploded = explode(':', $resultZbar[0]);
+    
+                            if (is_array($textExploded) && $textExploded[0] <> 'QR-Code') {
+                                // echo 'NO QR CODE' . PHP_EOL;
+                                $text = '';
+                            } else {
+                                $text = str_replace('QR-Code:', '', $resultZbar[0]);
+                            }
                         } else {
-                            $text = str_replace('QR-Code:', '', $resultZbar[0]);
+                            // echo "NO RESULT";
+                            $text = '';
                         }
                     }
 
@@ -374,11 +385,7 @@ class QRSeparator
                 }
 
                 echo "QR code : " . $text . PHP_EOL;
-
-                if ($this->qrcodePrefix == "false" && !empty($text) && !is_numeric($text) && $text != 'GENERIQUE') {
-                    echo 'not numeric ' .  $text . PHP_EOL;
-                    $text = '';
-                }
+                
                 if ($this->qrcodePrefix == "true" && !empty($text)) {
                     if (preg_match("/^MAARCH_/i", $text)) {
                         $text = preg_replace("/^MAARCH_/i", '', $text);
@@ -467,7 +474,7 @@ class QRSeparator
                 }
                 echo "Remove tmp file : ".$split_directory.$i.'.pdf';
                 echo "\n";
-                //unlink($split_directory.$i.'.pdf');
+                unlink($split_directory.$i.'.pdf');
             } else {
                 break;
             }

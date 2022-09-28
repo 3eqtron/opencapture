@@ -20,11 +20,15 @@
         </batch>
         <batch name="MAARCH_CI_MAIL" directory="/opt/maarch/MaarchCapture/files/" id="{batchname}-{timestamp}-{rand}" lock="0">
             <workflow name="MAARCH_CI_MAIL" debug="true" logMode="default">
+                <!-- /!\ si la balise configPath est utilisée, il faut conserver tous les arguments suivants (ne pas supprimer de lignes)-->
                 <step function="CaptureMails" module="MailCapture" name="CAPTURE_MAIL_1">
                     <input name="account">account_1</input>
                     <input name="Action">none</input>
+                    <input name="attachmentsOutputDir">false</input>
+                    <input name="addHeaderInMailContent">false</input>
                     <input name="configFile">MailCapture_ci.xml</input>
                     <input name="folder">maarch/purge</input>
+                    <!--<input name="configPath">/produit/maarch/maarch_scripts/maarch_capture/config/cabpm/config/</input>-->
                 </step>
             </workflow>
         </batch>
