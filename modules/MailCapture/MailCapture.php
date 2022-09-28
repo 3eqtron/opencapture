@@ -244,7 +244,7 @@ class MailCapture extends DOMXPath
                 
         $password =
             $accountConfig->getElementsByTagName('password')->item(0)->nodeValue;
-        
+
         if (
             !empty(
                 $accountConfig->getElementsByTagName('IMAP_CLIENT_CERT')->item(0)->nodeValue
@@ -426,7 +426,7 @@ class MailCapture extends DOMXPath
                     $folder = $folderError;
                 }
             }
-            //var_dump($folder);
+
             $metaError = $Element->getMetadata("error");
 
             if (empty($metaError)) {
@@ -1528,11 +1528,11 @@ class MailCapture extends DOMXPath
                     );
                 }
                 break;
-                
+
             case self::MIME_TYPE_MESSAGE:
                 # What ?
                 break;
-            
+
             case self::MIME_TYPE_TEXT:
             case self::MIME_TYPE_APPLICATION:
             case self::MIME_TYPE_AUDIO:
@@ -1610,31 +1610,31 @@ class MailCapture extends DOMXPath
         $mimeencoding
     ) {
         switch ($mimeencoding) {
-        case self::MIME_ENCODING_7BIT:
-            $decodeddata = $encodeddata;
-            break;
-            
-        case self::MIME_ENCODING_8BIT:
-            $decodeddata =
-                quoted_printable_decode(
-                    imap_8bit($encodeddata)
-                );
-            break;
-            
-        case self::MIME_ENCODING_BINARY:
-            $decodeddata = $encodeddata;
-            break;
-            
-        case self::MIME_ENCODING_BASE64:
-            $decodeddata = imap_base64($encodeddata);
-            break;
-            
-        case self::MIME_ENCODING_QPRINT:
-            $decodeddata = imap_qprint($encodeddata);
-            break;
-            
-        case self::MIME_ENCODING_OTHER:
-            break;
+            case self::MIME_ENCODING_7BIT:
+                $decodeddata = $encodeddata;
+                break;
+                
+            case self::MIME_ENCODING_8BIT:
+                $decodeddata =
+                    quoted_printable_decode(
+                        imap_8bit($encodeddata)
+                    );
+                break;
+                
+            case self::MIME_ENCODING_BINARY:
+                $decodeddata = $encodeddata;
+                break;
+                
+            case self::MIME_ENCODING_BASE64:
+                $decodeddata = imap_base64($encodeddata);
+                break;
+                
+            case self::MIME_ENCODING_QPRINT:
+                $decodeddata = imap_qprint($encodeddata);
+                break;
+                
+            case self::MIME_ENCODING_OTHER:
+                break;
         }
         
         return $decodeddata;
@@ -2051,7 +2051,7 @@ class MailCapture extends DOMXPath
                         return;
                     }
                     $iniFile = parse_ini_file($filename);
-    
+
                     $message_html = $iniFile['mail_message'];
                 }
                  
@@ -2062,7 +2062,7 @@ class MailCapture extends DOMXPath
                 //=====Définition du sujet.
                 $sujet = "Accusé de dépôt : ".$subject;
                 //=========
-    
+
                 //=====Création du header de l'e-mail.
                 $fromHeader = $iniFile['mail_from'] ?? '"NoReply" <NoReply@gmail.com>';
                 $replyToHeader = $iniFile['mail_reply_to'] ?? '"NoReply" <NoReply@gmail.com>';
