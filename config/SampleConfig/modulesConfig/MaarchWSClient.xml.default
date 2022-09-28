@@ -1,0 +1,128 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MaarchWSClient>
+    <!-- REST FRONTAL -->
+    <WS name="MaarchRestWS" type="REST" uri="http://superadmin:superadmin@localhost/MaarchCourrier/maarch/rest/" SSL="false" cacheUse="0" />
+    <!-- DEVELOP SAMPLES -->
+    <process name="MaarchRestWSProcessFromScan">
+        <loop xpath="/Batch/Documents/Document">
+            <call name="/resources" method="POST">
+                <argument type="entity" name="modelId">1</argument>
+                <argument type="entity" name="encodedFile" eval="base64_encode(file_get_contents($Element-&gt;path))"/>
+                <argument type="entity" name="doctype">1323</argument>
+                <argument type="entity" name="destination">346</argument>
+                <argument type="entity" name="priority">poiuytre1391nbvc</argument>
+                <!-- <argument type="entity" name="destination" eval="explode('_', $Element-&gt;filename)&#91;0&#93;"/> -->
+                <argument type="entity" name="format" attribute="extension"/>
+                <argument type="entity" name="status">INIT</argument>
+                <return>
+                    <resId metadata="resId" />
+                </return>
+            </call>
+        </loop>
+    </process>
+    <!-- REST SAMPLES -->
+    <!-- <process name="MaarchRestWSProcessFromScan">
+        <loop xpath="/Batch/Documents/Document">
+            <call name="/resources" method="POST">
+                <argument type="entity" name="modelId">1</argument>
+                <argument type="entity" name="encodedFile" eval="base64_encode(file_get_contents($Element-&gt;path))"/>
+                <argument type="entity" name="format" attribute="extension"/>
+                <argument type="entity" name="doctype">108</argument>
+                <argument type="entity" name="chrono">true</argument>
+                <argument type="entity" name="destination">15</argument>
+                <argument type="entity" name="priority">2</argument>
+                <argument type="entity" name="status">INIT</argument>
+                <return>
+                    <resId metadata="resId" />
+                </return>
+            </call>
+        </loop>
+    </process> -->
+
+    <!-- RECONCILE SAMPLES -->
+    <process name="ReconcilWithQrCode">
+        <loop xpath="/Batch/Documents/Document">
+            <call name="/reconcil" method="POST">
+                <argument type="entity" name="chrono" metadata="destination"/>
+                <argument type="entity" name="encodedFile" eval="base64_encode(file_get_contents($Element-&gt;path))"/>
+                <argument type="entity" name="format" attribute="extension"/>
+                <argument type="entity" name="title" metadata="filename"/>
+                <return>
+                    <id metadata="id" />
+                </return>
+            </call>
+            <call name="/res/resource/status" method="PUT">
+                <argument type="entity" name="resId" eval="[$Element-&gt;getMetadata('id')]"/>
+                <argument type="entity" name="status">END</argument>
+                <return>
+                    <id metadata="resId" />
+                </return>
+            </call>
+        </loop>
+    </process>
+    
+    <!--process name="ReconcileWithQrCode">
+        <loop xpath="/Batch/Documents/Document">
+            <call name="/attachments" method="POST">
+                <argument type="entity" name="chrono" metadata="chrono"/>
+                <argument type="entity" name="encodedFile" eval="base64_encode(file_get_contents($Element-&gt;path))"/>
+                <argument type="entity" name="format" attribute="extension"/>
+                <argument type="entity" name="title" metadata="filename"/>
+                <argument type="entity" name="resIdMaster" metadata="resIdMaster"/>
+                <argument type="entity" name="originId" metadata="originId"/>
+                <argument type="entity" name="title" metadata="title"/>
+                <argument type="entity" name="type">response_project</argument>
+                <return>
+                    <id metadata="resId" />
+                </return>
+            </call>
+        </loop>
+    </process-->
+
+    <process name="MaarchRestWSProcessFromMail">
+        <loop xpath="/Batch/Documents/Document">
+            <call name="/resources" method="POST">
+                <argument type="entity" name="modelId">1</argument>
+                <argument type="entity" name="encodedFile" eval="base64_encode(file_get_contents($Element-&gt;path))"/>
+                <argument type="entity" name="format" attribute="extension"/>
+                <argument type="entity" name="status">INIT</argument>
+                <argument type="entity" name="chrono">true</argument>
+                <argument type="entity" name="doctype" metadata="type_id"/>
+                <argument type="entity" name="subject" metadata="subject"/>
+                <argument type="entity" name="documentDate" metadata="doc_date"/>
+                <argument type="entity" name="destination" metadata="destination"/>
+                <argument type="entity" name="initiator" metadata="destination"/>
+                <argument type="entity" name="priority">poiuytre1357nbvc</argument>
+                <return>
+                    <resId metadata="resId" />
+                </return>
+            </call>
+            <loop xpath="Attachments/Attachment">
+                <call name="/attachments" method="POST">
+                    <argument type="entity" name="resIdMaster" xvalue="ancestor::Document/Metadata/resId"/>
+                    <argument type="entity" name="type">incoming_mail_attachment</argument>
+                    <argument type="entity" name="encodedFile" eval="base64_encode(file_get_contents($Element-&gt;path))"/>
+                    <argument type="entity" name="format" attribute="extension"/>
+                    <argument type="entity" name="title" metadata="filename"/>                    
+                    <return>
+                        <id metadata="resId" />
+                    </return>
+                </call>
+            </loop>
+        </loop>
+    </process>
+
+        <!--  RECONCILE UPDATE COURRIER  -->
+    <process name="ReconcilCourrier">
+        <loop xpath="/Batch/Documents/Document">
+            <call name="update_courrier" method="PUT">
+                <argument type="entity" name="resIdMaster" metadata="resIdMaster"/>
+                <argument type="query" name="onlyDocument">true</argument>
+                <argument type="entity" name="encodedFile" eval="base64_encode(file_get_contents($Element->path))"/>
+                <argument type="entity" name="format" attribute="extension"/>
+            </call>
+            </loop>
+    </process>
+
+
+</MaarchWSClient>
