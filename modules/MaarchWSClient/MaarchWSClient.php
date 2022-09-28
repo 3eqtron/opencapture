@@ -31,13 +31,14 @@ class MaarchWSClient extends DOMXPath
         $WSName,
         $ProcessName,
         $CatchError = "false",
-        $configFile = false
+        $configFile = false,
+        $configPath = __DIR__
     ) {
         if ($configFile) {
             $_SESSION['MaarchWSClient'] = $configFile;
             $Config = new DOMDocument();
             $Config->load(
-                __DIR__ . DIRECTORY_SEPARATOR . $configFile
+                $configPath . DIRECTORY_SEPARATOR . $configFile
             );
             parent::__construct($Config);
         }
@@ -219,8 +220,13 @@ class MaarchWSClient extends DOMXPath
         $Element,
         $service
     ) {
-        $serviceName = $service->getAttribute('name');
-        
+        if ($service->getAttribute('name')=='update_courrier') {
+            $resId = $Element->getMetaData('resIdMaster');
+            // resId= parseRESTArguments();
+            $serviceName = 'resources/'.$resId;
+        } else {
+            $serviceName = $service->getAttribute('name');
+        }
         if (isset($this->log) && $this->log) {
             $_SESSION['capture']->logEvent("Process Call of service '"
                 . $serviceName . "' for " . $Element->nodeName . " " . $Element->id);
@@ -471,7 +477,7 @@ class MaarchWSClient extends DOMXPath
                 }
             }
         }
-        
+
         return $argValues;
     }
     
