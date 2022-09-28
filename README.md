@@ -1,5 +1,5 @@
 # Version
-`develop`
+`1.9`
 
 # Prerequisit
 [See doc](http://docs.maarch.org/MaarchCapture/inst/prerequisites.html)
