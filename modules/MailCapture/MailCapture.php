@@ -181,7 +181,8 @@ class MailCapture extends DOMXPath
         $folder = false,
         $attachmentsOutputDir = false,
         $addHeaderInMailContent = true,
-        $folderError = false
+        $folderError = false,
+        $configPath = __DIR__
     ) {
         if (empty($folder) || $folder == 'false') {
             $folder=false;
@@ -212,7 +213,7 @@ class MailCapture extends DOMXPath
             $Config = new DOMDocument();
             echo 'LOAD ' . $configFile . ' FOR CAPTURE' . PHP_EOL;
             $Config->load(
-                __DIR__ . DIRECTORY_SEPARATOR . $configFile
+                $configPath . DIRECTORY_SEPARATOR . $configFile
             );
             parent::__construct($Config);
         }
