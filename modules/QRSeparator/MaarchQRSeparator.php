@@ -55,7 +55,7 @@ class QRSeparator
             $text = '';
             $resultZbar = '';
             $array_files = explode('.', $files[$key]);
-            //Ignore all files except pdf
+            // Ignore all files except pdf
             if (strtolower($array_files[1]) == 'pdf') {
                 echo "\n\n * File n°".$num_file.": ".$files[$key]." *\n";
                 $_SESSION['capture']->logEvent(
@@ -65,7 +65,8 @@ class QRSeparator
                 try {
                     copy($ScanSource.$files[$key], $this->Batch->directory . '/' . $key . '.pdf');
                     echo "process file n°".$this->Batch->directory . '/' . $key . '.pdf'. PHP_EOL;
-                    //Attempt to extract QRCODE
+
+                    // Attempt to extract QRCODE
                     try {
                         $qrcode = new \Zxing\QrReader($this->Batch->directory . '/' . $key.'.pdf');
                     } catch (Exception $e) {

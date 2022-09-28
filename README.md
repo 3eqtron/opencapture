@@ -2,7 +2,11 @@
 `develop`
 
 # Prerequisit
-`PHP 7 or greater`
+`PHP 7.3 or greater`
+
+To read QR code the command 'zbaring' is necessary
+To install the command on Debian : 
+`sudo apt install zbar-tools`
 
 ## PHP Modules:
 - fileinfo (php_finfo)
