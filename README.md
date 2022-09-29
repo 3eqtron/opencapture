@@ -9,5 +9,5 @@
 
 # Install 
 ```
-git clone -b develop https://labs.maarch.org/maarch/MaarchCapture
+git clone -b 1.9 https://labs.maarch.org/maarch/MaarchCapture
 ```
