@@ -19,15 +19,15 @@
         </layout>
     </appender>
     <root>
-        <level value="DEBUG" />
+        <level value="ERROR" />
         <appender_ref ref="fonctionnel,technique" />
     </root>
     <logger name="loggerFonctionnel" additivity="true">
-        <level value="DEBUG" />
+        <level value="ERROR" />
         <appender_ref ref="appenderFonctionnel" />
     </logger>
     <logger name="loggerTechnique" additivity="true">
-        <level value="DEBUG" />
+        <level value="ERROR" />
         <appender_ref ref="appenderTechnique" />
     </logger>
 </log4php:configuration>
