@@ -27,7 +27,7 @@
 
         <!-- SCAN TO MAARCHCOURRIER SAMPLE -->
         <batch name="MAARCH_SCAN_TO_MC" directory="/opt/maarch/MaarchCapture/files/" id="{batchname}-{timestamp}-{rand}" lock="0">
-            <workflow name="MAARCH_SCAN_TO_MC" debug="true" logMode="Maarch" maarchLogParam="/var/www/html/MaarchCourrier/apps/maarch_entreprise/xml/log4php.xml" maarchLoggerName="loggerTechnique">
+            <workflow name="MAARCH_SCAN_TO_MC" debug="true" logMode="Maarch" maarchLogParam="/opt/maarch/MaarchCapture/config/log4php/log4php.xml.default" maarchLoggerName="loggerTechnique">
                 <step name="ImportFiles" module='FileImport' function="ImportFiles">
                     <input name="Directory">/opt/maarch/scan/</input>
                     <input name="Target">Document</input>
@@ -53,7 +53,7 @@
         </batch>
         <!-- MAIL TO MAARCHCOURRIER SAMPLE -->
         <batch name="MAARCH_MAIL_TO_MC" directory="/opt/maarch/MaarchCapture/files/" id="{batchname}-{timestamp}-{rand}" lock="0">
-            <workflow name="MAARCH_MAIL_TO_MC" debug="true" logMode="Maarch" maarchLogParam="/var/www/html/MaarchCourrier/apps/maarch_entreprise/xml/log4php.xml" maarchLoggerName="loggerTechnique">
+            <workflow name="MAARCH_MAIL_TO_MC" debug="true" logMode="Maarch" maarchLogParam="/opt/maarch/MaarchCapture/config/log4php/log4php.xml.default" maarchLoggerName="loggerTechnique">
                 <step function="CaptureMails" module="MailCapture" name="CAPTURE_MAIL_1">
                     <input name="account">account_1</input>
                     <input name="Action">move</input>
@@ -79,7 +79,7 @@
         </batch>
         <!-- RECONCILE WITH QRCODE-->
         <batch name="RECONCILE_QR" directory="/opt/maarch/MaarchCapture/files/" id="{batchname}-{timestamp}-{rand}" lock="0">
-            <workflow name="RECONCILE_QR" debug="true" logMode="Maarch" maarchLogParam="/var/www/html/MaarchCourrier/apps/maarch_entreprise/xml/log4php.xml" maarchLoggerName="loggerTechnique">
+            <workflow name="RECONCILE_QR" debug="true" logMode="Maarch" maarchLogParam="/opt/maarch/MaarchCapture/config/log4php/log4php.xml.default" maarchLoggerName="loggerTechnique">
                 <step function="reconcile" module="QRSeparator" name="reconcile">
                     <input name="ScanSource">/opt/maarch/MaarchCapture/files/TEST_IMPORT/</input>
                     <input name="qrcodePrefix">true</input>
@@ -95,7 +95,7 @@
 
         <!--  RECONCILE UPDATE COURRIER WITH QRCODE -->
         <batch name="UPDATE_COURRIER" directory="/opt/maarch/MaarchCapture/files/" id="{batchname}-{timestamp}-{rand}" lock="0">
-            <workflow name="UPDATE_COURRIER" debug="true" logMode="Maarch" maarchLogParam="/var/www/html/MaarchCourrier/apps/maarch_entreprise/xml/log4php.xml" maarchLoggerName="loggerTechnique">
+            <workflow name="UPDATE_COURRIER" debug="true" logMode="Maarch" maarchLogParam="/opt/maarch/MaarchCapture/config/log4php/log4php.xml.default" maarchLoggerName="loggerTechnique">
                 <step function="reconcile" module="QRSeparator" name="reconcile">
                     <input name="ScanSource">/opt/maarch/MaarchCapture/files/TEST_IMPORT/</input>
                     <input name="qrcodePrefix">true</input>
