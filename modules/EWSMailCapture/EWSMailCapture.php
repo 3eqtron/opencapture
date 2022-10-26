@@ -29,7 +29,9 @@ class EWSMailCapture
         $mailbox = preg_replace('/\{(.+)\}.+/', '\1', $mailbox);
 
         $username = (string) ($accountConfig->xpath('username')[0] ?? '');
-        $password = (string) ($accountConfig->xpath('password')[0] ?? '');
+        $tenantID = (string) ($accountConfig->xpath('tenantID')[0] ?? '');
+        $clientID = (string) ($accountConfig->xpath('clientID')[0] ?? '');
+        $clientSecret = (string) ($accountConfig->xpath('clientSecret')[0] ?? '');
         $exchangeVersion = (string) ($accountConfig->xpath('exchangeversion')[0] ?? '');
 
         $messageRules = $xmlConfig->xpath('/EWSMailCapture/messagerules/messagerule') ?: [];
@@ -75,11 +77,12 @@ class EWSMailCapture
             }
         }
 
-        if (empty($mailbox) || empty($captureFolder) || empty($exchangeVersion) || empty($username) || empty($password)) {
+        if (empty($mailbox) || empty($captureFolder) || empty($exchangeVersion)
+            || empty($username) || empty($tenantID) || empty($clientID) || empty($clientSecret)) {
             $_SESSION['capture']->sendError('MS Exchange mailbox configuration is invalid!');
         }
 
-        $ewsMailbox = new ExchangeMailbox($mailbox, $username, $password, $exchangeVersion);
+        $ewsMailbox = new ExchangeMailbox($mailbox, $username, $exchangeVersion, $tenantID, $clientID, $clientSecret);
 
         $ewsItems = $ewsMailbox->getItemsByFolderName($captureFolder);
         $itemCount = count($ewsItems);

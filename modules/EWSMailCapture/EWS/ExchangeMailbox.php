@@ -20,6 +20,8 @@ use jamesiarmes\PhpEws\Type\FolderResponseShapeType;
 use jamesiarmes\PhpEws\Type\ItemResponseShapeType;
 use jamesiarmes\PhpEws\Enumeration\DefaultShapeNamesType;
 use jamesiarmes\PhpEws\Enumeration\DisposalType;
+use jamesiarmes\PhpEws\Type\ConnectingSIDType;
+use jamesiarmes\PhpEws\Type\ExchangeImpersonationType;
 
 /**
  * ExchangeMailbox class: an Exchage mailbox wrapper
@@ -30,9 +32,48 @@ class ExchangeMailbox {
 	private $client;
 	private $folders;
 
-	public function __construct($host, $address, $password, $version) {
-		$this->client = new Client($host, $address, $password, $version);
-		$this->client->setCurlOptions([CURLOPT_SSL_VERIFYPEER => false]);
+	private const BASE_TOKEN_URL = 'https://login.microsoftonline.com/';
+
+	public function __construct($host, $address, $version, $tenantID, $clientID, $clientSecret)
+	{
+		$batch = $_SESSION['capture']->Batch;
+        $logFile = $batch->directory . DIRECTORY_SEPARATOR . 'EWSMailCapture.log';
+
+		$curl = curl_init(ExchangeMailbox::BASE_TOKEN_URL . $tenantID . '/oauth2/v2.0/token');
+		curl_setopt_array($curl, [
+			CURLOPT_POST           => true,
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_HEADER         => true,
+			CURLOPT_POSTFIELDS     => [
+				'grant_type'    => 'client_credentials',
+				'client_id'     => $clientID,
+				'client_secret' => $clientSecret,
+				'scope'         => 'https://' . $host . '/.default'
+			]
+		]);
+		$response = curl_exec($curl);
+		curl_close($curl);
+
+		$response = explode("\r\n\r\n", $response);
+		$responseHeaders = $response[0] ?? '';
+		$responseBody    = $response[1] ?? '';
+		$responseBody    = json_decode($responseBody, true);
+		if (empty($responseBody['access_token'])) {
+			$errorString = '[' . date('c') . '] EWSMailCapture: ' . "\n\n" . $responseHeaders . "\n\n" . json_encode($responseBody, JSON_PRETTY_PRINT) . "\n";
+			file_put_contents($logFile, $errorString, FILE_APPEND);
+			throw new \Exception('error while fetching access token, return transfer written to ' . $logFile . "\n\n");
+		}
+
+		$this->client = new Client($host, $address, '-', $version);
+		$this->client->setCurlOptions([
+			CURLOPT_SSL_VERIFYPEER => false,
+			CURLOPT_HTTPHEADER => ['Authorization: Bearer ' . $responseBody['access_token']]
+		]);
+		$exim = new ExchangeImpersonationType();
+		$csid = new ConnectingSIDType();
+		$csid->PrimarySmtpAddress = $address;
+		$exim->ConnectingSID = $csid;
+		$this->client->setImpersonation($exim);
 		$this->discoverFolders();
 	}
 
