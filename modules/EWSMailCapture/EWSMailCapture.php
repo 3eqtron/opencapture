@@ -37,9 +37,13 @@ class EWSMailCapture
         $exchangeMailboxAgrs['clientSecret'] = (string) ($accountConfig->xpath('clientSecret')[0] ?? '');
 
         if (!empty($exchangeMailboxAgrs['password'])) {
-            $exchangeMailboxAgrs['authVersion'] = 1;
+            $exchangeMailboxAgrs['authMethod'] = ExchangeMailbox::BASIC_AUTH;
         } elseif (!empty($exchangeMailboxAgrs['tenantID']) && !empty($exchangeMailboxAgrs['clientID']) && !empty($exchangeMailboxAgrs['clientSecret'])) {
-            $exchangeMailboxAgrs['authVersion'] = 2;
+            $exchangeMailboxAgrs['authMethod'] = ExchangeMailbox::O_AUTH_2;
+        } else {
+            $log = sprintf("\n\nUnable to set auth method\nCheck the account '%s' configuration in %s\n\n", $account, __DIR__ . DIRECTORY_SEPARATOR . $configFile);
+            $this->writeLog($log);
+            $_SESSION['capture']->sendError($log);
         }
 
         $exchangeMailboxAgrs['exchangeversion'] = (string) ($accountConfig->xpath('exchangeversion')[0] ?? '');
@@ -87,13 +91,13 @@ class EWSMailCapture
             }
         }
 
-        if ($exchangeMailboxAgrs['authVersion'] == 1 && (empty($exchangeMailboxAgrs['mailbox']) || empty($captureFolder) || empty($exchangeMailboxAgrs['exchangeversion']) || 
+        if ($exchangeMailboxAgrs['authMethod'] == ExchangeMailbox::BASIC_AUTH && (empty($exchangeMailboxAgrs['mailbox']) || empty($captureFolder) || empty($exchangeMailboxAgrs['exchangeversion']) || 
             empty($exchangeMailboxAgrs['username']) || empty($exchangeMailboxAgrs['password']))) {
-            $_SESSION['capture']->sendError("MS Exchange mailbox configuration for is invalid!\n" .json_encode($exchangeMailboxAgrs));
-        } elseif ($exchangeMailboxAgrs['authVersion'] == 2 && (empty($exchangeMailboxAgrs['mailbox']) || empty($captureFolder) || empty($exchangeMailboxAgrs['exchangeversion']) || 
+            $_SESSION['capture']->sendError(sprintf("MS Exchange mailbox configuration for %s is invalid!\n%s", ExchangeMailbox::BASIC_AUTH, json_encode($exchangeMailboxAgrs)));
+        } elseif ($exchangeMailboxAgrs['authMethod'] == ExchangeMailbox::O_AUTH_2 && (empty($exchangeMailboxAgrs['mailbox']) || empty($captureFolder) || empty($exchangeMailboxAgrs['exchangeversion']) || 
             empty($exchangeMailboxAgrs['username']) || empty($exchangeMailboxAgrs['tenantID']) || empty($exchangeMailboxAgrs['clientID']) || 
             empty($exchangeMailboxAgrs['clientSecret']))) {
-            $_SESSION['capture']->sendError("MS Exchange mailbox configuration for is invalid!\n" . json_encode($exchangeMailboxAgrs));
+            $_SESSION['capture']->sendError(sprintf("\n\nMS Exchange mailbox configuration for %s is invalid!\n%s\n\n", ExchangeMailbox::O_AUTH_2, json_encode($exchangeMailboxAgrs)));
         }
 
         $ewsMailbox = new ExchangeMailbox($exchangeMailboxAgrs);

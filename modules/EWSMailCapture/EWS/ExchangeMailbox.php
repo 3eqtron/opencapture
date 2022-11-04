@@ -33,6 +33,8 @@ class ExchangeMailbox {
 	private $folders;
 	private $logFile;
 
+	public const BASIC_AUTH = "Basic";
+	public const O_AUTH_2 = "OAuth2";
 	private const BASE_TOKEN_URL = 'https://login.microsoftonline.com/';
 
 	public function __construct(array $args)
@@ -40,28 +42,31 @@ class ExchangeMailbox {
 		$batch = $_SESSION['capture']->Batch;
         $this->logFile = $batch->directory . DIRECTORY_SEPARATOR . 'EWSMailCapture.log';
 
-		switch ($args['authVersion']) {
-			case 1:
-				$this->initOauthVerion1($args['mailbox'], $args['username'], $args['password'], $args['exchangeversion']);
+		switch ($args['authMethod']) {
+			case ExchangeMailbox::BASIC_AUTH:
+				$this->writeLog(sprintf("Authenticate using '%s' methode ", ExchangeMailbox::BASIC_AUTH));
+				$this->initBasicAuth($args['mailbox'], $args['username'], $args['password'], $args['exchangeversion']);
 				$this->discoverFolders();
 				break;
-			case 2:
-				$this->initOauthVerion2($args['mailbox'], $args['username'], $args['exchangeversion'], $args['tenantID'], $args['clientID'], $args['clientSecret']);
+			case ExchangeMailbox::O_AUTH_2:
+				$this->writeLog(sprintf("Authenticate using '%s' methode ", ExchangeMailbox::O_AUTH_2));
+				$this->initOauth2($args['mailbox'], $args['username'], $args['exchangeversion'], $args['tenantID'], $args['clientID'], $args['clientSecret']);
 				$this->discoverFolders();
 				break;
 			default:
-				$this->writeLog("Unknown auth version.");
-				die("\n\nUnknown auth version.\n\n");
+				$log = sprintf("\n\nUnknown auth method '%s'.\nAvailable auth methods are %s or %s\n\n", $args['authMethod'], ExchangeMailbox::BASIC_AUTH, ExchangeMailbox::O_AUTH_2);
+				$this->writeLog($log);
+				$_SESSION['capture']->sendError($log);
 		}
 	}
 
-	private function initOauthVerion1($host, $address, $password, $version)
+	private function initBasicAuth($host, $address, $password, $version)
 	{
 		$this->client = new Client($host, $address, $password, $version);
 		$this->client->setCurlOptions([CURLOPT_SSL_VERIFYPEER => false]);
 	}
 
-	private function initOauthVerion2($host, $address, $version, $tenantID, $clientID, $clientSecret)
+	private function initOauth2($host, $address, $version, $tenantID, $clientID, $clientSecret)
 	{
 		$curl = curl_init(ExchangeMailbox::BASE_TOKEN_URL . $tenantID . '/oauth2/v2.0/token');
 		curl_setopt_array($curl, [
