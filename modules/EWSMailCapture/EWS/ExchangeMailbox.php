@@ -31,14 +31,38 @@ use jamesiarmes\PhpEws\Type\ExchangeImpersonationType;
 class ExchangeMailbox {
 	private $client;
 	private $folders;
+	private $logFile;
 
 	private const BASE_TOKEN_URL = 'https://login.microsoftonline.com/';
 
-	public function __construct($host, $address, $version, $tenantID, $clientID, $clientSecret)
+	public function __construct(array $args)
 	{
 		$batch = $_SESSION['capture']->Batch;
-        $logFile = $batch->directory . DIRECTORY_SEPARATOR . 'EWSMailCapture.log';
+        $this->logFile = $batch->directory . DIRECTORY_SEPARATOR . 'EWSMailCapture.log';
 
+		switch ($args['authVersion']) {
+			case 1:
+				$this->initOauthVerion1($args['mailbox'], $args['username'], $args['password'], $args['exchangeversion']);
+				$this->discoverFolders();
+				break;
+			case 2:
+				$this->initOauthVerion2($args['mailbox'], $args['username'], $args['exchangeversion'], $args['tenantID'], $args['clientID'], $args['clientSecret']);
+				$this->discoverFolders();
+				break;
+			default:
+				$this->writeLog("Unknown auth version.");
+				die("\n\nUnknown auth version.\n\n");
+		}
+	}
+
+	private function initOauthVerion1($host, $address, $password, $version)
+	{
+		$this->client = new Client($host, $address, $password, $version);
+		$this->client->setCurlOptions([CURLOPT_SSL_VERIFYPEER => false]);
+	}
+
+	private function initOauthVerion2($host, $address, $version, $tenantID, $clientID, $clientSecret)
+	{
 		$curl = curl_init(ExchangeMailbox::BASE_TOKEN_URL . $tenantID . '/oauth2/v2.0/token');
 		curl_setopt_array($curl, [
 			CURLOPT_POST           => true,
@@ -59,9 +83,8 @@ class ExchangeMailbox {
 		$responseBody    = $response[1] ?? '';
 		$responseBody    = json_decode($responseBody, true);
 		if (empty($responseBody['access_token'])) {
-			$errorString = '[' . date('c') . '] EWSMailCapture: ' . "\n\n" . $responseHeaders . "\n\n" . json_encode($responseBody, JSON_PRETTY_PRINT) . "\n";
-			file_put_contents($logFile, $errorString, FILE_APPEND);
-			throw new \Exception('error while fetching access token, return transfer written to ' . $logFile . "\n\n");
+			$this->writeLog("\n\n $responseHeaders \n\n");
+			die("Error while fetching access token, return transfer written to " . $this->logFile . "\n\n");
 		}
 
 		$this->client = new Client($host, $address, '-', $version);
@@ -74,8 +97,14 @@ class ExchangeMailbox {
 		$csid->PrimarySmtpAddress = $address;
 		$exim->ConnectingSID = $csid;
 		$this->client->setImpersonation($exim);
-		$this->discoverFolders();
 	}
+
+	private function writeLog($str)
+    {
+        $str = '[' . date('c') . '] ExchangeMailbox: ' . $str . PHP_EOL;
+        echo $str;
+        file_put_contents($this->logFile, $str, FILE_APPEND);
+    }
 
 	private function discoverFolders() {
 		$request = new FindFolderType();

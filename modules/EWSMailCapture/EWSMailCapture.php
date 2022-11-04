@@ -28,11 +28,21 @@ class EWSMailCapture
         $captureFolder = preg_replace('/\{.+\}(.+)/', '\1', $mailbox);
         $mailbox = preg_replace('/\{(.+)\}.+/', '\1', $mailbox);
 
-        $username = (string) ($accountConfig->xpath('username')[0] ?? '');
-        $tenantID = (string) ($accountConfig->xpath('tenantID')[0] ?? '');
-        $clientID = (string) ($accountConfig->xpath('clientID')[0] ?? '');
-        $clientSecret = (string) ($accountConfig->xpath('clientSecret')[0] ?? '');
-        $exchangeVersion = (string) ($accountConfig->xpath('exchangeversion')[0] ?? '');
+        $exchangeMailboxAgrs = [];
+        $exchangeMailboxAgrs['mailbox'] = $mailbox;
+        $exchangeMailboxAgrs['username'] = (string) ($accountConfig->xpath('username')[0] ?? '');
+        $exchangeMailboxAgrs['password'] = (string) ($accountConfig->xpath('password')[0] ?? '');
+        $exchangeMailboxAgrs['tenantID'] = (string) ($accountConfig->xpath('tenantID')[0] ?? '');
+        $exchangeMailboxAgrs['clientID'] = (string) ($accountConfig->xpath('clientID')[0] ?? '');
+        $exchangeMailboxAgrs['clientSecret'] = (string) ($accountConfig->xpath('clientSecret')[0] ?? '');
+
+        if (!empty($exchangeMailboxAgrs['password'])) {
+            $exchangeMailboxAgrs['authVersion'] = 1;
+        } elseif (!empty($exchangeMailboxAgrs['tenantID']) && !empty($exchangeMailboxAgrs['clientID']) && !empty($exchangeMailboxAgrs['clientSecret'])) {
+            $exchangeMailboxAgrs['authVersion'] = 2;
+        }
+
+        $exchangeMailboxAgrs['exchangeversion'] = (string) ($accountConfig->xpath('exchangeversion')[0] ?? '');
 
         $messageRules = $xmlConfig->xpath('/EWSMailCapture/messagerules/messagerule') ?: [];
         $attachmentRules = $xmlConfig->xpath('/EWSMailCapture/attachmentrules/attachmentrule') ?: [];
@@ -77,12 +87,16 @@ class EWSMailCapture
             }
         }
 
-        if (empty($mailbox) || empty($captureFolder) || empty($exchangeVersion)
-            || empty($username) || empty($tenantID) || empty($clientID) || empty($clientSecret)) {
-            $_SESSION['capture']->sendError('MS Exchange mailbox configuration is invalid!');
+        if ($exchangeMailboxAgrs['authVersion'] == 1 && (empty($exchangeMailboxAgrs['mailbox']) || empty($captureFolder) || empty($exchangeMailboxAgrs['exchangeversion']) || 
+            empty($exchangeMailboxAgrs['username']) || empty($exchangeMailboxAgrs['password']))) {
+            $_SESSION['capture']->sendError("MS Exchange mailbox configuration for is invalid!\n" .json_encode($exchangeMailboxAgrs));
+        } elseif ($exchangeMailboxAgrs['authVersion'] == 2 && (empty($exchangeMailboxAgrs['mailbox']) || empty($captureFolder) || empty($exchangeMailboxAgrs['exchangeversion']) || 
+            empty($exchangeMailboxAgrs['username']) || empty($exchangeMailboxAgrs['tenantID']) || empty($exchangeMailboxAgrs['clientID']) || 
+            empty($exchangeMailboxAgrs['clientSecret']))) {
+            $_SESSION['capture']->sendError("MS Exchange mailbox configuration for is invalid!\n" . json_encode($exchangeMailboxAgrs));
         }
 
-        $ewsMailbox = new ExchangeMailbox($mailbox, $username, $exchangeVersion, $tenantID, $clientID, $clientSecret);
+        $ewsMailbox = new ExchangeMailbox($exchangeMailboxAgrs);
 
         $ewsItems = $ewsMailbox->getItemsByFolderName($captureFolder);
         $itemCount = count($ewsItems);
