@@ -44,12 +44,12 @@ class ExchangeMailbox {
 
 		switch ($args['authMethod']) {
 			case ExchangeMailbox::BASIC_AUTH:
-				$this->writeLog(sprintf("Authenticate using '%s' methode ", ExchangeMailbox::BASIC_AUTH));
+				$this->writeLog(sprintf("Authenticating using '%s' method ", ExchangeMailbox::BASIC_AUTH));
 				$this->initBasicAuth($args['mailbox'], $args['username'], $args['password'], $args['exchangeversion']);
 				$this->discoverFolders();
 				break;
 			case ExchangeMailbox::O_AUTH_2:
-				$this->writeLog(sprintf("Authenticate using '%s' methode ", ExchangeMailbox::O_AUTH_2));
+				$this->writeLog(sprintf("Authenticating using '%s' method ", ExchangeMailbox::O_AUTH_2));
 				$this->initOauth2($args['mailbox'], $args['username'], $args['exchangeversion'], $args['tenantID'], $args['clientID'], $args['clientSecret']);
 				$this->discoverFolders();
 				break;
