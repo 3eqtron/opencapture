@@ -46,12 +46,24 @@ class ExchangeMailbox {
 			case ExchangeMailbox::BASIC_AUTH:
 				$this->writeLog(sprintf("Authenticating using '%s' method ", ExchangeMailbox::BASIC_AUTH));
 				$this->initBasicAuth($args['mailbox'], $args['username'], $args['password'], $args['exchangeversion']);
-				$this->discoverFolders();
+				try {
+					$this->discoverFolders();
+				} catch (\Exception $e) {
+					$log = "Exception occurred while trying Basic auth, you may want to setup OAuth2:\n\n" . (string)$e;
+					$this->writeLog($log);
+					$_SESSION['capture']->sendError($log);
+				}
 				break;
 			case ExchangeMailbox::O_AUTH_2:
 				$this->writeLog(sprintf("Authenticating using '%s' method ", ExchangeMailbox::O_AUTH_2));
 				$this->initOauth2($args['mailbox'], $args['username'], $args['exchangeversion'], $args['tenantID'], $args['clientID'], $args['clientSecret']);
-				$this->discoverFolders();
+				try {
+					$this->discoverFolders();
+				} catch (\Exception $e) {
+					$log = "Exception occurred while trying OAuth2:\n\n" . (string)$e;
+					$this->writeLog($log);
+					$_SESSION['capture']->sendError($log);
+				}
 				break;
 			default:
 				$log = sprintf("\n\nUnknown auth method '%s'.\nAvailable auth methods are %s or %s\n\n", $args['authMethod'], ExchangeMailbox::BASIC_AUTH, ExchangeMailbox::O_AUTH_2);
