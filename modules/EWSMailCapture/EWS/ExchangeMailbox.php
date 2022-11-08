@@ -100,8 +100,9 @@ class ExchangeMailbox {
 		$responseBody    = $response[1] ?? '';
 		$responseBody    = json_decode($responseBody, true);
 		if (empty($responseBody['access_token'])) {
-			$this->writeLog("\n\n $responseHeaders \n\n");
-			die("Error while fetching access token, return transfer written to " . $this->logFile . "\n\n");
+			$this->writeLog("\n\n$responseHeaders\n\n");
+			$this->writeLog("Error while fetching access token, return transfer written to " . $this->logFile . "\n");
+			$_SESSION['capture']->sendError("Error while fetching access token, return transfer written to " . $this->logFile . "\n");
 		}
 
 		$this->client = new Client($host, $address, '-', $version);
