@@ -24,7 +24,8 @@ class ExchangeItem {
 	private $toAddress;
 	private $ccAddress;
 
-	public function __construct($message, $client) {
+	public function __construct($message, $client)
+	{
 		$this->itemId = $message->ItemId->Id;
 		$this->senderName = $message->From->Mailbox->Name;
 		$this->senderEmailAddress = $message->From->Mailbox->EmailAddress;
@@ -56,7 +57,8 @@ class ExchangeItem {
 		}
 	}
 
-	public function get($key) {
+	public function get($key)
+	{
 		switch ($key) {
 			case 'date':
 				return $this->getISODate();
@@ -88,69 +90,84 @@ class ExchangeItem {
 		}
 	}
 
-	public function getItemId() {
+	public function getItemId()
+	{
 		return $this->itemId;
 	}
 
-	public function setItemId($itemId) {
+	public function setItemId($itemId)
+	{
 		$this->itemId = $itemId;
 	}
 
-	public function getSenderName() {
+	public function getSenderName()
+	{
 		return $this->senderName;
 	}
 
-	public function getSenderEmailAddress() {
+	public function getSenderEmailAddress()
+	{
 		return $this->senderEmailAddress;
 	}
 
-	public function getToAddress() {
+	public function getToAddress()
+	{
 		return $this->toAddress;
 	}
 
-	public function getCcAddress() {
+	public function getCcAddress()
+	{
 		return $this->ccAddress;
 	}
 
-	public function getSubject($attI = null) {
+	public function getSubject($attI = null)
+	{
 		if (is_int($attI) && $attI >= 0 && $attI < count($this->attachments)) {
 			return $this->subject . ' (' . ($attI + 1) . '/' . count($this->attachments) . ') : ' . $this->attachments[$attI]['name'];
 		}
 		return $this->subject;
 	}
 
-	public function getISODate() {
+	public function getISODate()
+	{
 		return $this->isoDate;
 	}
 
-	public function getBody() {
+	public function getBody()
+	{
 		return $this->body;
 	}
 
-	public function getImportance() {
+	public function getImportance()
+	{
 		return $this->importance;
 	}
 
-	public function isUrgent() {
+	public function isUrgent()
+	{
 		return $this->urgent;
 	}
 
-	public function getAttachments() {
+	public function getAttachments()
+	{
 		return $this->attachments;
 	}
 
-	public function getAttachmentsCount() {
+	public function getAttachmentsCount()
+	{
 		return count($this->attachments);
 	}
 
-	public function getInlineAttachmentsCount() {
+	public function getInlineAttachmentsCount()
+	{
 		return $this->inlineAttachmentsCount;
 	}
 
 	/**
 	 * this function fetches attachments ids, names and contents
 	 */
-	private function populateAttachments($rawAttachments, $client) {
+	private function populateAttachments($rawAttachments, $client)
+	{
 		$this->attachments = [];
 		if (empty($rawAttachments)) {
 			return;

@@ -114,6 +114,10 @@ class EWSMailCapture
         $ewsMailbox = new ExchangeMailbox($exchangeMailboxArgs);
 
         $ewsItems = $ewsMailbox->getItemsByFolderName($captureFolder);
+        if ($ewsItems === false) {
+            $this->writeLog('ERROR: could not get items: mailbox folder \'' . $captureFolder . '\' does not exist.');
+            $_SESSION['capture']->sendError('could not get items: mailbox folder \'' . $captureFolder . '\' does not exist.');
+        }
         $itemCount = count($ewsItems);
         $this->writeLog($itemCount . ' messages in mailbox');
 
@@ -193,7 +197,11 @@ class EWSMailCapture
 
             if ($action === 'move') {
                 $this->writeLog('moving email to purge folder: ' . $folder);
-                $ewsMailbox->moveItemToNamedFolder($ewsItem, $folder);
+                $moved = $ewsMailbox->moveItemToNamedFolder($ewsItem, $folder);
+                if ($moved === false) {
+                    $this->writeLog('ERROR: could not move item: mailbox folder \'' . $folder . '\' does not exist.');
+                    $_SESSION['capture']->sendError('could not move item: mailbox folder \'' . $folder . '\' does not exist.');
+                }
             } elseif ($action === 'delete') {
                 $this->writeLog('moving email to trash');
                 $ewsMailbox->deleteItem($ewsItem);
@@ -285,7 +293,11 @@ class EWSMailCapture
                 $folder = (string) ($messageRule->attributes()['folder'] ?? '');
                 if (!empty($folder)) {
                     $this->writeLog('moving mail to ' . $folder);
-                    $ewsMailbox->moveItemToNamedFolder($ewsItem, $folder);
+                    $moved = $ewsMailbox->moveItemToNamedFolder($ewsItem, $folder);
+                    if ($moved === false) {
+                        $this->writeLog('ERROR: could not move item: mailbox folder \'' . $folder . '\' does not exist.');
+                        $_SESSION['capture']->sendError('could not move item: mailbox folder \'' . $folder . '\' does not exist.');
+                    }
                 } else {
                     $this->writeLog('WARNING: move action with no specified folder!');
                 }

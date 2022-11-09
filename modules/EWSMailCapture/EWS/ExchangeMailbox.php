@@ -128,7 +128,8 @@ class ExchangeMailbox {
         file_put_contents($this->logFile, $str, FILE_APPEND);
     }
 
-	private function discoverFolders() {
+	private function discoverFolders()
+	{
 		$request = new FindFolderType();
 		$request->Traversal = FolderQueryTraversalType::DEEP;
 		$request->ParentFolderIds = new NonEmptyArrayOfBaseFolderIdsType();
@@ -179,19 +180,21 @@ class ExchangeMailbox {
 		}
 	}
 
-	private function getFolderIdByName($folderName) {
+	private function getFolderIdByName($folderName)
+	{
 		$folderName = trim($folderName, '/');
 		return array_key_exists($folderName, $this->folders) ? $this->folders[$folderName] : null;
 	}
 
-	public function getItemsByFolderName($folderName) {
+	public function getItemsByFolderName($folderName)
+	{
 		$folderId = $this->getFolderIdByName($folderName);
 		$useInbox = false;
 		if (mb_strtolower($folderName) === 'inbox') {
 			$useInbox = true;
 		}
 		if (!$useInbox && empty($folderId)) {
-			return [];
+			return false;
 		}
 		$request = new FindItemType();
 		$request->ParentFolderIds = new NonEmptyArrayOfBaseFolderIdsType();
@@ -229,14 +232,15 @@ class ExchangeMailbox {
 		return $items;
 	}
 
-	public function moveItemToNamedFolder(&$item, $folderName) {
+	public function moveItemToNamedFolder(&$item, $folderName)
+	{
 		$folderId = $this->getFolderIdByName($folderName);
 		$useInbox = false;
 		if (mb_strtolower($folderName) === 'inbox') {
 			$useInbox = true;
 		}
 		if (!$useInbox && empty($folderId)) {
-			return null;
+			return false;
 		}
 		$request = new MoveItemType();
 		$request->ToFolderId = new TargetFolderIdType();
@@ -260,7 +264,8 @@ class ExchangeMailbox {
 		return true;
 	}
 
-	public function deleteItem($item) {
+	public function deleteItem($item)
+	{
 		$request = new DeleteItemType();
 		$request->DeleteType = DisposalType::MOVE_TO_DELETED_ITEMS;
 		$request->ItemIds = new NonEmptyArrayOfBaseItemIdsType();
