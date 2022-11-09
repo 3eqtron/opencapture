@@ -28,9 +28,25 @@ class EWSMailCapture
         $captureFolder = preg_replace('/\{.+\}(.+)/', '\1', $mailbox);
         $mailbox = preg_replace('/\{(.+)\}.+/', '\1', $mailbox);
 
-        $username = (string) ($accountConfig->xpath('username')[0] ?? '');
-        $password = (string) ($accountConfig->xpath('password')[0] ?? '');
-        $exchangeVersion = (string) ($accountConfig->xpath('exchangeversion')[0] ?? '');
+        $exchangeMailboxArgs = [];
+        $exchangeMailboxArgs['mailbox'] = $mailbox;
+        $exchangeMailboxArgs['username'] = (string) ($accountConfig->xpath('username')[0] ?? '');
+        $exchangeMailboxArgs['password'] = (string) ($accountConfig->xpath('password')[0] ?? '');
+        $exchangeMailboxArgs['tenantID'] = (string) ($accountConfig->xpath('tenantID')[0] ?? '');
+        $exchangeMailboxArgs['clientID'] = (string) ($accountConfig->xpath('clientID')[0] ?? '');
+        $exchangeMailboxArgs['clientSecret'] = (string) ($accountConfig->xpath('clientSecret')[0] ?? '');
+
+        if (!empty($exchangeMailboxArgs['password'])) {
+            $exchangeMailboxArgs['authMethod'] = ExchangeMailbox::BASIC_AUTH;
+        } elseif (!empty($exchangeMailboxArgs['tenantID']) && !empty($exchangeMailboxArgs['clientID']) && !empty($exchangeMailboxArgs['clientSecret'])) {
+            $exchangeMailboxArgs['authMethod'] = ExchangeMailbox::O_AUTH_2;
+        } else {
+            $log = sprintf("\n\nUnable to set auth method\nCheck the account '%s' configuration in %s\n\n", $account, __DIR__ . DIRECTORY_SEPARATOR . $configFile);
+            $this->writeLog($log);
+            $_SESSION['capture']->sendError($log);
+        }
+
+        $exchangeMailboxArgs['exchangeversion'] = (string) ($accountConfig->xpath('exchangeversion')[0] ?? '');
 
         $messageRules = $xmlConfig->xpath('/EWSMailCapture/messagerules/messagerule') ?: [];
         $attachmentRules = $xmlConfig->xpath('/EWSMailCapture/attachmentrules/attachmentrule') ?: [];
@@ -75,15 +91,35 @@ class EWSMailCapture
             }
         }
 
-        if (empty($mailbox) || empty($captureFolder) || empty($exchangeVersion) || empty($username) || empty($password)) {
-            $_SESSION['capture']->sendError('MS Exchange mailbox configuration is invalid!');
+        if ($exchangeMailboxArgs['authMethod'] == ExchangeMailbox::BASIC_AUTH && (
+            empty($exchangeMailboxArgs['mailbox'])
+            || empty($exchangeMailboxArgs['exchangeversion'])
+            || empty($exchangeMailboxArgs['username'])
+            || empty($exchangeMailboxArgs['password'])
+            || empty($captureFolder)
+        )) {
+            $_SESSION['capture']->sendError(sprintf("MS Exchange mailbox configuration for %s is invalid!\n%s", ExchangeMailbox::BASIC_AUTH, json_encode($exchangeMailboxArgs)));
+        } elseif ($exchangeMailboxArgs['authMethod'] == ExchangeMailbox::O_AUTH_2 && (
+            empty($exchangeMailboxArgs['mailbox'])
+            || empty($exchangeMailboxArgs['exchangeversion'])
+            || empty($exchangeMailboxArgs['username'])
+            || empty($exchangeMailboxArgs['tenantID'])
+            || empty($exchangeMailboxArgs['clientID'])
+            || empty($exchangeMailboxArgs['clientSecret'])
+            || empty($captureFolder)
+        )) {
+            $_SESSION['capture']->sendError(sprintf("\n\nMS Exchange mailbox configuration for %s is invalid!\n%s\n\n", ExchangeMailbox::O_AUTH_2, json_encode($exchangeMailboxArgs)));
         }
 
-        $ewsMailbox = new ExchangeMailbox($mailbox, $username, $password, $exchangeVersion);
+        $ewsMailbox = new ExchangeMailbox($exchangeMailboxArgs);
 
         $ewsItems = $ewsMailbox->getItemsByFolderName($captureFolder);
+        if ($ewsItems === false) {
+            $this->writeLog('ERROR: could not get items: mailbox folder \'' . $captureFolder . '\' does not exist.');
+            $_SESSION['capture']->sendError('could not get items: mailbox folder \'' . $captureFolder . '\' does not exist.');
+        }
         $itemCount = count($ewsItems);
-        $this->writeLog($itemCount . ' messages in mailbox');
+        $this->writeLog($itemCount . ' messages in mailbox folder \'' . $captureFolder . '\'');
 
         foreach ($ewsItems as $ewsItemI => $ewsItem) {
             $this->writeLog('processing email ' . ($ewsItemI + 1) . '/' . $itemCount . ': ' . $ewsItem->getSubject());
@@ -161,7 +197,11 @@ class EWSMailCapture
 
             if ($action === 'move') {
                 $this->writeLog('moving email to purge folder: ' . $folder);
-                $ewsMailbox->moveItemToNamedFolder($ewsItem, $folder);
+                $moved = $ewsMailbox->moveItemToNamedFolder($ewsItem, $folder);
+                if ($moved === false) {
+                    $this->writeLog('ERROR: could not move item: mailbox folder \'' . $folder . '\' does not exist.');
+                    $_SESSION['capture']->sendError('could not move item: mailbox folder \'' . $folder . '\' does not exist.');
+                }
             } elseif ($action === 'delete') {
                 $this->writeLog('moving email to trash');
                 $ewsMailbox->deleteItem($ewsItem);
@@ -253,7 +293,11 @@ class EWSMailCapture
                 $folder = (string) ($messageRule->attributes()['folder'] ?? '');
                 if (!empty($folder)) {
                     $this->writeLog('moving mail to ' . $folder);
-                    $ewsMailbox->moveItemToNamedFolder($ewsItem, $folder);
+                    $moved = $ewsMailbox->moveItemToNamedFolder($ewsItem, $folder);
+                    if ($moved === false) {
+                        $this->writeLog('ERROR: could not move item: mailbox folder \'' . $folder . '\' does not exist.');
+                        $_SESSION['capture']->sendError('could not move item: mailbox folder \'' . $folder . '\' does not exist.');
+                    }
                 } else {
                     $this->writeLog('WARNING: move action with no specified folder!');
                 }

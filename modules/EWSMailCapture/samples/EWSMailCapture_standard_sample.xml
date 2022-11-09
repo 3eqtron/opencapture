@@ -3,8 +3,7 @@
     <accounts>
         <account name="account_1" >
             <mailbox>{mail.name.com}INBOX</mailbox>
-            <username>your-email@name.com</username>
-            <password>******</password>
+            <exchangeversion>Exchange2016</exchangeversion>
             <!--
                 exchangeversion must be one of:
                 Exchange2007
@@ -16,12 +15,23 @@
                 Exchange2013
                 Exchange2013_SP1
                 Exchange2016
-             -->
-            <exchangeversion>Exchange2016</exchangeversion>
+            -->
+
+            <!-- authentification : renseigner uniquement les balises du mode utilisé, supprimer ou commenter les autres -->
+            <!-- pour l’authentification Basic -->
+            <username>your-email@name.com</username>
+            <password>******</password>
+
+            <!-- pour l’authentification OAuth2 -->
+            <username>your-email@name.com</username>
+            <tenantID>******</tenantID>
+            <clientID>******</clientID>
+            <clientSecret>******</clientSecret>
+
         </account>
     </accounts>
     <messagerules>
-        <messagerule name="NO_CC_IN_SUBJECT" info="subject" action="none" folder="tmp" op="contains">Cc</messagerule>
+        <!-- <messagerule name="NO_CC_IN_SUBJECT" info="subject" action="none" folder="tmp" op="contains">Cc</messagerule> -->
     </messagerules>
     <messageoutputs>
         <messageoutput name="doc_date" info="date"/>
