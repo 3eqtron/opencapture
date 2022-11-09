@@ -119,7 +119,7 @@ class EWSMailCapture
             $_SESSION['capture']->sendError('could not get items: mailbox folder \'' . $captureFolder . '\' does not exist.');
         }
         $itemCount = count($ewsItems);
-        $this->writeLog($itemCount . ' messages in mailbox');
+        $this->writeLog($itemCount . ' messages in mailbox folder \'' . $captureFolder . '\'');
 
         foreach ($ewsItems as $ewsItemI => $ewsItem) {
             $this->writeLog('processing email ' . ($ewsItemI + 1) . '/' . $itemCount . ': ' . $ewsItem->getSubject());
