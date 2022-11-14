@@ -7,7 +7,7 @@
   </modules>
   <batches>
     <batch name="MAARCH_REST_WS" directory="/opt/maarch/MaarchCapture/files/" lock="0" id="{batchname}-{timestamp}-{rand}">
-      <workflow name="M2M" debug="true" logMode="Maarch" maarchLogParam="/var/www/html/MaarchCourrier/apps/maarch_entreprise/xml/log4php.xml" maarchLoggerName="loggerTechnique">
+      <workflow name="M2M" debug="true" logMode="Maarch" maarchLogParam="/opt/maarch/MaarchCapture/config/log4php/log4php.xml.default" maarchLoggerName="loggerTechnique">
           <step name="CaptureMails" module='MailCapture' function="CaptureMails">
               <input name="account">account_1</input>
               <input name="Action">move</input>
@@ -22,7 +22,7 @@
         </step>
       </workflow>
 
-      <workflow name="M2M_ACK" debug="true" logMode="Maarch" maarchLogParam="/var/www/html/MaarchCourrier/apps/maarch_entreprise/xml/log4php.xml" maarchLoggerName="loggerTechnique">
+      <workflow name="M2M_ACK" debug="true" logMode="Maarch" maarchLogParam="/opt/maarch/MaarchCapture/config/log4php/log4php.xml.default" maarchLoggerName="loggerTechnique">
           <step name="CaptureMails" module='MailCapture' function="CaptureMails">
               <input name="account">account_1</input>
               <input name="Action">move</input>
@@ -37,7 +37,7 @@
         </step>
       </workflow>
 
-      <workflow name="M2M_REPLY" debug="true" logMode="Maarch" maarchLogParam="/var/www/html/MaarchCourrier/apps/maarch_entreprise/xml/log4php.xml" maarchLoggerName="loggerTechnique">
+      <workflow name="M2M_REPLY" debug="true" logMode="Maarch" maarchLogParam="/opt/maarch/MaarchCapture/config/log4php/log4php.xml.default" maarchLoggerName="loggerTechnique">
           <step name="CaptureMails" module='MailCapture' function="CaptureMails">
               <input name="account">account_1</input>
               <input name="Action">move</input>
@@ -52,7 +52,7 @@
         </step>
       </workflow>
 
-      <workflow name="M2M_NOTIFICATION" debug="true" logMode="Maarch" maarchLogParam="/var/www/html/MaarchCourrier/apps/maarch_entreprise/xml/log4php.xml" maarchLoggerName="loggerTechnique">
+      <workflow name="M2M_NOTIFICATION" debug="true" logMode="Maarch" maarchLogParam="/opt/maarch/MaarchCapture/config/log4php/log4php.xml.default" maarchLoggerName="loggerTechnique">
           <step name="CaptureMails" module='MailCapture' function="CaptureMails">
               <input name="account">account_1</input>
               <input name="Action">move</input>

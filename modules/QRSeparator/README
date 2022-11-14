@@ -6,7 +6,7 @@
 in Capture.xml :
 
 <batch name='SCAN' directory='/exploit/maarch/maarch_capture/files/maarchcourrier' lock="0" id='{batchname}-{timestamp}-{rand}'>
-	<workflow name="SCAN" debug="true" logMode="Maarch" maarchLogParam="/produit/maarch/maarch_web/custom/cs_maarchcourrier/apps/maarch_entreprise/xml/log4php.xml" maarchLoggerName="loggerTechnique">
+	<workflow name="SCAN" debug="true" logMode="Maarch" maarchLogParam="/exploit/maarch/maarch_capture/config/log4php/log4php.xml.default" maarchLoggerName="loggerTechnique">
 		<step name="separatePDF" module='QRSeparator' function="separatePDF">
 			<input name="ScanSource">/exploit/maarch/depot/capture/entrant/maarchcourrier/</input>
 		</step>
