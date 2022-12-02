@@ -114,9 +114,9 @@ class EWSMailCapture
         $ewsMailbox = new ExchangeMailbox($exchangeMailboxArgs);
 
         $ewsItems = $ewsMailbox->getItemsByFolderName($captureFolder);
-        if ($ewsItems === false) {
-            $this->writeLog('ERROR: could not get items: mailbox folder \'' . $captureFolder . '\' does not exist.');
-            $_SESSION['capture']->sendError('could not get items: mailbox folder \'' . $captureFolder . '\' does not exist.');
+        if (!empty($ewsItems['error'])) {
+            $this->writeLog("ERROR: {$ewsItems['error']}");
+            $_SESSION['capture']->sendError($ewsItems['error']);
         }
         $itemCount = count($ewsItems);
         $this->writeLog($itemCount . ' messages in mailbox folder \'' . $captureFolder . '\'');

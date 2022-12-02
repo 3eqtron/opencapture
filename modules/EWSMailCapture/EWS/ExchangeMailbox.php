@@ -45,8 +45,8 @@ class ExchangeMailbox {
 		switch ($args['authMethod']) {
 			case ExchangeMailbox::BASIC_AUTH:
 				$this->writeLog(sprintf("Authenticating using '%s' method ", ExchangeMailbox::BASIC_AUTH));
-				$this->initBasicAuth($args['mailbox'], $args['username'], $args['password'], $args['exchangeversion']);
 				try {
+					$this->initBasicAuth($args['mailbox'], $args['username'], $args['password'], $args['exchangeversion']);
 					$this->discoverFolders();
 				} catch (\Exception $e) {
 					$log = "Exception occurred while trying Basic auth, you may want to setup OAuth2:\n\n" . (string)$e;
@@ -56,8 +56,8 @@ class ExchangeMailbox {
 				break;
 			case ExchangeMailbox::O_AUTH_2:
 				$this->writeLog(sprintf("Authenticating using '%s' method ", ExchangeMailbox::O_AUTH_2));
-				$this->initOauth2($args['mailbox'], $args['username'], $args['exchangeversion'], $args['tenantID'], $args['clientID'], $args['clientSecret']);
 				try {
+					$this->initOauth2($args['mailbox'], $args['username'], $args['exchangeversion'], $args['tenantID'], $args['clientID'], $args['clientSecret']);
 					$this->discoverFolders();
 				} catch (\Exception $e) {
 					$log = "Exception occurred while trying OAuth2:\n\n" . (string)$e;
@@ -167,8 +167,9 @@ class ExchangeMailbox {
 				'path'     => $displayName
 			];
 		}
+
 		$foldersPaths = array_map(function ($folderPath) {
-		$folderPath['path'] = trim($folderPath['path'], '/');
+			$folderPath['path'] = trim($folderPath['path'], '/');
 			return $folderPath;
 		}, $foldersPaths);
 		$foldersPaths = array_filter($foldersPaths, function ($folderPath) {
@@ -180,10 +181,26 @@ class ExchangeMailbox {
 		}
 	}
 
-	private function getFolderIdByName($folderName)
+	private function getFolderIdByName($folderPathNames)
 	{
-		$folderName = trim($folderName, '/');
-		return array_key_exists($folderName, $this->folders) ? $this->folders[$folderName] : null;
+		$folderPathNames = trim($folderPathNames, '/');
+		$foldersName = explode('/', $folderPathNames);
+		$tmpPath = $folderPathNames;
+
+		if (count($foldersName) > 0 ) {
+			$tmpPath = $foldersName[0];
+			for ($index = 0; $index < count($foldersName); $index++) {
+
+				$value = $foldersName[$index];
+				if ($index == 0 && ($value == 'inbox' || $value == 'INBOX')) {
+					continue;
+				}
+				if (array_key_exists($value, $this->folders)) {
+					$tmpPath .= "/$value";
+				}
+			}
+		}
+		return ($folderPathNames == $tmpPath ? true : false);
 	}
 
 	public function getItemsByFolderName($folderName)
@@ -194,7 +211,7 @@ class ExchangeMailbox {
 			$useInbox = true;
 		}
 		if (!$useInbox && empty($folderId)) {
-			return false;
+			return ['error' => "Mailbox folder '" . $folderName . "' does not exist."];
 		}
 		$request = new FindItemType();
 		$request->ParentFolderIds = new NonEmptyArrayOfBaseFolderIdsType();
@@ -212,6 +229,9 @@ class ExchangeMailbox {
 		$response = $this->client->FindItem($request);
 
 		$rawItems = $response->ResponseMessages->FindItemResponseMessage[0]->RootFolder->Items->Message;
+		if (empty($rawItems)) {
+			return ['error' => "Could not get items from mailbox folder '" . $folderName . "'."];
+		}
 		$items = [];
 		foreach ($rawItems as $rawItem) {
 			$request = new GetItemType();
