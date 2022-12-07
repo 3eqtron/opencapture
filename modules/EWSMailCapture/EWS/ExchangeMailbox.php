@@ -92,16 +92,20 @@ class ExchangeMailbox {
 				'scope'         => 'https://' . $host . '/.default'
 			]
 		]);
-		$response = curl_exec($curl);
+		$rawResponse 	= curl_exec($curl);
+		$code 			= curl_getinfo($curl, CURLINFO_HTTP_CODE);
+		$headerSize 	= curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+		$errors 		= curl_error($curl);
 		curl_close($curl);
 
-		$response = explode("\r\n\r\n", $response);
-		$responseHeaders = $response[0] ?? '';
-		$responseBody    = $response[1] ?? '';
-		$responseBody    = json_decode($responseBody, true);
+		$rawHeaders 	= substr($rawResponse, 0, $headerSize);
+		$headers 		= explode("\r\n", $rawHeaders);
+		$response 		= substr($rawResponse, $headerSize);
+		$responseBody 	= json_decode($response, true);
+
 		if (empty($responseBody['access_token'])) {
 			$this->writeLog("Error while fetching access token, return transfer written to " . $this->logFile);
-			$error = "\n\nHeaders: " . $responseHeaders;
+			$error = "\n\nHeaders:\n" . $rawHeaders;
 			if (!empty($responseBody['error'])) {
 				$error .= "\n\nError: " . $responseBody['error'] . "\n\nError description: " . ($responseBody['error_description'] ?? '');
 			}
