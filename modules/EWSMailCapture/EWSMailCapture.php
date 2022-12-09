@@ -198,9 +198,9 @@ class EWSMailCapture
             if ($action === 'move') {
                 $this->writeLog('moving email to purge folder: ' . $folder);
                 $moved = $ewsMailbox->moveItemToNamedFolder($ewsItem, $folder);
-                if ($moved === false) {
-                    $this->writeLog('ERROR: could not move item: mailbox folder \'' . $folder . '\' does not exist.');
-                    $_SESSION['capture']->sendError('could not move item: mailbox folder \'' . $folder . '\' does not exist.');
+                if (!empty($moved['error'])) {
+                    $this->writeLog('ERROR: could not move item: mailbox folder \'' . $folder . '\' : ' . $moved['error']);
+                    $_SESSION['capture']->sendError('could not move item: mailbox folder \'' . $folder . '\' : ' . $moved['error']);
                 }
             } elseif ($action === 'delete') {
                 $this->writeLog('moving email to trash');
