@@ -189,18 +189,17 @@ class ExchangeMailbox {
 
 		if (count($foldersName) > 0 ) {
 			$tmpPath = $foldersName[0];
-			for ($index = 0; $index < count($foldersName); $index++) {
 
-				$value = $foldersName[$index];
-				if ($index == 0 && ($value == 'inbox' || $value == 'INBOX')) {
+			foreach ($foldersName as $folderName) {
+				if ($folderName == 'inbox' || $folderName == 'INBOX') {
 					continue;
 				}
-				if (array_key_exists($value, $this->folders)) {
-					$tmpPath .= "/$value";
+				if (array_key_exists($folderName, $this->folders)) {
+					$tmpPath .= "/$folderName";
 				}
 			}
 		}
-		return ($folderPathNames == $tmpPath ? true : false);
+		return $folderPathNames == $tmpPath;
 	}
 
 	public function getItemsByFolderName($folderName)
