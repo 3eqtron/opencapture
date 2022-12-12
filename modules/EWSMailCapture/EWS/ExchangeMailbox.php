@@ -153,7 +153,7 @@ class ExchangeMailbox {
 			$this->folders[$path] = [
 				'id'       => $folder->FolderId->Id,
 				'parentId' => $folder->ParentFolderId->Id,
-				'path'     => $this->getFolderFullPath($folder,  $parentFoldersWithChildren)
+				'path'     => $path
 			];
 		}
 	}
