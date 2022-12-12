@@ -160,7 +160,7 @@ class ExchangeMailbox {
 
 	private function getFolderFullPath($folder, $parentFoldersWithChildren, $path = [])
 	{
-		if ($folder->DisplayName === 'Boîte de réception') {
+		if ($folder->DisplayName === 'Boîte de réception' || $folder->DisplayName === 'INBOX') {
 			$folder->DisplayName = 'inbox';
 		}
 		array_unshift($path, $folder->DisplayName);
