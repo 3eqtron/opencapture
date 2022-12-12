@@ -244,9 +244,7 @@ class ExchangeMailbox {
 		$response = $this->client->FindItem($request);
 
 		$rawItems = $response->ResponseMessages->FindItemResponseMessage[0]->RootFolder->Items->Message;
-		if (empty($rawItems)) {
-			return ['error' => "Could not get items from mailbox folder '" . $folderName . "'."];
-		}
+
 		$items = [];
 		foreach ($rawItems as $rawItem) {
 			$request = new GetItemType();
