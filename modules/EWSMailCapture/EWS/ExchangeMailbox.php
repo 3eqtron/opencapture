@@ -143,31 +143,31 @@ class ExchangeMailbox {
 
 		$folders = $this->getDisplayFolders($response->ResponseMessages->FindFolderResponseMessage[0]->RootFolder->Folders->Folder);
 
-		$parentFoldersWhithChildren = $this->getParentFolderWithChildren($folders);
+		$parentFoldersWithChildren = $this->getParentFoldersWithChildren($folders);
 
 		$foldersPaths = [];
 		foreach ($folders as $folder) {
 			$displayName = $folder->DisplayName;
 			$displayName = str_replace('/', '\/', $displayName);
-			$path = $this->getFolderFullPath($folder,  $parentFoldersWhithChildren);
+			$path = $this->getFolderFullPath($folder,  $parentFoldersWithChildren);
 			$this->folders[$path] = [
 				'id'       => $folder->FolderId->Id,
 				'parentId' => $folder->ParentFolderId->Id,
-				'path'     => $this->getFolderFullPath($folder,  $parentFoldersWhithChildren)
+				'path'     => $this->getFolderFullPath($folder,  $parentFoldersWithChildren)
 			];
 		}
 	}
 
-	private function getFolderFullPath($folder, $parentFoldersWhithChildren, $path = [])
+	private function getFolderFullPath($folder, $parentFoldersWithChildren, $path = [])
 	{
 		if ($folder->DisplayName === 'Boîte de réception') {
 			$folder->DisplayName = 'inbox';
 		}
 		array_unshift($path, $folder->DisplayName);
-		$parentFolderIdsWhithChildren = $this->getFolderIds($parentFoldersWhithChildren);
-		if (in_array($folder->ParentFolderId->Id, $parentFolderIdsWhithChildren)) {
-			$parentFolder = $this->getFolderById($parentFoldersWhithChildren, $folder->ParentFolderId->Id);
-			return $this->getFolderFullPath($parentFolder, $parentFoldersWhithChildren, $path);	
+		$parentFolderIdsWithChildren = $this->getFolderIds($parentFoldersWithChildren);
+		if (in_array($folder->ParentFolderId->Id, $parentFolderIdsWithChildren)) {
+			$parentFolder = $this->getFolderById($parentFoldersWithChildren, $folder->ParentFolderId->Id);
+			return $this->getFolderFullPath($parentFolder, $parentFoldersWithChildren, $path);	
 		}
 		return implode('/', $path);
 	}
@@ -201,7 +201,7 @@ class ExchangeMailbox {
 		}
 	}
 
-	private function getParentFolderWithChildren($folders)
+	private function getParentFoldersWithChildren($folders)
 	{
 		$parentFolders = [];
 		foreach ($folders as $folder) {
