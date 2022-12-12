@@ -160,7 +160,7 @@ class ExchangeMailbox {
 
 	private function getFolderFullPath($folder, $parentFoldersWithChildren, $path = [])
 	{
-		if ($folder->DisplayName === 'Boîte de réception' || $folder->DisplayName === 'INBOX') {
+		if ($folder->DisplayName === 'Boîte de réception') {
 			$folder->DisplayName = 'inbox';
 		}
 		array_unshift($path, $folder->DisplayName);
@@ -269,6 +269,7 @@ class ExchangeMailbox {
 
 	public function moveItemToNamedFolder(&$item, $folderName)
 	{
+		$folderName = $this->formatFolderName($folderName);
 		$folderId = $this->getFolderIdByName($folderName);
 
 		if ($folderId == null) {
@@ -305,6 +306,16 @@ class ExchangeMailbox {
 		$item->setItemId($response->ResponseMessages->MoveItemResponseMessage[0]->Items->Message[0]->ItemId->Id);
 
 		return true;
+	}
+
+	private function formatFolderName($folderName) {
+		$arrFolderName = explode('/', trim($folderName, '/'));
+		if ($arrFolderName[0] == 'Boîte de réception' || $arrFolderName[0] == 'INBOX') {
+			$arrFolderName[0] = 'inbox';
+			return implode('/', $arrFolderName);
+		} else {
+			return $folderName;
+		}
 	}
 
 	public function deleteItem($item)
