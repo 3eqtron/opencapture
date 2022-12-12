@@ -199,6 +199,7 @@ class ExchangeMailbox {
 				return $folder;
 			}
 		}
+		return null;
 	}
 
 	private function getParentFoldersWithChildren($folders)
