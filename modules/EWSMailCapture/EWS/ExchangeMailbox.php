@@ -45,8 +45,8 @@ class ExchangeMailbox {
 		switch ($args['authMethod']) {
 			case ExchangeMailbox::BASIC_AUTH:
 				$this->writeLog(sprintf("Authenticating using '%s' method ", ExchangeMailbox::BASIC_AUTH));
-				$this->initBasicAuth($args['mailbox'], $args['username'], $args['password'], $args['exchangeversion']);
 				try {
+					$this->initBasicAuth($args['mailbox'], $args['username'], $args['password'], $args['exchangeversion']);
 					$this->discoverFolders();
 				} catch (\Exception $e) {
 					$log = "Exception occurred while trying Basic auth, you may want to setup OAuth2:\n\n" . (string)$e;
@@ -56,8 +56,8 @@ class ExchangeMailbox {
 				break;
 			case ExchangeMailbox::O_AUTH_2:
 				$this->writeLog(sprintf("Authenticating using '%s' method ", ExchangeMailbox::O_AUTH_2));
-				$this->initOauth2($args['mailbox'], $args['username'], $args['exchangeversion'], $args['tenantID'], $args['clientID'], $args['clientSecret']);
 				try {
+					$this->initOauth2($args['mailbox'], $args['username'], $args['exchangeversion'], $args['tenantID'], $args['clientID'], $args['clientSecret']);
 					$this->discoverFolders();
 				} catch (\Exception $e) {
 					$log = "Exception occurred while trying OAuth2:\n\n" . (string)$e;
@@ -145,49 +145,81 @@ class ExchangeMailbox {
 
 		$response = $this->client->FindFolder($request);
 
-		$folders = $response->ResponseMessages->FindFolderResponseMessage[0]->RootFolder->Folders->Folder;
+		$folders = $this->getDisplayFolders($response->ResponseMessages->FindFolderResponseMessage[0]->RootFolder->Folders->Folder);
+
+		$parentFoldersWithChildren = $this->getParentFoldersWithChildren($folders);
 
 		$foldersPaths = [];
 		foreach ($folders as $folder) {
-			$displayName = !empty($folder->FolderClass) ? $folder->DisplayName : '';
+			$displayName = $folder->DisplayName;
 			$displayName = str_replace('/', '\/', $displayName);
-
-			foreach ($foldersPaths as $folderPath) {
-				if ($folder->ParentFolderId->Id == $folderPath['id']->Id) {
-					$foldersPaths[] = [
-						'id'       => $folder->FolderId,
-						'parentId' => $folder->ParentFolderId,
-						'path'     => $folderPath['path'] . '/' . $displayName
-					];
-					continue 2;
-				} elseif ($folder->FolderId->Id == $folderPath['parentId']->Id) {
-					$folderPath['path'] = $displayName . '/' . $folderPath['path'];
-					continue 2;
-				}
-			}
-			$foldersPaths[] = [
-				'id'       => $folder->FolderId,
-				'parentId' => $folder->ParentFolderId,
-				'path'     => $displayName
+			$path = $this->getFolderFullPath($folder,  $parentFoldersWithChildren);
+			$this->folders[$path] = [
+				'id'       => $folder->FolderId->Id,
+				'parentId' => $folder->ParentFolderId->Id,
+				'path'     => $path
 			];
-		}
-		$foldersPaths = array_map(function ($folderPath) {
-		$folderPath['path'] = trim($folderPath['path'], '/');
-			return $folderPath;
-		}, $foldersPaths);
-		$foldersPaths = array_filter($foldersPaths, function ($folderPath) {
-			return !empty($folderPath['path']);
-		});
-
-		foreach ($foldersPaths as $folderPath) {
-			$this->folders[$folderPath['path']] = $folderPath['id'];
 		}
 	}
 
-	private function getFolderIdByName($folderName)
+	private function getFolderFullPath($folder, $parentFoldersWithChildren, $path = [])
 	{
-		$folderName = trim($folderName, '/');
-		return array_key_exists($folderName, $this->folders) ? $this->folders[$folderName] : null;
+		if ($folder->DisplayName === 'Boîte de réception') {
+			$folder->DisplayName = 'inbox';
+		}
+		array_unshift($path, $folder->DisplayName);
+		$parentFolderIdsWithChildren = $this->getFolderIds($parentFoldersWithChildren);
+		if (in_array($folder->ParentFolderId->Id, $parentFolderIdsWithChildren)) {
+			$parentFolder = $this->getFolderById($parentFoldersWithChildren, $folder->ParentFolderId->Id);
+			return $this->getFolderFullPath($parentFolder, $parentFoldersWithChildren, $path);	
+		}
+		return implode('/', $path);
+	}
+
+	private function getDisplayFolders($folders)
+	{
+		$filteredFolders = [];
+		foreach ($folders as $folder) {
+			if ($folder->FolderClass == 'IPF.Note') {
+				$filteredFolders[] = $folder;
+			}
+		}
+		return $filteredFolders;
+	}
+
+	private function getFolderIds($folders)
+	{
+		$folderIds = [];
+		foreach ($folders as $folder) {
+			$folderIds[] = $folder->FolderId->Id;
+		}
+		return $folderIds;
+	}
+
+	private function getFolderById($folders, $folderId)
+	{
+		foreach ($folders as $folder) {
+			if ($folder->FolderId->Id == $folderId) {
+				return $folder;
+			}
+		}
+		return null;
+	}
+
+	private function getParentFoldersWithChildren($folders)
+	{
+		$parentFolders = [];
+		foreach ($folders as $folder) {
+			if ($folder->ChildFolderCount > 0) {
+				$parentFolders[] = $folder;
+			}
+		}
+		return $parentFolders;
+	}
+
+	private function getFolderIdByName($folderPathNames)
+	{
+		return $this->folders[$folderPathNames]['id'];
 	}
 
 	public function getItemsByFolderName($folderName)
@@ -198,7 +230,7 @@ class ExchangeMailbox {
 			$useInbox = true;
 		}
 		if (!$useInbox && empty($folderId)) {
-			return false;
+			return ['error' => "Mailbox folder '" . $folderName . "' does not exist."];
 		}
 		$request = new FindItemType();
 		$request->ParentFolderIds = new NonEmptyArrayOfBaseFolderIdsType();
@@ -216,6 +248,7 @@ class ExchangeMailbox {
 		$response = $this->client->FindItem($request);
 
 		$rawItems = $response->ResponseMessages->FindItemResponseMessage[0]->RootFolder->Items->Message;
+
 		$items = [];
 		foreach ($rawItems as $rawItem) {
 			$request = new GetItemType();
@@ -238,7 +271,12 @@ class ExchangeMailbox {
 
 	public function moveItemToNamedFolder(&$item, $folderName)
 	{
+		$folderName = $this->formatFolderName($folderName);
 		$folderId = $this->getFolderIdByName($folderName);
+
+		if ($folderId == null) {
+			return ['error' => 'Folder does not exist'];
+		}
 		$useInbox = false;
 		if (mb_strtolower($folderName) === 'inbox') {
 			$useInbox = true;
@@ -249,7 +287,7 @@ class ExchangeMailbox {
 		$request = new MoveItemType();
 		$request->ToFolderId = new TargetFolderIdType();
 		if (!$useInbox) {
-			$request->ToFolderId->FolderId = $folderId;
+			$request->ToFolderId->FolderId->Id = $folderId;
 		} else {
 			$inboxId = new DistinguishedFolderIdType();
 			$inboxId->Id = DistinguishedFolderIdNameType::INBOX;
@@ -263,9 +301,23 @@ class ExchangeMailbox {
 
 		$response = $this->client->MoveItem($request);
 
+		if ($response->ResponseMessages->MoveItemResponseMessage[0]->ResponseClass == 'Error') {
+			return ['error' => $response->ResponseMessages->MoveItemResponseMessage[0]->MessageText];
+		}
+
 		$item->setItemId($response->ResponseMessages->MoveItemResponseMessage[0]->Items->Message[0]->ItemId->Id);
 
 		return true;
+	}
+
+	private function formatFolderName($folderName) {
+		$arrFolderName = explode('/', trim($folderName, '/'));
+		if ($arrFolderName[0] == 'Boîte de réception' || $arrFolderName[0] == 'INBOX') {
+			$arrFolderName[0] = 'inbox';
+			return implode('/', $arrFolderName);
+		} else {
+			return $folderName;
+		}
 	}
 
 	public function deleteItem($item)

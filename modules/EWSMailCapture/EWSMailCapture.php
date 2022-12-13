@@ -114,9 +114,9 @@ class EWSMailCapture
         $ewsMailbox = new ExchangeMailbox($exchangeMailboxArgs);
 
         $ewsItems = $ewsMailbox->getItemsByFolderName($captureFolder);
-        if ($ewsItems === false) {
-            $this->writeLog('ERROR: could not get items: mailbox folder \'' . $captureFolder . '\' does not exist.');
-            $_SESSION['capture']->sendError('could not get items: mailbox folder \'' . $captureFolder . '\' does not exist.');
+        if (!empty($ewsItems['error'])) {
+            $this->writeLog("ERROR: {$ewsItems['error']}");
+            $_SESSION['capture']->sendError($ewsItems['error']);
         }
         $itemCount = count($ewsItems);
         $this->writeLog($itemCount . ' messages in mailbox folder \'' . $captureFolder . '\'');
@@ -198,9 +198,9 @@ class EWSMailCapture
             if ($action === 'move') {
                 $this->writeLog('moving email to purge folder: ' . $folder);
                 $moved = $ewsMailbox->moveItemToNamedFolder($ewsItem, $folder);
-                if ($moved === false) {
-                    $this->writeLog('ERROR: could not move item: mailbox folder \'' . $folder . '\' does not exist.');
-                    $_SESSION['capture']->sendError('could not move item: mailbox folder \'' . $folder . '\' does not exist.');
+                if (!empty($moved['error'])) {
+                    $this->writeLog('ERROR: could not move item: mailbox folder \'' . $folder . '\' : ' . $moved['error']);
+                    $_SESSION['capture']->sendError('could not move item: mailbox folder \'' . $folder . '\' : ' . $moved['error']);
                 }
             } elseif ($action === 'delete') {
                 $this->writeLog('moving email to trash');
