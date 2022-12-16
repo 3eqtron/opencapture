@@ -224,9 +224,10 @@ class ExchangeMailbox {
 
 	public function getItemsByFolderName($folderName)
 	{
+		$folderName = $this->formatFolderName($folderName);
 		$folderId = $this->getFolderIdByName($folderName);
 		$useInbox = false;
-		if (mb_strtolower($folderName) === 'inbox') {
+		if ($folderName === 'inbox') {
 			$useInbox = true;
 		}
 		if (!$useInbox && empty($folderId)) {
@@ -234,8 +235,10 @@ class ExchangeMailbox {
 		}
 		$request = new FindItemType();
 		$request->ParentFolderIds = new NonEmptyArrayOfBaseFolderIdsType();
+
 		if (!$useInbox) {
-			$request->ParentFolderIds->FolderId[] = $folderId;
+			$request->ParentFolderIds->FolderId[0] = new stdClass();
+			$request->ParentFolderIds->FolderId[0]->Id = $folderId;
 		} else {
 			$inboxId = new DistinguishedFolderIdType();
 			$inboxId->Id = DistinguishedFolderIdNameType::INBOX;
@@ -247,23 +250,30 @@ class ExchangeMailbox {
 
 		$response = $this->client->FindItem($request);
 
+		if ($response->ResponseMessages->FindItemResponseMessage[0]->ResponseClass == 'Error') {
+			return ['error' => $response->ResponseMessages->FindItemResponseMessage[0]->MessageText];
+		}
+
 		$rawItems = $response->ResponseMessages->FindItemResponseMessage[0]->RootFolder->Items->Message;
 
 		$items = [];
-		foreach ($rawItems as $rawItem) {
-			$request = new GetItemType();
-			$request->ItemShape = new ItemResponseShapeType();
-			$request->ItemShape->BaseShape = DefaultShapeNamesType::ALL_PROPERTIES;
-			$request->ItemShape->BodyType = BodyTypeResponseType::BEST;
-			$request->ItemIds = new NonEmptyArrayOfBaseItemIdsType();
-			$itemId = new ItemIdType();
-			$itemId->Id = $rawItem->ItemId->Id;
-			$request->ItemIds->ItemId[] = $itemId;
-			
-			$response = $this->client->GetItem($request);
 
-			foreach ($response->ResponseMessages->GetItemResponseMessage[0]->Items->Message as $gottenItem) {
-				$items[] = new ExchangeItem($gottenItem, $this->client);
+		if ($rawItems != NULL) {
+			foreach ($rawItems as $rawItem) {
+				$request = new GetItemType();
+				$request->ItemShape = new ItemResponseShapeType();
+				$request->ItemShape->BaseShape = DefaultShapeNamesType::ALL_PROPERTIES;
+				$request->ItemShape->BodyType = BodyTypeResponseType::BEST;
+				$request->ItemIds = new NonEmptyArrayOfBaseItemIdsType();
+				$itemId = new ItemIdType();
+				$itemId->Id = $rawItem->ItemId->Id;
+				$request->ItemIds->ItemId[] = $itemId;
+				
+				$response = $this->client->GetItem($request);
+	
+				foreach ($response->ResponseMessages->GetItemResponseMessage[0]->Items->Message as $gottenItem) {
+					$items[] = new ExchangeItem($gottenItem, $this->client);
+				}
 			}
 		}
 		return $items;
@@ -278,7 +288,7 @@ class ExchangeMailbox {
 			return ['error' => 'Folder does not exist'];
 		}
 		$useInbox = false;
-		if (mb_strtolower($folderName) === 'inbox') {
+		if ($folderName === 'inbox') {
 			$useInbox = true;
 		}
 		if (!$useInbox && empty($folderId)) {
@@ -287,6 +297,7 @@ class ExchangeMailbox {
 		$request = new MoveItemType();
 		$request->ToFolderId = new TargetFolderIdType();
 		if (!$useInbox) {
+			$request->ToFolderId->FolderId = new stdClass();
 			$request->ToFolderId->FolderId->Id = $folderId;
 		} else {
 			$inboxId = new DistinguishedFolderIdType();
