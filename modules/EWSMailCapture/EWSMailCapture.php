@@ -8,13 +8,13 @@ class EWSMailCapture
 {
     private $logFile;
 
-    public function CaptureMails($account, $action, $configFile, $folder, $addHeaderInMailContent)
+    public function CaptureMails($account, $action, $configFile, $folder, $addHeaderInMailContent,$configPath = __DIR__)
     {
         $batch = $_SESSION['capture']->Batch;
         $this->logFile = $batch->directory . DIRECTORY_SEPARATOR . 'EWSMailCapture.log';
 
         $this->writeLog('loading config file: ' . $configFile);
-        $xmlConfig = simplexml_load_file(__DIR__ . DIRECTORY_SEPARATOR . $configFile);
+        $xmlConfig = simplexml_load_file($configPath . DIRECTORY_SEPARATOR . $configFile);
         if (empty($xmlConfig)) {
             $_SESSION['capture']->sendError('Configuration file ' . $configFile . ' not found');
         }
