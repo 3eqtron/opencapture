@@ -77,14 +77,13 @@ class Workflow extends DOMDocument
         $this->XPath = new DOMXPath($this);
     }
     
-    public function save(
-        $filename = false
-    ) {
-        if (!$filename) {
-            $filename = $this->directory . DIRECTORY_SEPARATOR . $this->id . '.xml';
-        }
-        parent::save($filename);
+public function save(string $filename = '', int $options = 0): int|false {
+    if (!$filename) {
+        $filename = $this->directory . DIRECTORY_SEPARATOR . $this->id . '.xml';
     }
+    return parent::save($filename, $options);
+}
+
     
     public function setStatus(
         $status,

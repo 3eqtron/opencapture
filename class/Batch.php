@@ -238,11 +238,12 @@ class Batch
     }
     
     function save(
-        $filename=false
+        $filename=false,
+        $options = 0
     ) {
         if(!$filename)
             $filename = $this->directory . DIRECTORY_SEPARATOR . $this->id . '.xml';
-        parent::save($filename);
+        parent::save($filename, $options);
     }
        
     /**************************************************************************

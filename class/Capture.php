@@ -1,6 +1,6 @@
 <?php
 
-class Capture extends DOMXPath
+class Capture
 {
     public $Batch;
     public $Workflow;
@@ -9,13 +9,20 @@ class Capture extends DOMXPath
     protected $BatchConfig;
     protected $WorkflowConfig;
     protected $StepConfig;
+    protected $dom;
+    protected $xpath;
     
-    public function Capture($ConfigName)
+    public function __construct($ConfigName)
     {
-        $Config = new DOMDocument();
+        $this->dom = new DOMDocument();
         $_SESSION['CaptureName'] = $ConfigName.".xml";
-        $Config->load("config/".$ConfigName.".xml");
-        parent::__construct($Config);
+        $this->dom->load("config/".$ConfigName.".xml");
+        $this->xpath = new DOMXPath($this->dom);
+    }
+    
+    public function query($query)
+    {
+        return $this->xpath->query($query);
     }
     
     #**********************************************************************
