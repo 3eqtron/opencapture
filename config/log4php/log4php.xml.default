@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns="http://logging.apache.org/log4php/">
+    <appender name="loggerTechnique" class="LoggerAppenderFile">
+        <param name="file" value="/opt/maarch/Maarchcapture/files/capture.log"/>
+        <param name="append" value="true"/>
+        <layout class="LoggerLayoutPattern">
+            <param name="conversionPattern" value="%d{Y-m-d H:i:s} [%p] %m%n"/>
+        </layout>
+    </appender>
+    <logger name="loggerTechnique">
+        <appender_ref ref="loggerTechnique"/>
+    </logger>
+</configuration>

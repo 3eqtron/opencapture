@@ -19,11 +19,16 @@ class Capture
         $this->dom->load("config/".$ConfigName.".xml");
         $this->xpath = new DOMXPath($this->dom);
     }
-    
-    public function query($query)
-    {
-        return $this->xpath->query($query);
+public function query($query, $context = null)
+{
+    if ($context) {
+        return $this->xpath->query($query, $context);
     }
+    return $this->xpath->query($query);
+}
+
+
+
     
     #**********************************************************************
     #
